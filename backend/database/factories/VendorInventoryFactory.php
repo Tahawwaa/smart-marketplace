@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\VendorInventory;
 use App\Models\ProductVariant;
 use App\Models\Vendor;
+use App\Models\VendorInventory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

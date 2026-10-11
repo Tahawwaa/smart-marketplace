@@ -20,6 +20,7 @@ erDiagram
     vendors ||--o{ vendor_payouts : "receives"
     vendors ||--o{ coupons : "issues"
     vendors ||--o{ shipping_methods : "defines"
+    warranties ||--o{ vendor_inventories : "covers"
 
     categories ||--o{ categories : "parent"
     categories ||--o{ products : "contains"
@@ -37,6 +38,9 @@ erDiagram
     vendor_inventories ||--o{ inventory_logs : "logs"
     vendor_inventories ||--o{ cart_items : "added_as"
     vendor_inventories ||--o{ order_items : "sold_as"
+    vendor_inventories ||--o{ inventory_reservations : "reserved_by"
+    carts ||--o{ inventory_reservations : "held_for"
+    orders ||--o{ inventory_reservations : "held_for"
     order_items ||--o{ inventory_logs : "causes"
     order_items ||--o| product_reviews : "reviewed_by"
 
@@ -99,8 +103,17 @@ erDiagram
         bigint parent_id FK
         string name
         string slug UK
+        smallint depth
         boolean is_active
         int sort_order
+        timestamps timestamps
+    }
+
+    warranties {
+        bigint id PK
+        string name
+        smallint duration_months
+        boolean is_active
         timestamps timestamps
     }
     brands {
@@ -140,18 +153,21 @@ erDiagram
     attributes {
         bigint id PK
         string name UK
+        string slug UK
     }
     attribute_values {
         bigint id PK
         bigint attribute_id FK
         string value "UK(attribute_id,value)"
+        string color_code
     }
     product_variants {
         bigint id PK
         bigint product_id FK
         string sku UK
-        string barcode
+        string barcode UK
         int weight_grams
+        boolean is_active
         timestamps timestamps
         timestamp deleted_at
     }
@@ -164,6 +180,8 @@ erDiagram
         bigint id PK
         bigint vendor_id FK
         bigint variant_id FK
+        bigint warranty_id FK
+        smallint lead_time_days
         decimal price
         decimal sale_price
         int quantity
@@ -172,6 +190,16 @@ erDiagram
         int lock_version
         timestamps timestamps
         timestamp deleted_at
+    }
+    inventory_reservations {
+        bigint id PK
+        bigint vendor_inventory_id FK
+        bigint cart_id FK
+        bigint order_id FK
+        int quantity
+        string status "active|consumed|released"
+        timestamp expires_at
+        timestamps timestamps
     }
     inventory_logs {
         bigint id PK

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
 use App\Enums\UserRole;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Models\VendorInventory;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -58,7 +60,7 @@ class DatabaseSchemaTest extends TestCase
             'variant_id' => $variant->id, 'attribute_id' => $attributeId, 'attribute_value_id' => $red,
         ]);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         DB::table('variant_attribute_values')->insert([
             'variant_id' => $variant->id, 'attribute_id' => $attributeId, 'attribute_value_id' => $blue,
@@ -69,7 +71,7 @@ class DatabaseSchemaTest extends TestCase
     {
         $item = OrderItem::factory()->create();
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         DB::table('sub_orders')->where('id', $item->sub_order_id)->delete();
     }
@@ -79,5 +81,16 @@ class DatabaseSchemaTest extends TestCase
         $product = Product::factory()->create()->refresh();
 
         $this->assertSame('approved', $product->status->value);
+    }
+
+    public function test_category_depth_is_derived_from_the_parent_chain(): void
+    {
+        $root = Category::factory()->create(['parent_id' => null]);
+        $child = Category::factory()->create(['parent_id' => $root->id]);
+        $grandchild = Category::factory()->create(['parent_id' => $child->id]);
+
+        $this->assertSame(0, $root->refresh()->depth);
+        $this->assertSame(1, $child->refresh()->depth);
+        $this->assertSame(2, $grandchild->refresh()->depth);
     }
 }

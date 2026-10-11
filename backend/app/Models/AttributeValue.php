@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['attribute_id', 'value'])]
+#[Fillable(['attribute_id', 'value', 'color_code'])]
 class AttributeValue extends Model
 {
     /**
@@ -39,6 +39,6 @@ class AttributeValue extends Model
             'variant_attribute_values',
             'attribute_value_id',
             'variant_id',
-        );
+        )->withPivot('attribute_id');
     }
 }

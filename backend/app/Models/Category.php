@@ -8,9 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['parent_id', 'name', 'slug', 'is_active', 'sort_order'])]
+#[Fillable(['parent_id', 'name', 'slug', 'depth', 'is_active', 'sort_order'])]
 class Category extends Model
 {
+    protected static function booted(): void
+    {
+        static::saving(function (Category $category) {
+            $category->depth = $category->parent_id
+                ? (int) static::query()->whereKey($category->parent_id)->value('depth') + 1
+                : 0;
+        });
+    }
+
     use HasFactory;
 
     /**
@@ -43,6 +52,23 @@ class Category extends Model
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
+    }
+
+    /**
+     * Get the child categories with their own children, recursively.
+     *
+     * The whole tree is resolved in one eager load. Callers must keep
+     * `parent_id` acyclic; a self-referencing chain would recurse forever.
+     *
+     * @return HasMany<Category, $this>
+     */
+    public function childrenRecursive(): HasMany
+    {
+        return $this->children()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->with('childrenRecursive');
     }
 
     /**

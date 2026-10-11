@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Vendor;
 use App\Enums\VendorStatus;
 use App\Models\User;
+use App\Models\Vendor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

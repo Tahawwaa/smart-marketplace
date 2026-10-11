@@ -10,10 +10,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['product_id', 'sku', 'barcode', 'weight_grams'])]
+#[Fillable(['product_id', 'sku', 'barcode', 'weight_grams', 'is_active'])]
 class ProductVariant extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     /**
      * Get the product the variant belongs to.

@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable([
     'vendor_id',
     'variant_id',
+    'warranty_id',
+    'lead_time_days',
     'price',
     'sale_price',
     'quantity',
@@ -22,6 +24,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class VendorInventory extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * Get the warranty offered by the vendor for this stock row.
+     *
+     * @return BelongsTo<Warranty, $this>
+     */
+    public function warranty(): BelongsTo
+    {
+        return $this->belongsTo(Warranty::class);
+    }
+
+    /**
+     * Get the active reservations holding stock.
+     *
+     * @return HasMany<InventoryReservation, $this>
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(InventoryReservation::class);
+    }
 
     /**
      * Get the attributes that should be cast.
