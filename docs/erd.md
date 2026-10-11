@@ -1,6 +1,6 @@
 # Database ERD
 
-Derived from `backend/database/migrations` (including `2026_10_10_000001` and `2026_10_10_000002`).
+Derived from `backend/database/migrations` (including `2026_10_10_000001`, `2026_10_10_000002`, `2026_10_10_000003` and the Sanctum `personal_access_tokens` migration).
 Framework tables (`password_reset_tokens`, `sessions`, `cache`, `cache_locks`, `jobs`, `job_batches`, `failed_jobs`, `migrations`) are omitted.
 
 ```mermaid
@@ -13,6 +13,7 @@ erDiagram
     users ||--o{ order_status_histories : "changed_by"
     users ||--o{ order_histories : "changed_by"
     users ||--o{ refunds : "requested_by"
+    users ||--o{ personal_access_tokens : "authenticates_with"
 
     vendors ||--o{ products : "submits"
     vendors ||--o{ vendor_inventories : "offers"
@@ -69,6 +70,17 @@ erDiagram
         boolean is_active
         timestamp email_verified_at
         string remember_token
+        timestamps timestamps
+    }
+    personal_access_tokens {
+        bigint id PK
+        string tokenable_type "morph"
+        bigint tokenable_id FK,morph
+        text name
+        string token UK "sha256 hash"
+        text abilities
+        timestamp last_used_at
+        timestamp expires_at
         timestamps timestamps
     }
     vendors {
