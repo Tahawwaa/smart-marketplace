@@ -11,6 +11,10 @@
 --   php artisan migrate:fresh
 -- ---------------------------------------------------------------------------
 
+-- WARNING: this file is OUTDATED. It predates migrations 2026_10_10_000001 and
+-- 2026_10_10_000002. The migrations are the source of truth; regenerate with
+-- `php artisan schema:dump` against a MySQL server after `migrate:fresh`.
+
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 

@@ -15,9 +15,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'address_line',
     'recipient_name',
     'recipient_phone',
+    'is_default',
+    'latitude',
+    'longitude',
 ])]
 class Address extends Model
 {
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_default' => 'boolean',
+            'latitude' => 'decimal:7',
+            'longitude' => 'decimal:7',
+        ];
+    }
+
     /**
      * Get the user that owns the address.
      *

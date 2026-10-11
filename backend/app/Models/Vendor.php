@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
+use App\Enums\VendorStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['user_id', 'store_name', 'slug', 'commission_rate', 'status'])]
+#[Fillable(['user_id', 'store_name', 'slug', 'commission_rate', 'bank_sheba', 'status', 'approved_at'])]
 class Vendor extends Model
 {
+    use HasFactory, SoftDeletes;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -19,6 +24,8 @@ class Vendor extends Model
     {
         return [
             'commission_rate' => 'decimal:2',
+            'status' => VendorStatus::class,
+            'approved_at' => 'datetime',
         ];
     }
 

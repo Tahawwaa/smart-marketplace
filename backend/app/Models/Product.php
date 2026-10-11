@@ -2,22 +2,32 @@
 
 namespace App\Models;
 
+use App\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'category_id',
+    'brand_id',
+    'vendor_id',
     'name',
     'slug',
     'description',
     'ai_generated_description',
+    'status',
+    'meta_title',
+    'meta_description',
     'is_active',
 ])]
 class Product extends Model
 {
+    use HasFactory, SoftDeletes;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -27,7 +37,38 @@ class Product extends Model
     {
         return [
             'is_active' => 'boolean',
+            'status' => ProductStatus::class,
         ];
+    }
+
+    /**
+     * Get the brand of the product.
+     *
+     * @return BelongsTo<Brand, $this>
+     */
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
+    }
+
+    /**
+     * Get the vendor that submitted the product.
+     *
+     * @return BelongsTo<Vendor, $this>
+     */
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    /**
+     * Get the images of the product.
+     *
+     * @return HasMany<ProductImage, $this>
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
     /**

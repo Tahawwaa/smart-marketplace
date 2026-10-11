@@ -3,14 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['product_id', 'sku', 'barcode', 'weight_grams'])]
 class ProductVariant extends Model
 {
+    use HasFactory, SoftDeletes;
+
     /**
      * Get the product the variant belongs to.
      *
@@ -33,7 +37,7 @@ class ProductVariant extends Model
             'variant_attribute_values',
             'variant_id',
             'attribute_value_id',
-        );
+        )->withPivot('attribute_id');
     }
 
     /**
