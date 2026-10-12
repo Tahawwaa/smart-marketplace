@@ -95,4 +95,12 @@ class VendorInventory extends Model
     {
         return max(0, $this->quantity - $this->reserved_quantity);
     }
+
+    /**
+     * Get the price a customer actually pays for this stock row.
+     */
+    public function effectivePrice(): float
+    {
+        return (float) ($this->sale_price ?? $this->price);
+    }
 }
