@@ -132,15 +132,18 @@ export function Catalog({ category, search, onSelectCategory }: Props) {
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 py-4">
-        <p className="flex items-center gap-2 text-xs text-neutral-500">
-          <SlidersHorizontal className="size-3.5" />
-          {activeCategory ? activeCategory.name : 'همه دسته‌بندی‌ها'}
-          {search ? <span className="text-neutral-400">• «{search}»</span> : null}
-          {total > 0 ? <span className="text-neutral-600">• {faNum(total)} کالا</span> : null}
+      <div className="flex flex-col gap-3 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <p className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-neutral-500">
+          <SlidersHorizontal className="size-3.5 shrink-0" />
+          <span className="truncate">
+            {activeCategory ? activeCategory.name : 'همه دسته‌بندی‌ها'}
+            {search ? <span className="text-neutral-400"> • «{search}»</span> : null}
+            {total > 0 ? <span className="text-neutral-600"> • {faNum(total)} کالا</span> : null}
+          </span>
         </p>
 
-        <div className="flex items-center gap-1 rounded-full border border-white/[0.08] p-1">
+        {/* On narrow phones the four sort pills would overflow, so the group scrolls sideways. */}
+        <div className="-mx-4 flex max-w-[calc(100%+2rem)] items-center gap-0.5 overflow-x-auto rounded-none border-white/[0.08] px-4 py-0.5 sm:mx-0 sm:max-w-full sm:gap-1 sm:rounded-full sm:border sm:p-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
           {SORTS.map((option) => (
             <button
               key={option.value}
@@ -148,7 +151,7 @@ export function Catalog({ category, search, onSelectCategory }: Props) {
               aria-pressed={sort === option.value}
               onClick={() => setSort(option.value)}
               className={cn(
-                'rounded-full px-3 py-1 text-xs transition',
+                'shrink-0 rounded-full px-3 py-1 text-xs whitespace-nowrap transition',
                 sort === option.value
                   ? 'bg-white font-bold text-black'
                   : 'text-neutral-400 hover:text-white',
