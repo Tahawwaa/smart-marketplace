@@ -4,21 +4,6 @@
   --font-sans: "Vazirmatn", ui-sans-serif, system-ui, sans-serif;
   --color-ink: #050507;
   --color-panel: #0b0b10;
-  --animate-shimmer: shimmer 2.5s linear infinite;
-  --animate-spotlight: spotlight 2.2s ease 0.4s 1 forwards;
-
-  @keyframes shimmer {
-    from { background-position: 0 0; }
-    to { background-position: -200% 0; }
-  }
-  @keyframes spotlight {
-    0% { opacity: 0; transform: translate(72%, -62%) scale(0.5); }
-    100% { opacity: 1; transform: translate(-50%, -40%) scale(1); }
-  }
-}
-
-@keyframes marquee-scroll {
-  to { transform: translateX(-100%); }
 }
 
 html {

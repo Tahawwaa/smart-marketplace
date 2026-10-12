@@ -1,24 +1,24 @@
-import { FloatingNavbar } from '../../components/ui/floating-navbar'
-import { BentoGrid } from './bento-grid'
-import { Hero } from './hero'
-import { BrandStrip, Faq, FinalCta, Footer, HowItWorks, Reviews, Stats, VendorBanner } from './sections'
+import { useState } from 'react'
+import { SiteFooter } from '../../components/layout/site-footer'
+import { SiteHeader } from '../../components/layout/site-header'
+import { Catalog } from '../products/catalog'
 
 export function HomePage() {
+  const [category, setCategory] = useState('')
+  const [search, setSearch] = useState('')
+
   return (
-    <div className="min-h-screen bg-ink font-sans text-neutral-200">
-      <FloatingNavbar />
-      <main>
-        <Hero />
-        <BrandStrip />
-        <Stats />
-        <BentoGrid />
-        <HowItWorks />
-        <VendorBanner />
-        <Reviews />
-        <Faq />
-        <FinalCta />
+    <div id="top" className="flex min-h-screen flex-col bg-ink font-sans text-neutral-200">
+      <SiteHeader
+        category={category}
+        search={search}
+        onSearch={setSearch}
+        onSelectCategory={setCategory}
+      />
+      <main className="flex-1">
+        <Catalog category={category} search={search} onSelectCategory={setCategory} />
       </main>
-      <Footer />
+      <SiteFooter />
     </div>
   )
 }
