@@ -33,7 +33,11 @@ class DatabaseSeeder extends Seeder
         Category::factory(3)->create();
 
         $vendor = Vendor::factory()->create([
-            'user_id' => User::factory()->create(['role' => UserRole::Vendor])->id,
+            'user_id' => User::factory()->create([
+                'name' => 'Vendor User',
+                'email' => 'vendor@example.com',
+                'role' => UserRole::Vendor,
+            ])->id,
         ]);
 
         VendorInventory::factory(5)->create(['vendor_id' => $vendor->id]);

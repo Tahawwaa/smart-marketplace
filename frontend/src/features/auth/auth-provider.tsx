@@ -15,7 +15,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authApi
       .fetchMe(controller.signal)
       .then(setUser)
-      .catch(() => tokenStore.clear())
+      // درخواست لغوشده نشانه‌ی توکن نامعتبر نیست؛ پاک‌کردن توکن اینجا باعث خروج کاربر پس از هر رفرش می‌شد.
+      .catch(() => {
+        if (!controller.signal.aborted) tokenStore.clear()
+      })
       .finally(() => {
         if (!controller.signal.aborted) setReady(true)
       })

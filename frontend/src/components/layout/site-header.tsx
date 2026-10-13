@@ -118,6 +118,14 @@ export function SiteHeader() {
 
         {user ? (
           <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+            {user.role === 'vendor' ? (
+              <Link
+                to="/vendor"
+                className="rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] px-3 py-2 text-xs text-cyan-100 transition hover:border-cyan-400/40"
+              >
+                پنل فروشنده
+              </Link>
+            ) : null}
             <Link
               to="/orders"
               className="rounded-xl border border-white/10 px-3 py-2 text-xs text-neutral-300 transition hover:border-white/25 hover:text-white"

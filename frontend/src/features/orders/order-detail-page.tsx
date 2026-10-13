@@ -87,6 +87,23 @@ export function OrderDetailPage() {
           {detail.shipping_address_snapshot.address_line}
         </p>
       </div>
+
+      {detail.payment_status === 'paid' ? (
+        <p className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-3 text-xs text-emerald-200">
+          پرداخت این سفارش انجام شده است.
+        </p>
+      ) : detail.status === 'cancelled' || detail.status === 'refunded' ? (
+        <p className="mt-6 rounded-xl border border-white/[0.08] px-4 py-3 text-xs text-neutral-400">
+          این سفارش پرداخت‌شدنی نیست.
+        </p>
+      ) : (
+        <Link
+          to={`/orders/${detail.id}/pay`}
+          className="mt-6 inline-flex rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+        >
+          پرداخت سفارش
+        </Link>
+      )}
     </section>
   )
 }

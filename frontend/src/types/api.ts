@@ -165,3 +165,110 @@ export type Order = {
   created_at: string | null
   updated_at: string | null
 }
+
+export type Vendor = {
+  id: number
+  store_name: string
+  slug: string
+  commission_rate: number
+  bank_sheba: string | null
+  status: string
+  approved_at: string | null
+  created_at: string | null
+}
+
+export type VendorProfileResponse = { data: Vendor | null }
+
+export type VendorVariantInventory = {
+  id: number
+  price: number
+  sale_price: number | null
+  effective_price: number
+  quantity: number
+  reserved_quantity: number
+  available_quantity: number
+  lead_time_days: number | null
+  is_available: boolean
+}
+
+export type VendorVariant = {
+  id: number
+  sku: string | null
+  barcode: string | null
+  weight_grams: number | null
+  is_active: boolean
+  inventories?: VendorVariantInventory[]
+}
+
+export type VendorProduct = {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  status: string
+  is_active: boolean
+  meta_title?: string | null
+  meta_description?: string | null
+  category?: { id: number; name: string; slug: string } | null
+  brand?: { id: number; name: string; slug: string } | null
+  variants?: VendorVariant[]
+  created_at: string | null
+  updated_at: string | null
+}
+
+export type VendorStock = {
+  id: number
+  vendor_inventory_id: number
+  variant_id: number
+  price: number
+  sale_price: number | null
+  effective_price: number
+  quantity: number
+  reserved_quantity: number
+  available_quantity: number
+  lead_time_days: number
+  is_available: boolean
+  lock_version: number
+  variant: {
+    id: number
+    sku: string | null
+    product: { id: number; name: string; slug: string } | null
+  } | null
+  warranty: { id: number; name: string; duration_months: number | null } | null
+}
+
+export type VendorSubOrder = {
+  id: number
+  sub_order_number: string
+  status: string
+  subtotal_price: number
+  shipping_fee: number
+  commission_rate: number
+  commission_amount: number
+  vendor_net_amount: number
+  created_at: string | null
+  order: {
+    id: number
+    order_number: string
+    status: string
+    payment_status: string
+    shipping_address_snapshot: Partial<Address> & { address_id?: number }
+    user: { id: number; name: string; email: string; phone: string | null } | null
+    created_at: string | null
+  } | null
+  items?: OrderItem[]
+}
+
+export type Payment = {
+  id: number
+  order_id: number
+  gateway_name: string
+  reference_id: string | null
+  transaction_id: string | null
+  amount: number
+  status: string
+  paid_at: string | null
+  created_at: string | null
+}
+
+export type PaymentStartResponse = { data: Payment; redirect_url: string | null }
