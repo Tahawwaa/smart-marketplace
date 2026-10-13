@@ -28,7 +28,8 @@ export function RegisterPage() {
     setErrors({})
     try {
       await register({ ...form, phone: form.phone || undefined })
-      navigate('/orders', { replace: true })
+      // ثبت‌نام فروشنده یعنی «قصد فروشندگی»؛ مرحله‌ی بعد ساختن فروشگاه است.
+      navigate(form.role === 'vendor' ? '/account/store' : '/account', { replace: true })
     } catch (cause) {
       if (cause instanceof ApiError) {
         setError(cause.message)
@@ -109,6 +110,11 @@ export function RegisterPage() {
             <option value="customer">خریدار</option>
             <option value="vendor">فروشنده</option>
           </select>
+          <p className="mt-1 text-[11px] text-neutral-500">
+            {form.role === 'vendor'
+              ? 'پس از ثبت‌نام، نام فروشگاه را وارد می‌کنید و مدیر آن را تأیید می‌کند. حساب شما همچنان خریدار هم می‌ماند.'
+              : 'هر زمان خواستید می‌توانید از پنل کاربری، فروشنده هم بشوید؛ نیازی به حساب جدید نیست.'}
+          </p>
         </div>
 
         {error ? (

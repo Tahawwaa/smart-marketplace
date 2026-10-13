@@ -37,3 +37,20 @@ export async function logout() {
     tokenStore.clear()
   }
 }
+
+export type ProfileInput = {
+  name?: string
+  phone?: string | null
+}
+
+export const updateProfile = (input: ProfileInput) =>
+  api<ApiItem<User>>('/auth/profile', { method: 'PUT', body: input })
+
+export type PasswordInput = {
+  current_password: string
+  password: string
+  password_confirmation: string
+}
+
+export const updatePassword = (input: PasswordInput) =>
+  api<{ message: string }>('/auth/password', { method: 'PUT', body: input })

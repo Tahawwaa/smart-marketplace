@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api\Vendor;
 
-use App\Enums\VendorStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Vendor;
+use App\Services\VendorStoreService;
 use Illuminate\Http\Request;
 
 abstract class VendorController extends Controller
 {
+    public function __construct(private readonly VendorStoreService $stores) {}
+
     /**
      * Resolve the store owned by the authenticated account.
      *
@@ -21,15 +23,6 @@ abstract class VendorController extends Controller
 
         abort_if($user === null, 401);
 
-        $vendor = $user->vendors()->first();
-
-        abort_if($vendor === null, 403, 'برای این حساب فروشنده‌ای ثبت نشده است.');
-        abort_if(
-            in_array($vendor->status, [VendorStatus::Suspended, VendorStatus::Rejected], true),
-            403,
-            'فروشگاه شما فعال نیست.',
-        );
-
-        return $vendor;
+        return $this->stores->forUserOrAbort($user);
     }
 }

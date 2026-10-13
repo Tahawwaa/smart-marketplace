@@ -3,6 +3,11 @@ import { NotFoundPage } from './app/not-found-page'
 import { RequireAdmin } from './components/layout/require-admin'
 import { RequireAuth } from './components/layout/require-auth'
 import { RequireVendor } from './components/layout/require-vendor'
+import { AccountAddressesPage } from './features/account/account-addresses-page'
+import { AccountLayout } from './features/account/account-layout'
+import { AccountOverviewPage } from './features/account/account-overview-page'
+import { AccountPasswordPage } from './features/account/account-password-page'
+import { AccountStorePage } from './features/account/account-store-page'
 import { AdminBrandsPage } from './features/admin/admin-brands-page'
 import { AdminCategoriesPage } from './features/admin/admin-categories-page'
 import { AdminDashboardPage } from './features/admin/admin-dashboard-page'
@@ -45,6 +50,13 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route element={<RequireAuth />}>
                 <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/account" element={<AccountLayout />}>
+                  <Route index element={<AccountOverviewPage />} />
+                  <Route path="orders" element={<OrdersPage embedded />} />
+                  <Route path="addresses" element={<AccountAddressesPage />} />
+                  <Route path="password" element={<AccountPasswordPage />} />
+                  <Route path="store" element={<AccountStorePage />} />
+                </Route>
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />
                 <Route path="/orders/:orderId/pay" element={<PaymentPage />} />

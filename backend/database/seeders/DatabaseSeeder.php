@@ -30,6 +30,15 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        // حساب مدیر شخصی؛ در محیط توسعه با ایمیل teenhuntero0o0@gmail.com و رمز taha1242
+        // وارد شوید. این اعتبارنامه فقط برای کار محلی است و در محیط عملیاتی نباید seed شود.
+        User::factory()->create([
+            'name' => 'Taha',
+            'email' => 'teenhuntero0o0@gmail.com',
+            'password' => 'taha1242',
+            'role' => UserRole::Admin,
+        ]);
+
         Category::factory(3)->create();
 
         $vendor = Vendor::factory()->create([

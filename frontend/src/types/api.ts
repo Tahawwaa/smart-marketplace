@@ -69,7 +69,17 @@ export type User = {
   id: number
   name: string
   email: string
+  phone?: string | null
   role?: string
+  /** فروشگاه کاربر؛ اگر باز نکرده باشد `null` است. وجود همین مقدار یعنی فروشنده است. */
+  store?: VendorSummary | null
+}
+
+export type VendorSummary = {
+  id: number
+  store_name: string
+  slug: string
+  status: string
 }
 
 export type AuthResponse = {

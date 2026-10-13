@@ -36,6 +36,8 @@ Route::delete('cart/items/{item}', [CartController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
+    Route::put('auth/profile', [AuthController::class, 'updateProfile']);
+    Route::put('auth/password', [AuthController::class, 'updatePassword']);
     Route::post('auth/logout', [AuthController::class, 'logout']);
 
     Route::get('addresses', [AddressController::class, 'index']);
@@ -52,6 +54,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('vendors/me')->group(function () {
         Route::get('/', [VendorProfileController::class, 'show']);
+        // «فروشنده شوید»: هر حسابی می‌تواند فروشگاه باز کند؛ فروشگاه تا تأیید مدیر
+        // در وضعیت pending می‌ماند.
+        Route::post('/', [VendorProfileController::class, 'store']);
 
         Route::get('products', [VendorProductController::class, 'index']);
         Route::post('products', [VendorProductController::class, 'store']);

@@ -1,4 +1,4 @@
-import { LogOut, Menu, Search, ShoppingBag, User, X } from 'lucide-react'
+import { LayoutDashboard, LogOut, Menu, Search, ShoppingBag, Store, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../features/auth/auth-context'
@@ -117,45 +117,74 @@ export function SiteHeader() {
         </Link>
 
         {user ? (
-          <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
-            {user.role === 'vendor' ? (
-              <Link
-                to="/vendor"
-                className="rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] px-3 py-2 text-xs text-cyan-100 transition hover:border-cyan-400/40"
-              >
-                پنل فروشنده
-              </Link>
-            ) : null}
+          <div className="flex shrink-0 items-center gap-1.5">
+            {/* پنل مدیریت همیشه دیده می‌شود؛ داشتن فروشگاه نقشی را از مدیر نمی‌گیرد. */}
             {user.role === 'admin' ? (
               <Link
                 to="/admin"
-                className="rounded-xl border border-violet-400/25 bg-violet-400/[0.08] px-3 py-2 text-xs text-violet-100 transition hover:border-violet-400/40"
+                title="پنل مدیریت"
+                className="flex items-center gap-1.5 rounded-xl border border-violet-400/25 bg-violet-400/[0.08] px-2.5 py-2 text-xs text-violet-100 transition hover:border-violet-400/40 sm:px-3"
               >
-                پنل مدیریت
+                <LayoutDashboard className="size-4 sm:hidden" />
+                <span className="hidden sm:inline">پنل مدیریت</span>
               </Link>
             ) : null}
+
+            {/* فروشندگی با «وجود فروشگاه» تعیین می‌شود، نه با نقش حساب. */}
+            {user.store ? (
+              <Link
+                to="/vendor"
+                title="پنل فروشنده"
+                className="flex items-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] px-2.5 py-2 text-xs text-cyan-100 transition hover:border-cyan-400/40 sm:px-3"
+              >
+                <Store className="size-4 sm:hidden" />
+                <span className="hidden sm:inline">پنل فروشنده</span>
+              </Link>
+            ) : (
+              <Link
+                to="/account/store"
+                title="فروشنده شوید"
+                className="flex items-center gap-1.5 rounded-xl border border-white/10 px-2.5 py-2 text-xs text-neutral-300 transition hover:border-cyan-400/40 hover:text-cyan-100 sm:px-3"
+              >
+                <Store className="size-4 sm:hidden" />
+                <span className="hidden sm:inline">فروشنده شوید</span>
+              </Link>
+            )}
+
+            <div className="hidden items-center gap-1.5 sm:flex">
+              <Link
+                to="/account"
+                className="shrink-0 rounded-xl border border-white/10 px-3 py-2 text-xs text-neutral-300 transition hover:border-white/25 hover:text-white"
+              >
+                {user.name}
+              </Link>
+              <button
+                type="button"
+                aria-label="خروج"
+                onClick={() => void logout()}
+                className="grid size-9 place-items-center rounded-xl border border-white/10 text-neutral-300 transition hover:border-white/25 hover:text-white"
+              >
+                <LogOut className="size-4" />
+              </button>
+            </div>
+
+            {/* در موبایل، دکمه‌های بالا فشرده می‌شوند و ورود به پنل از این آیکن انجام می‌شود. */}
             <Link
-              to="/orders"
-              className="rounded-xl border border-white/10 px-3 py-2 text-xs text-neutral-300 transition hover:border-white/25 hover:text-white"
+              to="/account"
+              aria-label="پنل کاربری"
+              className="grid size-9 place-items-center rounded-xl border border-white/10 text-neutral-300 transition hover:border-white/25 hover:text-white sm:hidden"
             >
-              {user.name}
+              <User className="size-4" />
             </Link>
-            <button
-              type="button"
-              aria-label="خروج"
-              onClick={() => void logout()}
-              className="grid size-9 place-items-center rounded-xl border border-white/10 text-neutral-300 transition hover:border-white/25 hover:text-white"
-            >
-              <LogOut className="size-4" />
-            </button>
           </div>
         ) : (
           <Link
             to="/login"
-            className="hidden shrink-0 items-center gap-1.5 rounded-xl border border-white/10 px-3 py-2 text-xs text-neutral-300 transition hover:border-white/25 hover:text-white sm:flex"
+            aria-label="ورود / ثبت‌نام"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 px-2.5 py-2 text-xs text-neutral-300 transition hover:border-white/25 hover:text-white sm:px-3"
           >
             <User className="size-4" />
-            ورود
+            <span className="hidden sm:inline">ورود</span>
           </Link>
         )}
         <button

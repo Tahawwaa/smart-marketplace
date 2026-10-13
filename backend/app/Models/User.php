@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -48,6 +49,19 @@ class User extends Authenticatable
     public function vendors(): HasMany
     {
         return $this->hasMany(Vendor::class);
+    }
+
+    /**
+     * Get the store attached to the account.
+     *
+     * Vendor access is granted by owning a store row, not by the `role`
+     * column, so an admin can sell without giving up the admin role.
+     *
+     * @return HasOne<Vendor, $this>
+     */
+    public function store(): HasOne
+    {
+        return $this->hasOne(Vendor::class);
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Http\Requests\Vendor\UpdateProductRequest;
 use App\Http\Resources\VendorProductResource;
 use App\Models\Product;
 use App\Services\VendorCatalogService;
+use App\Services\VendorStoreService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -14,7 +15,12 @@ use Illuminate\Http\Response;
 
 class VendorProductController extends VendorController
 {
-    public function __construct(private readonly VendorCatalogService $catalog) {}
+    public function __construct(
+        private readonly VendorCatalogService $catalog,
+        VendorStoreService $stores,
+    ) {
+        parent::__construct($stores);
+    }
 
     public function index(Request $request): AnonymousResourceCollection
     {

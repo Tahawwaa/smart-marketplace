@@ -14,3 +14,8 @@ export const fetchAddresses = (signal?: AbortSignal) => api<ApiList<Address>>('/
 
 export const createAddress = (input: AddressInput) =>
   api<ApiItem<Address>>('/addresses', { method: 'POST', body: input })
+
+export const updateAddress = (id: number, input: AddressInput) =>
+  api<ApiItem<Address>>(`/addresses/${id}`, { method: 'PUT', body: input })
+
+export const deleteAddress = (id: number) => api<void>(`/addresses/${id}`, { method: 'DELETE' })

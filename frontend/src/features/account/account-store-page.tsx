@@ -1,0 +1,163 @@
+import { ArrowLeft, Loader2, ShieldAlert, Store } from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useAsync } from '../../hooks/use-async'
+import { ApiError } from '../../lib/api/client'
+import { adminVendorStatusLabel } from '../admin/api'
+import { useAuth } from '../auth/auth-context'
+import { StatusPill } from '../admin/admin-ui'
+import { openStore, fetchMyStore } from './api'
+import { Field, FormError, FormNotice, SubmitButton, inputClass } from './form-controls'
+
+/**
+ * «فروشندگی» — هم فرمِ فروشنده‌شدن است و هم نمای وضعیت فروشگاه.
+ * وجود فروشگاه (نه نقش حساب) تعیین می‌کند کدام حالت نمایش داده شود.
+ */
+export function AccountStorePage() {
+  const { user, setUser } = useAuth()
+  const store = useAsync((signal) => fetchMyStore(signal), 'account-store')
+
+  const [storeName, setStoreName] = useState('')
+  const [sheba, setSheba] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [opened, setOpened] = useState(false)
+
+  const mine = store.data?.data ?? null
+
+  async function submit() {
+    setBusy(true)
+    setError(null)
+    try {
+      const response = await openStore({ store_name: storeName.trim(), bank_sheba: sheba.trim() || null })
+      setUser(response.user)
+      setOpened(true)
+      store.retry()
+    } catch (cause) {
+      setError(
+        cause instanceof ApiError
+          ? (Object.values(cause.errors ?? {})[0]?.[0] ?? cause.message)
+          : 'ساخت فروشگاه انجام نشد.',
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (store.loading) {
+    return (
+      <p className="flex items-center gap-2 text-sm text-neutral-400">
+        <Loader2 className="size-4 animate-spin" /> در حال بارگذاری وضعیت فروشگاه…
+      </p>
+    )
+  }
+
+  if (mine) {
+    return (
+      <div className="space-y-4">
+        <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-1.5 text-sm font-bold text-white">
+              <Store className="size-4 text-cyan-300" /> فروشگاه من
+            </h2>
+            <StatusPill status={mine.status} label={adminVendorStatusLabel(mine.status)} />
+          </div>
+
+          <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
+            <div>
+              <dt className="text-neutral-500">نام فروشگاه</dt>
+              <dd className="mt-0.5 text-sm text-white">{mine.store_name}</dd>
+            </div>
+            <div>
+              <dt className="text-neutral-500">نشانی فروشگاه</dt>
+              <dd className="mt-0.5 text-sm text-neutral-300" dir="ltr">
+                /products?store={mine.slug}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-neutral-500">شماره شبا</dt>
+              <dd className="mt-0.5 text-sm text-neutral-300" dir="ltr">
+                {mine.bank_sheba ?? '—'}
+              </dd>
+            </div>
+          </dl>
+
+          {opened ? (
+            <div className="mt-4">
+              <FormNotice
+                tone="amber"
+                message="فروشگاه ثبت شد و در صف بررسی مدیر قرار گرفت."
+              />
+            </div>
+          ) : null}
+
+          {mine.status === 'pending' ? (
+            <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3 text-xs text-amber-100">
+              <ShieldAlert className="mt-0.5 size-4 shrink-0" />
+              فروشگاه شما در انتظار تأیید مدیر است؛ پس از تأیید می‌توانید کالا ثبت کنید. تا آن زمان پنل فروشنده
+              فقط وضعیت فروشگاه را نشان می‌دهد.
+            </p>
+          ) : null}
+
+          {mine.status === 'rejected' || mine.status === 'suspended' ? (
+            <p className="mt-4 flex items-start gap-2 rounded-xl border border-rose-400/20 bg-rose-400/[0.06] px-4 py-3 text-xs text-rose-200">
+              <ShieldAlert className="mt-0.5 size-4 shrink-0" />
+              وضعیت فروشگاه «{adminVendorStatusLabel(mine.status)}» است؛ برای پیگیری با پشتیبانی تماس بگیرید.
+            </p>
+          ) : null}
+
+          <Link
+            to="/vendor"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] px-4 py-2.5 text-xs font-bold text-cyan-100 transition hover:border-cyan-400/40"
+          >
+            ورود به پنل فروشنده <ArrowLeft className="size-3.5" />
+          </Link>
+        </section>
+      </div>
+    )
+  }
+
+  return (
+    <section className="max-w-xl rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+      <h2 className="flex items-center gap-1.5 text-sm font-bold text-white">
+        <Store className="size-4 text-cyan-300" /> فروشنده شوید
+      </h2>
+      <p className="mt-1 text-[11px] text-neutral-500">
+        با ساخت فروشگاه، همان حساب فعلی شما ({user?.email}) فروشنده هم می‌شود و دسترسی خریدار یا مدیرتان از
+        دست نمی‌رود.
+      </p>
+
+      <div className="mt-4 grid gap-3">
+        <Field label="نام فروشگاه" required hint="این نام در فهرست کالاها و صفحه‌ی فروشگاه دیده می‌شود.">
+          <input
+            value={storeName}
+            onChange={(event) => setStoreName(event.target.value)}
+            placeholder="مثلاً لوازم خانگی تها"
+            className={inputClass}
+          />
+        </Field>
+        <Field label="شماره شبا" hint="اختیاری؛ برای تسویه‌ی درآمد فروش. قالب: IR و ۲۴ رقم.">
+          <input
+            value={sheba}
+            onChange={(event) => setSheba(event.target.value)}
+            placeholder="IR000000000000000000000000"
+            dir="ltr"
+            className={inputClass}
+          />
+        </Field>
+      </div>
+
+      <p className="mt-4 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-[11px] text-neutral-400">
+        پس از ساخت، فروشگاه در وضعیت «در انتظار تأیید» قرار می‌گیرد و مدیر آن را بررسی می‌کند.
+      </p>
+
+      <div className="mt-4 space-y-3">
+        <FormError message={error} />
+      </div>
+
+      <div className="mt-4">
+        <SubmitButton label="ساخت فروشگاه" busy={busy} onClick={() => void submit()} />
+      </div>
+    </section>
+  )
+}

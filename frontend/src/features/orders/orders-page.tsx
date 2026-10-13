@@ -4,14 +4,16 @@ import { useAsync } from '../../hooks/use-async'
 import { faNum, faPrice } from '../../lib/format'
 import { fetchOrders } from './api'
 
-export function OrdersPage() {
+/**
+ * `embedded` حالت درون پنل کاربری است؛ سرصفحه و حاشیه‌ی صفحه را پنل می‌دهد
+ * و اینجا فقط فهرست سفارش‌ها رندر می‌شود.
+ */
+export function OrdersPage({ embedded = false }: { embedded?: boolean } = {}) {
   const orders = useAsync((signal) => fetchOrders(signal), 'orders')
   const items = orders.data?.data ?? []
 
-  return (
-    <section className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <h1 className="mb-6 text-base font-extrabold text-white">سفارش‌های من</h1>
-
+  const body = (
+    <>
       {orders.loading ? (
         <p className="flex items-center gap-2 text-sm text-neutral-400">
           <Loader2 className="size-4 animate-spin" />
@@ -56,6 +58,15 @@ export function OrdersPage() {
           ))}
         </ul>
       )}
+    </>
+  )
+
+  if (embedded) return body
+
+  return (
+    <section className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <h1 className="mb-6 text-base font-extrabold text-white">سفارش‌های من</h1>
+      {body}
     </section>
   )
 }

@@ -6,6 +6,8 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
+use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\CartService;
@@ -34,7 +36,7 @@ class AuthController extends Controller
         $this->carts->mergeGuestCart($user, $this->carts->sessionId($request));
 
         return response()->json([
-            'user' => UserResource::make($user),
+            'user' => UserResource::make($user->load('store')),
             'token' => $token,
             'token_type' => 'Bearer',
         ], Response::HTTP_CREATED);
@@ -61,7 +63,7 @@ class AuthController extends Controller
         $this->carts->mergeGuestCart($user, $this->carts->sessionId($request));
 
         return response()->json([
-            'user' => UserResource::make($user),
+            'user' => UserResource::make($user->load('store')),
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
@@ -69,7 +71,33 @@ class AuthController extends Controller
 
     public function me(Request $request): UserResource
     {
-        return UserResource::make($request->user());
+        return UserResource::make($request->user()->load('store'));
+    }
+
+    public function updateProfile(UpdateProfileRequest $request): UserResource
+    {
+        $user = $request->user();
+        $user->update($request->validated());
+
+        return UserResource::make($user->load('store'));
+    }
+
+    /**
+     * Changing the password keeps the current token so the user stays signed in
+     * on this device, and drops every other session.
+     */
+    public function updatePassword(UpdatePasswordRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $currentToken = $user->currentAccessToken();
+
+        $user->update(['password' => $request->string('password')->value()]);
+
+        $user->tokens()
+            ->when($currentToken !== null, fn ($query) => $query->whereKeyNot($currentToken->getKey()))
+            ->delete();
+
+        return response()->json(['message' => 'گذرواژه تغییر کرد.']);
     }
 
     public function logout(Request $request): JsonResponse

@@ -8,6 +8,8 @@ export type AuthState = {
   login: (input: authApi.LoginInput) => Promise<void>
   register: (input: authApi.RegisterInput) => Promise<void>
   logout: () => Promise<void>
+  /** جایگزینی کاربر نشست با نسخه‌ی تازه‌ی سرور، بعد از تغییر نقش یا ساخت فروشگاه. */
+  setUser: (user: User) => void
 }
 
 export const AuthContext = createContext<AuthState | null>(null)

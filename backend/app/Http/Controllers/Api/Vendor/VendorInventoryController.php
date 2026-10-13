@@ -6,12 +6,18 @@ use App\Http\Requests\Vendor\UpdateInventoryRequest;
 use App\Http\Resources\VendorStockResource;
 use App\Models\VendorInventory;
 use App\Services\VendorCatalogService;
+use App\Services\VendorStoreService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class VendorInventoryController extends VendorController
 {
-    public function __construct(private readonly VendorCatalogService $catalog) {}
+    public function __construct(
+        private readonly VendorCatalogService $catalog,
+        VendorStoreService $stores,
+    ) {
+        parent::__construct($stores);
+    }
 
     public function index(Request $request): AnonymousResourceCollection
     {
