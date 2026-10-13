@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { Heart, Package, ShoppingBag, Star } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { GlowCard } from '../../components/ui/glow-card'
 import { cn } from '../../lib/cn'
 import { faNum, faPercent, faPrice } from '../../lib/format'
@@ -7,6 +8,7 @@ import { CATEGORIES } from '../home/data'
 
 export type ProductCardData = {
   id: number
+  slug?: string
   name: string
   categorySlug: string
   categoryName: string
@@ -27,7 +29,13 @@ const accentOf = (slug: string) => {
   }
 }
 
-export function ProductCard({ product, index = 0 }: { product: ProductCardData; index?: number }) {
+type Props = {
+  product: ProductCardData
+  index?: number
+  onAdd?: (product: ProductCardData) => void
+}
+
+export function ProductCard({ product, index = 0, onAdd }: Props) {
   const { color, tint, icon: Icon } = accentOf(product.categorySlug)
   const discount =
     product.price !== null && product.oldPrice ? faPercent(product.price, product.oldPrice) : null
@@ -87,7 +95,15 @@ export function ProductCard({ product, index = 0 }: { product: ProductCardData; 
 
           <div className="flex flex-1 flex-col p-4">
             <span className={cn('mb-1.5 text-[11px] font-medium', tint)}>{product.categoryName}</span>
-            <h3 className="line-clamp-2 text-sm font-bold leading-6 text-white">{product.name}</h3>
+            <h3 className="line-clamp-2 text-sm font-bold leading-6 text-white">
+              {product.slug ? (
+                <Link to={`/products/${product.slug}`} className="transition hover:text-cyan-200">
+                  {product.name}
+                </Link>
+              ) : (
+                product.name
+              )}
+            </h3>
 
             <div className="mb-3 mt-2 flex items-center gap-2 text-[11px] text-neutral-500">
               {product.rating ? (
@@ -114,6 +130,7 @@ export function ProductCard({ product, index = 0 }: { product: ProductCardData; 
 
               <button
                 type="button"
+                onClick={() => onAdd?.(product)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] py-2 text-xs font-bold text-neutral-200 transition hover:border-white/25 hover:bg-white/10 hover:text-white"
               >
                 <ShoppingBag className="size-3.5" />

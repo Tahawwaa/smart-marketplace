@@ -1,5 +1,5 @@
 import { api } from '../../lib/api/client'
-import type { ApiList, Category, Product } from '../../types/api'
+import type { ApiItem, ApiList, Category, Product, ProductDetail } from '../../types/api'
 
 export const fetchCategories = (signal?: AbortSignal) => api<ApiList<Category>>('/categories', { signal })
 
@@ -19,3 +19,6 @@ export const fetchProductCount = async (params: ProductQuery, signal?: AbortSign
   const response = await fetchProducts({ ...params, per_page: 1 }, signal)
   return response.meta?.total ?? response.data.length
 }
+
+export const fetchProduct = (slug: string, signal?: AbortSignal) =>
+  api<ApiItem<ProductDetail>>(`/products/${slug}`, { signal })

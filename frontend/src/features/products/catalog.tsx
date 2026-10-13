@@ -1,9 +1,11 @@
 import { motion } from 'motion/react'
 import { Loader2, PackageSearch, RefreshCw, SlidersHorizontal } from 'lucide-react'
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { cn } from '../../lib/cn'
 import { faNum } from '../../lib/format'
 import { useAsync } from '../../hooks/use-async'
+import { useCart } from '../cart/cart-context'
 import { CATEGORIES } from '../home/data'
 import { fetchProducts } from './api'
 import { ProductCard, type ProductCardData } from './product-card'
@@ -54,15 +56,20 @@ function sampleAsCards(category: string, search: string): ProductCardData[] {
   }))
 }
 
-type Props = {
-  category: string
-  search: string
-  onSelectCategory: (slug: string) => void
-}
-
-export function Catalog({ category, search, onSelectCategory }: Props) {
+export function Catalog() {
+  const [params, setParams] = useSearchParams()
+  const { add } = useCart()
+  const category = params.get('category') ?? ''
+  const search = params.get('search') ?? ''
   const [sort, setSort] = useState('newest')
   const [perPage, setPerPage] = useState(PER_PAGE)
+
+  const onSelectCategory = (slug: string) => {
+    const next = new URLSearchParams(params)
+    if (slug) next.set('category', slug)
+    else next.delete('category')
+    setParams(next)
+  }
 
   // Collapse back to the first batch whenever the filters change.
   const filterKey = `${category}|${search}|${sort}`
@@ -84,6 +91,7 @@ export function Catalog({ category, search, onSelectCategory }: Props) {
 
   const live: ProductCardData[] = (products.data?.data ?? []).map((product) => ({
     id: product.id,
+    slug: product.slug,
     name: product.name,
     categorySlug: product.category?.slug ?? '',
     categoryName: product.category?.name ?? '',
@@ -96,6 +104,11 @@ export function Catalog({ category, search, onSelectCategory }: Props) {
   const total = usingSample ? items.length : (products.data?.meta?.total ?? items.length)
   const hasMore = !usingSample && items.length < total
   const activeCategory = CATEGORIES.find((item) => item.slug === category)
+
+  const onAddToCart = (product: ProductCardData) => {
+    if (product.price === null) return
+    add({ id: product.id, slug: product.slug ?? '', name: product.name, price: product.price })
+  }
 
   return (
     <section id="products" className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -194,7 +207,7 @@ export function Catalog({ category, search, onSelectCategory }: Props) {
           )}
           <motion.div layout className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {items.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
+              <ProductCard key={product.id} product={product} index={index} onAdd={onAddToCart} />
             ))}
           </motion.div>
 
