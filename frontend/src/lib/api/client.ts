@@ -8,6 +8,16 @@ export const tokenStore = {
   clear: () => localStorage.removeItem(TOKEN_KEY),
 }
 
+export const CART_SESSION_KEY = 'sm_cart_session'
+
+/**
+ * شناسه‌ی سبد مهمان؛ سبد سمت سرور به این مقدار گره خورده است.
+ */
+export const cartSessionStore = {
+  get: () => localStorage.getItem(CART_SESSION_KEY),
+  set: (value: string) => localStorage.setItem(CART_SESSION_KEY, value),
+}
+
 export class ApiError extends Error {
   status: number
   errors?: Record<string, string[]>
@@ -37,6 +47,8 @@ export async function api<T>(path: string, { method = 'GET', query, body, signal
   const headers: Record<string, string> = { Accept: 'application/json' }
   const token = tokenStore.get()
   if (token) headers.Authorization = `Bearer ${token}`
+  const cartSession = cartSessionStore.get()
+  if (cartSession) headers['X-Cart-Session'] = cartSession
   if (body !== undefined) headers['Content-Type'] = 'application/json'
 
   let response: Response

@@ -1,17 +1,16 @@
 import { api } from '../../lib/api/client'
-import type { ApiItem, ApiList, Order } from '../../types/api'
-import type { CartLine } from '../cart/cart-context'
+import type { Address, AddressInput, ApiItem, ApiList, Order } from '../../types/api'
 
 export const fetchOrders = (signal?: AbortSignal) => api<ApiList<Order>>('/orders', { signal })
 
 export const fetchOrder = (id: number, signal?: AbortSignal) =>
   api<ApiItem<Order>>(`/orders/${id}`, { signal })
 
-export const placeOrder = (items: CartLine[], signal?: AbortSignal) =>
-  api<ApiItem<Order>>('/orders', {
-    method: 'POST',
-    signal,
-    body: {
-      items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
-    },
-  })
+/** سفارش از روی سبد سمت سرور ساخته می‌شود؛ فقط نشانی فرستاده می‌شود. */
+export const placeOrder = (address: { address_id: number } | { address: AddressInput }) =>
+  api<ApiItem<Order>>('/orders', { method: 'POST', body: address })
+
+export const fetchAddresses = (signal?: AbortSignal) => api<ApiList<Address>>('/addresses', { signal })
+
+export const createAddress = (input: AddressInput) =>
+  api<ApiItem<Address>>('/addresses', { method: 'POST', body: input })

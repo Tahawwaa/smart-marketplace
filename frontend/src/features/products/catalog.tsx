@@ -1,11 +1,10 @@
 import { motion } from 'motion/react'
 import { Loader2, PackageSearch, RefreshCw, SlidersHorizontal } from 'lucide-react'
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { cn } from '../../lib/cn'
 import { faNum } from '../../lib/format'
 import { useAsync } from '../../hooks/use-async'
-import { useCart } from '../cart/cart-context'
 import { CATEGORIES } from '../home/data'
 import { fetchProducts } from './api'
 import { ProductCard, type ProductCardData } from './product-card'
@@ -58,7 +57,7 @@ function sampleAsCards(category: string, search: string): ProductCardData[] {
 
 export function Catalog() {
   const [params, setParams] = useSearchParams()
-  const { add } = useCart()
+  const navigate = useNavigate()
   const category = params.get('category') ?? ''
   const search = params.get('search') ?? ''
   const [sort, setSort] = useState('newest')
@@ -106,8 +105,8 @@ export function Catalog() {
   const activeCategory = CATEGORIES.find((item) => item.slug === category)
 
   const onAddToCart = (product: ProductCardData) => {
-    if (product.price === null) return
-    add({ id: product.id, slug: product.slug ?? '', name: product.name, price: product.price })
+    // فهرست کالاها موجودی نمی‌فرستد؛ برای انتخاب تنوع به صفحه‌ی کالا می‌رویم.
+    if (product.slug) navigate(`/products/${product.slug}`)
   }
 
   return (

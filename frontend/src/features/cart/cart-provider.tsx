@@ -1,64 +1,92 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { CartContext, type CartLine } from './cart-context'
-
-const STORAGE_KEY = 'sm_cart'
-
-function readStored(): CartLine[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed: unknown = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? (parsed as CartLine[]) : []
-  } catch {
-    return []
-  }
-}
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { ApiError } from '../../lib/api/client'
+import type { Cart } from '../../types/api'
+import { useAuth } from '../auth/auth-context'
+import * as cartApi from './api'
+import { CartContext } from './cart-context'
+import { cartSession } from './cart-session'
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartLine[]>(readStored)
+  const { ready, user } = useAuth()
+  const [cart, setCart] = useState<Cart | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const loadedFor = useRef<number | null | undefined>(undefined)
+
+  // سبد مهمان به شناسه‌ی مرورگر گره خورده و باید پیش از نخستین درخواست ساخته شود.
+  if (typeof window !== 'undefined') cartSession.get()
+
+  const refresh = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await cartApi.fetchCart()
+      setCart(response.data)
+      setError(null)
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : 'سبد خرید دریافت نشد.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  }, [items])
+    // سبد مهمان هنگام ورود به سرور منتقل می‌شود؛ پس از تغییر کاربر دوباره می‌خوانیم.
+    if (!ready || loadedFor.current === user?.id) return
 
-  const add = useCallback((line: Omit<CartLine, 'quantity'>, quantity = 1) => {
-    setItems((current) => {
-      const existing = current.find((item) => item.id === line.id)
-      if (existing) {
-        return current.map((item) =>
-          item.id === line.id ? { ...item, quantity: item.quantity + quantity } : item,
-        )
-      }
-      return [...current, { ...line, quantity }]
-    })
+    loadedFor.current = user?.id
+    void refresh()
+  }, [ready, user?.id, refresh])
+
+  const mutate = useCallback(async (run: () => Promise<{ data: Cart }>) => {
+    setError(null)
+    try {
+      const response = await run()
+      setCart(response.data)
+    } catch (cause) {
+      const message = cause instanceof ApiError ? cause.message : 'عملیات سبد خرید انجام نشد.'
+      setError(message)
+      throw cause
+    }
   }, [])
 
-  const remove = useCallback((id: number) => {
-    setItems((current) => current.filter((item) => item.id !== id))
-  }, [])
+  const add = useCallback(
+    (vendorInventoryId: number, quantity = 1) =>
+      mutate(() => cartApi.addCartItem(vendorInventoryId, quantity)),
+    [mutate],
+  )
 
-  const setQuantity = useCallback((id: number, quantity: number) => {
-    setItems((current) =>
+  const remove = useCallback((itemId: number) => mutate(() => cartApi.removeCartItem(itemId)), [mutate])
+
+  const setQuantity = useCallback(
+    (itemId: number, quantity: number) =>
       quantity <= 0
-        ? current.filter((item) => item.id !== id)
-        : current.map((item) => (item.id === id ? { ...item, quantity } : item)),
-    )
-  }, [])
+        ? mutate(() => cartApi.removeCartItem(itemId))
+        : mutate(() => cartApi.updateCartItem(itemId, quantity)),
+    [mutate],
+  )
 
-  const clear = useCallback(() => setItems([]), [])
-
-  const { count, total } = useMemo(() => {
-    return items.reduce(
-      (acc, item) => ({
-        count: acc.count + item.quantity,
-        total: acc.total + item.price * item.quantity,
-      }),
-      { count: 0, total: 0 },
-    )
-  }, [items])
+  const clear = useCallback(async () => {
+    const items = cart?.items ?? []
+    for (const item of items) {
+      await cartApi.removeCartItem(item.id)
+    }
+    await refresh()
+  }, [cart, refresh])
 
   const value = useMemo(
-    () => ({ items, count, total, add, remove, setQuantity, clear }),
-    [items, count, total, add, remove, setQuantity, clear],
+    () => ({
+      items: cart?.items ?? [],
+      count: cart?.total_quantity ?? 0,
+      total: cart?.subtotal ?? 0,
+      loading,
+      error,
+      add,
+      remove,
+      setQuantity,
+      clear,
+      refresh,
+    }),
+    [cart, loading, error, add, remove, setQuantity, clear, refresh],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

@@ -39,7 +39,19 @@ export type ProductVariant = {
   weight_grams: number | null
   is_active: boolean
   attributes?: { slug: string; name: string; values: { id: number; value: string; color_code: string | null }[] }[]
-  inventories?: { id: number; price: number | null; quantity: number }[]
+  inventories?: VendorInventory[]
+}
+
+export type VendorInventory = {
+  id: number
+  price: number
+  sale_price: number | null
+  effective_price: number
+  available_quantity: number
+  lead_time_days: number | null
+  is_available: boolean
+  vendor?: { id: number; store_name: string; slug: string } | null
+  warranty?: { id: number; name: string; duration_months: number | null } | null
 }
 
 export type ProductDetail = Product & {
@@ -66,20 +78,90 @@ export type AuthResponse = {
   token_type: string
 }
 
-export type OrderItem = {
+export type CartItem = {
   id: number
-  product_name: string
+  vendor_inventory_id: number
   quantity: number
   unit_price: number
-  total: number
+  unit_price_snapshot: number | null
+  total_price: number
+  available_quantity: number | null
+  product: { id: number; name: string; slug: string } | null
+  variant: { id: number; sku: string | null } | null
+  vendor: { id: number; store_name: string; slug: string } | null
+}
+
+export type Cart = {
+  id: number
+  items: CartItem[]
+  items_count: number
+  total_quantity: number
+  subtotal: number
+  currency: string
+  expires_at: string | null
+}
+
+export type Address = {
+  id: number
+  title: string | null
+  province: string
+  city: string
+  postal_code: string | null
+  address_line: string
+  recipient_name: string
+  recipient_phone: string
+  is_default: boolean
+}
+
+export type AddressInput = {
+  title?: string | null
+  province: string
+  city: string
+  postal_code?: string | null
+  address_line: string
+  recipient_name: string
+  recipient_phone: string
+  is_default?: boolean
+}
+
+export type OrderItem = {
+  id: number
+  vendor_inventory_id: number
+  product_name_snapshot: string
+  variant_sku_snapshot: string | null
+  selected_attributes_snapshot: Record<string, unknown> | null
+  unit_price: number
+  quantity: number
+  total_price: number
+}
+
+export type SubOrder = {
+  id: number
+  sub_order_number: string
+  status: string
+  subtotal_price: number
+  shipping_fee: number
+  commission_rate: number
+  commission_amount: number
+  vendor_net_amount: number
+  vendor?: { id: number; store_name: string; slug: string } | null
+  items?: OrderItem[]
 }
 
 export type Order = {
   id: number
-  number: string
+  order_number: string
   status: string
-  total: number
+  payment_status: string
+  total_items_price: number
+  total_shipping_fee: number
+  discount_total: number
+  tax_total: number
+  grand_total: number
+  currency: string
+  shipping_address_snapshot: Partial<Address> & { address_id?: number }
   items_count?: number
-  created_at: string
-  items?: OrderItem[]
+  sub_orders?: SubOrder[]
+  created_at: string | null
+  updated_at: string | null
 }

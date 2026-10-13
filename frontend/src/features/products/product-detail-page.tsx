@@ -1,6 +1,7 @@
 import { ArrowRight, Loader2, PackageSearch, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { ApiError } from '../../lib/api/client'
 import { useCart } from '../cart/cart-context'
 import { useAsync } from '../../hooks/use-async'
 import { faNum, faPrice } from '../../lib/format'
@@ -11,10 +12,20 @@ export function ProductDetailPage() {
   const { add } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
+  const [inventoryId, setInventoryId] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const product = useAsync((signal) => fetchProduct(slug, signal), slug)
   const detail = product.data?.data ?? null
   const image = detail?.images?.find((item) => item.is_primary) ?? detail?.images?.[0] ?? null
+
+  // موجودی‌ها زیر هر تنوع می‌آیند؛ ارزان‌ترین موجودی قابل خرید انتخاب می‌شود.
+  const offers = (detail?.variants ?? []).flatMap((variant) => variant.inventories ?? [])
+  const selected =
+    offers.find((offer) => offer.id === inventoryId) ??
+    [...offers].sort((a, b) => a.effective_price - b.effective_price)[0] ??
+    null
+  const price = selected?.effective_price ?? detail?.price_from ?? null
 
   if (product.loading) {
     return (
@@ -66,9 +77,7 @@ export function ProductDetailPage() {
           ) : null}
 
           <p className="mt-4 text-xl font-bold tabular-nums text-white">
-            {detail.price_from === null || detail.price_from === undefined
-              ? 'قیمت پس از انتخاب تنوع'
-              : faPrice(detail.price_from)}
+            {price === null ? 'قیمت پس از انتخاب تنوع' : faPrice(price)}
           </p>
 
           <div className="mt-5 flex items-center gap-3">
@@ -87,18 +96,15 @@ export function ProductDetailPage() {
 
           <button
             type="button"
-            disabled={detail.price_from === null || detail.price_from === undefined}
+            disabled={selected === null}
             onClick={() => {
-              add(
-                {
-                  id: detail.id,
-                  slug: detail.slug,
-                  name: detail.name,
-                  price: detail.price_from ?? 0,
-                },
-                quantity,
-              )
-              setAdded(true)
+              if (selected === null) return
+              setError(null)
+              add(selected.id, quantity)
+                .then(() => setAdded(true))
+                .catch((cause: unknown) =>
+                  setError(cause instanceof ApiError ? cause.message : 'افزودن به سبد انجام نشد.'),
+                )
             }}
             className="mt-5 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -114,6 +120,8 @@ export function ProductDetailPage() {
               </Link>
             </p>
           ) : null}
+
+          {error ? <p className="mt-3 text-xs text-rose-300">{error}</p> : null}
 
           {detail.description ? (
             <div className="mt-6 border-t border-white/[0.06] pt-5">
@@ -136,6 +144,34 @@ export function ProductDetailPage() {
                         {' '}
                         — {variant.attributes.map((attr) => `${attr.name}: ${attr.values.map((v) => v.value).join('، ')}`).join(' | ')}
                       </span>
+                    ) : null}
+                    {variant.inventories?.length ? (
+                      <ul className="mt-2 list-none space-y-1 p-0">
+                        {variant.inventories.map((offer) => (
+                          <li key={offer.id}>
+                            <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-white/[0.06] px-2.5 py-1.5">
+                              <span className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name="offer"
+                                  checked={selected?.id === offer.id}
+                                  onChange={() => setInventoryId(offer.id)}
+                                />
+                                <span className="text-neutral-300">
+                                  {offer.vendor?.store_name ?? 'فروشنده'}
+                                </span>
+                              </span>
+                              <span className="tabular-nums text-neutral-300">
+                                {faPrice(offer.effective_price)}
+                                <span className="text-neutral-600">
+                                  {' '}
+                                  ({faNum(offer.available_quantity)} عدد)
+                                </span>
+                              </span>
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
                     ) : null}
                   </li>
                 ))}

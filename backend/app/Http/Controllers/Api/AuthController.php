@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\CartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,6 +17,8 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly CartService $carts) {}
+
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
@@ -27,6 +30,8 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken($this->deviceName($request))->plainTextToken;
+
+        $this->carts->mergeGuestCart($user, $this->carts->sessionId($request));
 
         return response()->json([
             'user' => UserResource::make($user),
@@ -52,6 +57,8 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken($this->deviceName($request))->plainTextToken;
+
+        $this->carts->mergeGuestCart($user, $this->carts->sessionId($request));
 
         return response()->json([
             'user' => UserResource::make($user),

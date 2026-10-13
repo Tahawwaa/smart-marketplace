@@ -43,10 +43,10 @@ export function OrdersPage() {
                 to={`/orders/${order.id}`}
                 className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 transition hover:border-white/20"
               >
-                <span className="text-sm text-white">سفارش {order.number}</span>
+                <span className="text-sm text-white">سفارش {order.order_number}</span>
                 <span className="text-xs text-neutral-400">{order.status}</span>
                 <span className="text-xs tabular-nums text-neutral-300">
-                  {faPrice(order.total)}
+                  {faPrice(order.grand_total)}
                   {order.items_count ? (
                     <span className="text-neutral-500"> • {faNum(order.items_count)} قلم</span>
                   ) : null}

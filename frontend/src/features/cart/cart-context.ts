@@ -1,21 +1,17 @@
 import { createContext, useContext } from 'react'
-
-export type CartLine = {
-  id: number
-  slug: string
-  name: string
-  price: number
-  quantity: number
-}
+import type { CartItem } from '../../types/api'
 
 export type CartState = {
-  items: CartLine[]
+  items: CartItem[]
   count: number
   total: number
-  add: (line: Omit<CartLine, 'quantity'>, quantity?: number) => void
-  remove: (id: number) => void
-  setQuantity: (id: number, quantity: number) => void
-  clear: () => void
+  loading: boolean
+  error: string | null
+  add: (vendorInventoryId: number, quantity?: number) => Promise<void>
+  remove: (itemId: number) => Promise<void>
+  setQuantity: (itemId: number, quantity: number) => Promise<void>
+  clear: () => Promise<void>
+  refresh: () => Promise<void>
 }
 
 export const CartContext = createContext<CartState | null>(null)
