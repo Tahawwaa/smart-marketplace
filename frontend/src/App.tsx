@@ -1,7 +1,16 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { NotFoundPage } from './app/not-found-page'
+import { RequireAdmin } from './components/layout/require-admin'
 import { RequireAuth } from './components/layout/require-auth'
 import { RequireVendor } from './components/layout/require-vendor'
+import { AdminBrandsPage } from './features/admin/admin-brands-page'
+import { AdminCategoriesPage } from './features/admin/admin-categories-page'
+import { AdminDashboardPage } from './features/admin/admin-dashboard-page'
+import { AdminLayout } from './features/admin/admin-layout'
+import { AdminOrdersPage } from './features/admin/admin-orders-page'
+import { AdminProductsPage } from './features/admin/admin-products-page'
+import { AdminUsersPage } from './features/admin/admin-users-page'
+import { AdminVendorsPage } from './features/admin/admin-vendors-page'
 import { AuthProvider } from './features/auth/auth-provider'
 import { LoginPage } from './features/auth/login-page'
 import { RegisterPage } from './features/auth/register-page'
@@ -47,6 +56,17 @@ function App() {
                     <Route path="products/:id/edit" element={<VendorProductFormPage />} />
                     <Route path="inventory" element={<VendorInventoryPage />} />
                     <Route path="orders" element={<VendorOrdersPage />} />
+                  </Route>
+                </Route>
+                <Route element={<RequireAdmin />}>
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<AdminDashboardPage />} />
+                    <Route path="vendors" element={<AdminVendorsPage />} />
+                    <Route path="products" element={<AdminProductsPage />} />
+                    <Route path="orders" element={<AdminOrdersPage />} />
+                    <Route path="users" element={<AdminUsersPage />} />
+                    <Route path="categories" element={<AdminCategoriesPage />} />
+                    <Route path="brands" element={<AdminBrandsPage />} />
                   </Route>
                 </Route>
               </Route>

@@ -50,6 +50,16 @@ class Vendor extends Model
     }
 
     /**
+     * Get the products submitted by the vendor.
+     *
+     * @return HasMany<Product, $this>
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    /**
      * Get the sub-orders fulfilled by the vendor.
      *
      * @return HasMany<SubOrder, $this>

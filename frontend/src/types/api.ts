@@ -272,3 +272,121 @@ export type Payment = {
 }
 
 export type PaymentStartResponse = { data: Payment; redirect_url: string | null }
+
+export type AdminDashboard = {
+  cards: {
+    revenue_total: number
+    revenue_today: number
+    revenue_30_days: number
+    orders_total: number
+    orders_today: number
+    customers_total: number
+    vendors_total: number
+    vendors_pending: number
+    products_total: number
+    products_pending: number
+    low_stock_variants: number
+  }
+  revenue_trend: { date: string; revenue: number; orders: number }[]
+  order_status_breakdown: { status: string; count: number }[]
+  top_vendors: {
+    vendor: { id: number; store_name: string; slug: string } | null
+    gross: number
+    commission: number
+    orders: number
+  }[]
+  recent_orders: {
+    id: number
+    order_number: string
+    status: string
+    payment_status: string
+    grand_total: number
+    items_count: number
+    customer: { id: number; name: string; email: string } | null
+    created_at: string | null
+  }[]
+  pending_queues: { vendors: number; products: number; unpaid_orders: number }
+}
+
+export type AdminUser = {
+  id: number
+  name: string
+  email: string
+  phone: string | null
+  role: string
+  is_active: boolean
+  email_verified_at: string | null
+  orders_count?: number
+  vendors?: { id: number; store_name: string; slug: string; status: string }[]
+  created_at: string | null
+}
+
+export type AdminVendor = {
+  id: number
+  store_name: string
+  slug: string
+  commission_rate: number
+  bank_sheba: string | null
+  status: string
+  approved_at: string | null
+  products_count?: number
+  inventories_count?: number
+  user?: { id: number; name: string; email: string } | null
+  created_at: string | null
+}
+
+export type AdminProduct = {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  status: string
+  is_active: boolean
+  brand?: { id: number; name: string; slug: string } | null
+  category?: { id: number; name: string; slug: string } | null
+  vendor?: { id: number; store_name: string; slug: string } | null
+  variants?: ProductVariant[]
+  created_at: string | null
+  updated_at: string | null
+}
+
+export type AdminOrder = {
+  id: number
+  order_number: string
+  status: string
+  payment_status: string
+  total_items_price: number
+  total_shipping_fee: number
+  discount_total: number
+  tax_total: number
+  grand_total: number
+  currency: string
+  shipping_address_snapshot: Partial<Address> & { address_id?: number }
+  items_count?: number
+  user?: { id: number; name: string; email: string; phone: string | null } | null
+  sub_orders?: SubOrder[]
+  created_at: string | null
+  updated_at: string | null
+}
+
+export type AdminCategory = {
+  id: number
+  name: string
+  slug: string
+  depth: number
+  sort_order: number
+  is_active: boolean
+  parent_id: number | null
+  products_count?: number
+  created_at: string | null
+}
+
+export type AdminBrand = {
+  id: number
+  name: string
+  slug: string
+  logo_path: string | null
+  is_active: boolean
+  products_count?: number
+  created_at: string | null
+}

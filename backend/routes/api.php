@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdminBrandController;
+use App\Http\Controllers\Api\Admin\AdminCategoryController;
+use App\Http\Controllers\Api\Admin\AdminDashboardController;
+use App\Http\Controllers\Api\Admin\AdminOrderController;
+use App\Http\Controllers\Api\Admin\AdminProductController;
+use App\Http\Controllers\Api\Admin\AdminUserController;
+use App\Http\Controllers\Api\Admin\AdminVendorController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
@@ -56,5 +63,38 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('orders', [VendorOrderController::class, 'index']);
         Route::patch('orders/{subOrder}/status', [VendorOrderController::class, 'updateStatus']);
+    });
+
+    Route::prefix('admin')->middleware('admin')->group(function () {
+        Route::get('dashboard', [AdminDashboardController::class, 'show']);
+
+        Route::get('vendors', [AdminVendorController::class, 'index']);
+        Route::get('vendors/{vendor}', [AdminVendorController::class, 'show']);
+        Route::put('vendors/{vendor}', [AdminVendorController::class, 'update']);
+        Route::patch('vendors/{vendor}/status', [AdminVendorController::class, 'updateStatus']);
+
+        Route::get('products', [AdminProductController::class, 'index']);
+        Route::get('products/{product}', [AdminProductController::class, 'show']);
+        Route::put('products/{product}', [AdminProductController::class, 'update']);
+        Route::patch('products/{product}/status', [AdminProductController::class, 'updateStatus']);
+
+        Route::get('orders', [AdminOrderController::class, 'index']);
+        Route::get('orders/{order}', [AdminOrderController::class, 'show']);
+        Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus']);
+
+        Route::get('users', [AdminUserController::class, 'index']);
+        Route::get('users/{user}', [AdminUserController::class, 'show']);
+        Route::put('users/{user}', [AdminUserController::class, 'update']);
+        Route::delete('users/{user}', [AdminUserController::class, 'destroy']);
+
+        Route::get('categories', [AdminCategoryController::class, 'index']);
+        Route::post('categories', [AdminCategoryController::class, 'store']);
+        Route::put('categories/{category}', [AdminCategoryController::class, 'update']);
+        Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy']);
+
+        Route::get('brands', [AdminBrandController::class, 'index']);
+        Route::post('brands', [AdminBrandController::class, 'store']);
+        Route::put('brands/{brand}', [AdminBrandController::class, 'update']);
+        Route::delete('brands/{brand}', [AdminBrandController::class, 'destroy']);
     });
 });

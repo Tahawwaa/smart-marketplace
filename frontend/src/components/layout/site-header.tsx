@@ -126,6 +126,14 @@ export function SiteHeader() {
                 پنل فروشنده
               </Link>
             ) : null}
+            {user.role === 'admin' ? (
+              <Link
+                to="/admin"
+                className="rounded-xl border border-violet-400/25 bg-violet-400/[0.08] px-3 py-2 text-xs text-violet-100 transition hover:border-violet-400/40"
+              >
+                پنل مدیریت
+              </Link>
+            ) : null}
             <Link
               to="/orders"
               className="rounded-xl border border-white/10 px-3 py-2 text-xs text-neutral-300 transition hover:border-white/25 hover:text-white"
