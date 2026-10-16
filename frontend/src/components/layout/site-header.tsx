@@ -5,6 +5,7 @@ import { useAuth } from '../../features/auth/auth-context'
 import { useCart } from '../../features/cart/cart-context'
 import { CATEGORIES } from '../../features/home/data'
 import { cn } from '../../lib/cn'
+import { ThemeToggle } from './theme-toggle'
 import { faNum } from '../../lib/format'
 
 const ALL_ITEMS_LABEL = 'همه کالاها'
@@ -65,12 +66,12 @@ export function SiteHeader() {
   return (
     <header
       ref={panelRef}
-      className="sticky top-0 z-50 border-b border-white/[0.06] bg-ink/85 backdrop-blur-xl"
+      className="sticky top-0 z-50 border-b border-line bg-surface/80 backdrop-blur-xl"
     >
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2 text-sm font-extrabold text-white">
-          <span className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-cyan-400 via-indigo-500 to-fuchsia-500">
-            <ShoppingBag className="size-4" />
+      <div className="container-page flex items-center gap-2 py-3 sm:gap-3">
+        <Link to="/" className="flex shrink-0 items-center gap-2 text-sm font-extrabold text-fg">
+          <span className="grid size-9 place-items-center rounded-xl bg-brand text-brand-fg shadow-[var(--shadow-md)]">
+            <ShoppingBag className="size-5" />
           </span>
           <span className="hidden sm:inline">بازار هوشمند</span>
         </Link>
@@ -78,15 +79,15 @@ export function SiteHeader() {
         <form
           onSubmit={submit}
           role="search"
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 transition focus-within:border-white/25"
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2 transition focus-within:border-brand focus-within:bg-surface focus-within:shadow-[0_0_0_4px_var(--ring)]"
         >
-          <Search className="size-4 shrink-0 text-neutral-500" />
+          <Search className="size-4 shrink-0 text-fg-subtle" />
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="جست‌وجوی نام کالا یا برند…"
             aria-label="جست‌وجوی کالا"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-neutral-500"
+            className="min-w-0 flex-1 bg-transparent text-sm text-fg outline-none placeholder:text-fg-subtle"
           />
           {input && (
             <button
@@ -96,7 +97,7 @@ export function SiteHeader() {
                 setInput('')
                 navigate('/products')
               }}
-              className="grid size-6 shrink-0 place-items-center rounded-full text-neutral-500 transition hover:bg-white/10 hover:text-white"
+              className="grid size-6 shrink-0 place-items-center rounded-full text-fg-subtle transition hover:bg-surface-3 hover:text-fg"
             >
               <X className="size-3.5" />
             </button>
@@ -106,11 +107,11 @@ export function SiteHeader() {
         <Link
           to="/cart"
           aria-label="سبد خرید"
-          className="relative grid size-9 shrink-0 place-items-center rounded-xl border border-white/10 text-neutral-300 transition hover:border-white/25 hover:text-white"
+          className="relative grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-surface text-fg-muted transition hover:border-line-strong hover:text-fg"
         >
           <ShoppingBag className="size-4" />
           {count > 0 ? (
-            <span className="absolute -end-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-cyan-400 px-1 text-[10px] font-bold text-black tabular-nums">
+            <span className="absolute -end-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-white tabular-nums">
               {faNum(count)}
             </span>
           ) : null}
@@ -123,7 +124,7 @@ export function SiteHeader() {
               <Link
                 to="/admin"
                 title="پنل مدیریت"
-                className="flex items-center gap-1.5 rounded-xl border border-violet-400/25 bg-violet-400/[0.08] px-2.5 py-2 text-xs text-violet-100 transition hover:border-violet-400/40 sm:px-3"
+                className="alert alert-info"
               >
                 <LayoutDashboard className="size-4 sm:hidden" />
                 <span className="hidden sm:inline">پنل مدیریت</span>
@@ -135,7 +136,7 @@ export function SiteHeader() {
               <Link
                 to="/vendor"
                 title="پنل فروشنده"
-                className="flex items-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] px-2.5 py-2 text-xs text-cyan-100 transition hover:border-cyan-400/40 sm:px-3"
+                className="alert alert-info"
               >
                 <Store className="size-4 sm:hidden" />
                 <span className="hidden sm:inline">پنل فروشنده</span>
@@ -144,7 +145,7 @@ export function SiteHeader() {
               <Link
                 to="/account/store"
                 title="فروشنده شوید"
-                className="flex items-center gap-1.5 rounded-xl border border-white/10 px-2.5 py-2 text-xs text-neutral-300 transition hover:border-cyan-400/40 hover:text-cyan-100 sm:px-3"
+                className="flex items-center gap-1.5 rounded-xl border border-line px-2.5 py-2 text-xs text-fg-muted transition hover:border-info hover:text-info-ink sm:px-3"
               >
                 <Store className="size-4 sm:hidden" />
                 <span className="hidden sm:inline">فروشنده شوید</span>
@@ -154,7 +155,7 @@ export function SiteHeader() {
             <div className="hidden items-center gap-1.5 sm:flex">
               <Link
                 to="/account"
-                className="shrink-0 rounded-xl border border-white/10 px-3 py-2 text-xs text-neutral-300 transition hover:border-white/25 hover:text-white"
+                className="shrink-0 rounded-xl border border-line px-3 py-2 text-xs text-fg-muted transition hover:border-line-strong hover:text-fg"
               >
                 {user.name}
               </Link>
@@ -162,7 +163,7 @@ export function SiteHeader() {
                 type="button"
                 aria-label="خروج"
                 onClick={() => void logout()}
-                className="grid size-9 place-items-center rounded-xl border border-white/10 text-neutral-300 transition hover:border-white/25 hover:text-white"
+                className="grid size-9 place-items-center rounded-xl border border-line bg-surface text-fg-muted transition hover:border-line-strong hover:text-fg"
               >
                 <LogOut className="size-4" />
               </button>
@@ -172,7 +173,7 @@ export function SiteHeader() {
             <Link
               to="/account"
               aria-label="پنل کاربری"
-              className="grid size-9 place-items-center rounded-xl border border-white/10 text-neutral-300 transition hover:border-white/25 hover:text-white sm:hidden"
+              className="grid size-9 place-items-center rounded-xl border border-line bg-surface text-fg-muted transition hover:border-line-strong hover:text-fg sm:hidden"
             >
               <User className="size-4" />
             </Link>
@@ -181,20 +182,21 @@ export function SiteHeader() {
           <Link
             to="/login"
             aria-label="ورود / ثبت‌نام"
-            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 px-2.5 py-2 text-xs text-neutral-300 transition hover:border-white/25 hover:text-white sm:px-3"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-line px-2.5 py-2 text-xs text-fg-muted transition hover:border-line-strong hover:text-fg sm:px-3"
           >
             <User className="size-4" />
             <span className="hidden sm:inline">ورود</span>
           </Link>
         )}
+        <ThemeToggle />
         <button
           type="button"
           aria-label={open ? 'بستن فهرست دسته‌بندی‌ها' : 'فهرست دسته‌بندی‌ها'}
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
           className={cn(
-            'grid size-9 shrink-0 place-items-center rounded-xl border text-white transition',
-            open ? 'border-white/25 bg-white/10' : 'border-white/10 hover:border-white/25',
+            'grid size-9 shrink-0 place-items-center rounded-xl border text-fg transition',
+            open ? 'border-line-strong bg-surface-3' : 'border-line hover:border-line-strong',
           )}
         >
           <Menu className="size-4" />
@@ -202,8 +204,8 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav aria-label="دسته‌بندی‌ها" className="border-t border-white/[0.06] bg-neutral-950/95">
-          <ul className="mx-auto grid max-w-6xl list-none grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-6">
+        <nav aria-label="دسته‌بندی‌ها" className="border-t border-line bg-surface/95 backdrop-blur-xl">
+          <ul className="container-page grid list-none grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-6">
             <li>
               <button
                 type="button"
@@ -211,11 +213,11 @@ export function SiteHeader() {
                 className={cn(
                   'flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-xs transition',
                   category === ''
-                    ? 'border-white/25 bg-white/10 text-white'
-                    : 'border-white/[0.07] text-neutral-400 hover:border-white/20 hover:text-white',
+                    ? 'border-line-strong bg-surface-3 text-fg'
+                    : 'border-line text-fg-muted hover:border-line-strong hover:text-fg',
                 )}
               >
-                <ShoppingBag className="size-4 shrink-0 text-neutral-400" />
+                <ShoppingBag className="size-4 shrink-0 text-fg-muted" />
                 <span className="truncate">{ALL_ITEMS_LABEL}</span>
               </button>
             </li>
@@ -227,8 +229,8 @@ export function SiteHeader() {
                   className={cn(
                     'flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-xs transition',
                     category === item.slug
-                      ? 'border-white/25 bg-white/10 text-white'
-                      : 'border-white/[0.07] text-neutral-400 hover:border-white/20 hover:text-white',
+                      ? 'border-line-strong bg-surface-3 text-fg'
+                      : 'border-line text-fg-muted hover:border-line-strong hover:text-fg',
                   )}
                 >
                   <item.icon className={cn('size-4 shrink-0', item.tint)} />

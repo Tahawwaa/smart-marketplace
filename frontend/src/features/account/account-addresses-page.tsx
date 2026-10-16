@@ -88,20 +88,20 @@ export function AccountAddressesPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-bold text-white">
-          <MapPin className="size-4 text-cyan-300" /> نشانی‌های من
+        <h2 className="flex items-center gap-1.5 text-sm font-bold text-fg">
+          <MapPin className="size-4 text-brand" /> نشانی‌های من
         </h2>
         <button
           type="button"
           onClick={startNew}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/10"
+          className="btn btn-secondary btn-sm"
         >
           <Plus className="size-4" /> نشانی جدید
         </button>
       </div>
 
       {editing !== null ? (
-        <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+        <section className="card p-4">
           <div className="grid gap-3 sm:grid-cols-2">
             {FIELDS.map((field) => (
               <Field key={field.name} label={field.label} required={field.required}>
@@ -122,7 +122,7 @@ export function AccountAddressesPage() {
                 className={inputClass}
               />
             </Field>
-            <label className="flex items-center gap-2 text-xs text-neutral-400">
+            <label className="flex items-center gap-2 text-xs text-fg-muted">
               <input
                 type="checkbox"
                 checked={Boolean(form.is_default)}
@@ -148,7 +148,7 @@ export function AccountAddressesPage() {
                 setEditing(null)
                 setError(null)
               }}
-              className="rounded-xl border border-white/10 px-4 py-2.5 text-xs text-neutral-400 transition hover:border-white/25 hover:text-white"
+              className="btn btn-secondary btn-sm"
             >
               انصراف
             </button>
@@ -159,38 +159,38 @@ export function AccountAddressesPage() {
       {!editing ? <FormError message={error} /> : null}
 
       {addresses.loading ? (
-        <p className="flex items-center gap-2 text-sm text-neutral-400">
+        <p className="flex items-center gap-2 text-sm text-fg-muted">
           <Loader2 className="size-4 animate-spin" /> در حال بارگذاری…
         </p>
       ) : addresses.error ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] py-12 text-center text-sm text-neutral-400">
+        <div className="card py-12 text-center text-sm text-fg-muted">
           {addresses.error}
         </div>
       ) : saved.length === 0 && editing === null ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] py-16 text-center">
-          <p className="text-sm text-neutral-400">هنوز نشانی‌ای ثبت نکرده‌اید.</p>
-          <p className="mt-1 text-xs text-neutral-500">برای تحویل سریع‌تر سفارش، نشانی پیش‌فرض بسازید.</p>
+        <div className="card py-16 text-center">
+          <p className="text-sm text-fg-muted">هنوز نشانی‌ای ثبت نکرده‌اید.</p>
+          <p className="mt-1 text-xs text-fg-subtle">برای تحویل سریع‌تر سفارش، نشانی پیش‌فرض بسازید.</p>
         </div>
       ) : (
         <ul className="list-none space-y-2 p-0">
           {saved.map((address) => (
             <li
               key={address.id}
-              className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-4 py-3"
+              className="flex flex-wrap items-start justify-between gap-3 card px-4 py-3"
             >
               <div className="min-w-0 text-xs">
-                <p className="flex items-center gap-1.5 text-white">
+                <p className="flex items-center gap-1.5 text-fg">
                   {address.recipient_name}
                   {address.is_default ? (
-                    <span className="inline-flex items-center gap-0.5 rounded-lg border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[10px] text-emerald-200">
+                    <span className="badge badge-success">
                       <Star className="size-3" /> پیش‌فرض
                     </span>
                   ) : null}
                 </p>
-                <p className="mt-0.5 text-neutral-500" dir="ltr">
+                <p className="mt-0.5 text-fg-subtle" dir="ltr">
                   {address.recipient_phone}
                 </p>
-                <p className="mt-1 text-neutral-400">
+                <p className="mt-1 text-fg-muted">
                   {address.province}، {address.city}، {address.address_line}
                   {address.postal_code ? ` — کدپستی ${address.postal_code}` : ''}
                 </p>
@@ -200,7 +200,7 @@ export function AccountAddressesPage() {
                   type="button"
                   aria-label="ویرایش نشانی"
                   onClick={() => startEdit(address)}
-                  className="grid size-8 place-items-center rounded-xl border border-white/10 text-neutral-300 transition hover:border-white/25 hover:text-white"
+                  className="grid size-8 place-items-center rounded-xl border border-line text-fg-muted transition hover:border-line-strong hover:text-fg"
                 >
                   <Pencil className="size-3.5" />
                 </button>
@@ -208,7 +208,7 @@ export function AccountAddressesPage() {
                   type="button"
                   aria-label="حذف نشانی"
                   onClick={() => void remove(address.id)}
-                  className="grid size-8 place-items-center rounded-xl border border-rose-400/20 text-rose-200 transition hover:border-rose-400/40"
+                  className="grid size-8 place-items-center rounded-xl border border-danger/30 text-danger-ink transition hover:border-danger"
                 >
                   <Trash2 className="size-3.5" />
                 </button>

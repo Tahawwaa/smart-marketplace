@@ -1,4 +1,4 @@
-import { ArrowRight, Loader2, PackageSearch, ShoppingBag } from 'lucide-react'
+import { ArrowRight, CheckCircle2, PackageSearch, ShoppingBag, Store } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../../lib/api/client'
@@ -29,19 +29,27 @@ export function ProductDetailPage() {
 
   if (product.loading) {
     return (
-      <p className="flex items-center justify-center gap-2 px-4 py-24 text-sm text-neutral-400">
-        <Loader2 className="size-4 animate-spin" />
-        در حال بارگذاری کالا…
-      </p>
+      <section className="container-page py-8" aria-busy="true">
+        <div className="skeleton mb-6 h-4 w-40" />
+        <div className="grid gap-8 md:grid-cols-2">
+          <div className="skeleton aspect-square w-full rounded-3xl" />
+          <div className="space-y-4">
+            <div className="skeleton h-8 w-3/4" />
+            <div className="skeleton h-4 w-1/3" />
+            <div className="skeleton h-10 w-1/2" />
+            <div className="skeleton h-40 w-full" />
+          </div>
+        </div>
+      </section>
     )
   }
 
   if (product.error || !detail) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-24 text-center sm:px-6">
-        <PackageSearch className="mx-auto size-8 text-neutral-600" />
-        <p className="mt-3 text-sm text-neutral-400">{product.error ?? 'کالا پیدا نشد.'}</p>
-        <Link to="/products" className="mt-5 inline-block text-xs text-cyan-300 hover:text-cyan-200">
+      <div className="container-page py-24 text-center">
+        <PackageSearch className="mx-auto size-10 text-fg-subtle" />
+        <p className="mt-3 text-sm text-fg-muted">{product.error ?? 'کالا پیدا نشد.'}</p>
+        <Link to="/products" className="btn btn-secondary btn-sm mt-5">
           بازگشت به فهرست کالاها
         </Link>
       </div>
@@ -49,98 +57,102 @@ export function ProductDetailPage() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <nav className="mb-6 flex items-center gap-2 text-xs text-neutral-500">
-        <Link to="/products" className="transition hover:text-neutral-200">
+    <section className="container-page py-8">
+      <nav className="mb-6 flex items-center gap-2 text-xs text-fg-subtle">
+        <Link to="/products" className="transition hover:text-fg">
           کالاها
         </Link>
         <ArrowRight className="size-3.5 rotate-180" />
-        <span className="truncate text-neutral-300">{detail.name}</span>
+        <span className="truncate text-fg-muted">{detail.name}</span>
       </nav>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <div className="grid h-72 place-items-center rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+      <div className="grid gap-8 md:grid-cols-2 md:items-start">
+        <div className="card grid aspect-square place-items-center overflow-hidden md:sticky md:top-24">
           {image ? (
-            <img src={image.path} alt={image.alt ?? detail.name} className="size-full rounded-2xl object-cover" />
+            <img src={image.path} alt={image.alt ?? detail.name} className="size-full object-cover" />
           ) : (
-            <PackageSearch className="size-12 text-neutral-700" />
+            <PackageSearch className="size-16 text-fg-subtle" />
           )}
         </div>
 
         <div>
-          <h1 className="text-lg font-extrabold text-white">{detail.name}</h1>
-          {detail.brand ? (
-            <p className="mt-1 text-xs text-neutral-500">برند: {detail.brand.name}</p>
-          ) : null}
-          {detail.category ? (
-            <p className="mt-0.5 text-xs text-neutral-500">دسته: {detail.category.name}</p>
-          ) : null}
-
-          <p className="mt-4 text-xl font-bold tabular-nums text-white">
-            {price === null ? 'قیمت پس از انتخاب تنوع' : faPrice(price)}
-          </p>
-
-          <div className="mt-5 flex items-center gap-3">
-            <label htmlFor="quantity" className="text-xs text-neutral-400">
-              تعداد
-            </label>
-            <input
-              id="quantity"
-              type="number"
-              min={1}
-              value={quantity}
-              onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
-              className="w-20 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-white outline-none"
-            />
+          <h1 className="page-title">{detail.name}</h1>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {detail.brand ? <span className="badge badge-neutral">برند: {detail.brand.name}</span> : null}
+            {detail.category ? <span className="badge badge-neutral">دسته: {detail.category.name}</span> : null}
           </div>
 
-          <button
-            type="button"
-            disabled={selected === null}
-            onClick={() => {
-              if (selected === null) return
-              setError(null)
-              add(selected.id, quantity)
-                .then(() => setAdded(true))
-                .catch((cause: unknown) =>
-                  setError(cause instanceof ApiError ? cause.message : 'افزودن به سبد انجام نشد.'),
-                )
-            }}
-            className="mt-5 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <ShoppingBag className="size-4" />
-            افزودن به سبد خرید
-          </button>
-
-          {added ? (
-            <p className="mt-3 text-xs text-emerald-300">
-              به سبد اضافه شد.{' '}
-              <Link to="/cart" className="underline">
-                مشاهده سبد خرید
-              </Link>
+          <div className="panel mt-5">
+            <p className="text-xs text-fg-subtle">قیمت</p>
+            <p className="mt-1 text-3xl font-black tabular-nums text-fg">
+              {price === null ? 'قیمت پس از انتخاب تنوع' : faPrice(price)}
             </p>
-          ) : null}
 
-          {error ? <p className="mt-3 text-xs text-rose-300">{error}</p> : null}
+            <div className="mt-5 flex items-center gap-3">
+              <label htmlFor="quantity" className="label !mb-0">
+                تعداد
+              </label>
+              <input
+                id="quantity"
+                type="number"
+                min={1}
+                value={quantity}
+                onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
+                className="input !w-24"
+              />
+            </div>
+
+            <button
+              type="button"
+              disabled={selected === null}
+              onClick={() => {
+                if (selected === null) return
+                setError(null)
+                add(selected.id, quantity)
+                  .then(() => setAdded(true))
+                  .catch((cause: unknown) =>
+                    setError(cause instanceof ApiError ? cause.message : 'افزودن به سبد انجام نشد.'),
+                  )
+              }}
+              className="btn btn-primary btn-lg mt-5 w-full disabled:cursor-not-allowed"
+            >
+              <ShoppingBag className="size-4" />
+              افزودن به سبد خرید
+            </button>
+
+            {added ? (
+              <p className="alert alert-success mt-3 flex items-center gap-2">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>
+                  به سبد اضافه شد.{' '}
+                  <Link to="/cart" className="font-bold underline">
+                    مشاهده سبد خرید
+                  </Link>
+                </span>
+              </p>
+            ) : null}
+
+            {error ? <p className="alert alert-danger mt-3">{error}</p> : null}
+          </div>
 
           {detail.description ? (
-            <div className="mt-6 border-t border-white/[0.06] pt-5">
-              <h2 className="mb-2 text-xs font-bold text-neutral-300">توضیحات</h2>
-              <p className="text-xs leading-7 text-neutral-400">{detail.description}</p>
+            <div className="mt-6">
+              <h2 className="section-title mb-2">توضیحات</h2>
+              <p className="text-sm leading-8 text-fg-muted">{detail.description}</p>
             </div>
           ) : null}
 
           {detail.variants?.length ? (
-            <div className="mt-6 border-t border-white/[0.06] pt-5">
-              <h2 className="mb-2 text-xs font-bold text-neutral-300">
+            <div className="mt-6">
+              <h2 className="section-title mb-2">
                 تنوع‌ها ({faNum(detail.variants.length)})
               </h2>
-              <ul className="list-none space-y-2 p-0 text-xs text-neutral-400">
+              <ul className="list-none space-y-2 p-0 text-xs text-fg-muted">
                 {detail.variants.map((variant) => (
-                  <li key={variant.id} className="rounded-lg border border-white/[0.07] px-3 py-2">
+                  <li key={variant.id} className="panel-muted !p-3">
                     {variant.sku ? <span className="tabular-nums">کد: {variant.sku}</span> : 'تنوع کالا'}
                     {variant.attributes?.length ? (
-                      <span className="text-neutral-500">
+                      <span className="text-fg-subtle">
                         {' '}
                         — {variant.attributes.map((attr) => `${attr.name}: ${attr.values.map((v) => v.value).join('، ')}`).join(' | ')}
                       </span>
@@ -149,21 +161,29 @@ export function ProductDetailPage() {
                       <ul className="mt-2 list-none space-y-1 p-0">
                         {variant.inventories.map((offer) => (
                           <li key={offer.id}>
-                            <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-white/[0.06] px-2.5 py-1.5">
+                            <label
+                              className={`flex cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 py-2 transition ${
+                                selected?.id === offer.id
+                                  ? 'border-brand bg-brand-soft'
+                                  : 'border-line bg-surface hover:border-line-strong'
+                              }`}
+                            >
                               <span className="flex items-center gap-2">
                                 <input
                                   type="radio"
                                   name="offer"
                                   checked={selected?.id === offer.id}
                                   onChange={() => setInventoryId(offer.id)}
+                                  className="accent-[var(--brand)]"
                                 />
-                                <span className="text-neutral-300">
+                                <Store className="size-3.5 text-fg-subtle" />
+                                <span className="text-fg">
                                   {offer.vendor?.store_name ?? 'فروشنده'}
                                 </span>
                               </span>
-                              <span className="tabular-nums text-neutral-300">
+                              <span className="font-bold tabular-nums text-fg">
                                 {faPrice(offer.effective_price)}
-                                <span className="text-neutral-600">
+                                <span className="text-fg-subtle">
                                   {' '}
                                   ({faNum(offer.available_quantity)} عدد)
                                 </span>

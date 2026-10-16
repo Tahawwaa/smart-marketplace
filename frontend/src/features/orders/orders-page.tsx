@@ -15,25 +15,25 @@ export function OrdersPage({ embedded = false }: { embedded?: boolean } = {}) {
   const body = (
     <>
       {orders.loading ? (
-        <p className="flex items-center gap-2 text-sm text-neutral-400">
+        <p className="flex items-center gap-2 text-sm text-fg-muted">
           <Loader2 className="size-4 animate-spin" />
           در حال بارگذاری…
         </p>
       ) : orders.error ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] py-16 text-center">
-          <p className="text-sm text-neutral-400">{orders.error}</p>
+        <div className="card py-16 text-center">
+          <p className="text-sm text-fg-muted">{orders.error}</p>
           <button
             type="button"
             onClick={orders.retry}
-            className="mt-4 rounded-xl border border-white/15 px-4 py-2 text-xs font-bold text-white transition hover:bg-white/10"
+            className="btn btn-secondary btn-sm mt-4"
           >
             تلاش دوباره
           </button>
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] py-20 text-center">
-          <p className="text-sm text-neutral-400">هنوز سفارشی ثبت نشده است.</p>
-          <Link to="/products" className="mt-4 inline-block text-xs text-cyan-300 hover:text-cyan-200">
+        <div className="card py-20 text-center">
+          <p className="text-sm text-fg-muted">هنوز سفارشی ثبت نشده است.</p>
+          <Link to="/products" className="mt-4 inline-block text-xs font-bold text-brand hover:underline">
             رفتن به فهرست کالاها
           </Link>
         </div>
@@ -43,14 +43,14 @@ export function OrdersPage({ embedded = false }: { embedded?: boolean } = {}) {
             <li key={order.id}>
               <Link
                 to={`/orders/${order.id}`}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 transition hover:border-white/20"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 transition hover:border-line-strong"
               >
-                <span className="text-sm text-white">سفارش {order.order_number}</span>
-                <span className="text-xs text-neutral-400">{order.status}</span>
-                <span className="text-xs tabular-nums text-neutral-300">
+                <span className="text-sm text-fg">سفارش {order.order_number}</span>
+                <span className="text-xs text-fg-muted">{order.status}</span>
+                <span className="text-xs tabular-nums text-fg-muted">
                   {faPrice(order.grand_total)}
                   {order.items_count ? (
-                    <span className="text-neutral-500"> • {faNum(order.items_count)} قلم</span>
+                    <span className="text-fg-subtle"> • {faNum(order.items_count)} قلم</span>
                   ) : null}
                 </span>
               </Link>
@@ -64,8 +64,8 @@ export function OrdersPage({ embedded = false }: { embedded?: boolean } = {}) {
   if (embedded) return body
 
   return (
-    <section className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <h1 className="mb-6 text-base font-extrabold text-white">سفارش‌های من</h1>
+    <section className="container-page max-w-3xl py-8">
+      <h1 className="mb-6 page-title">سفارش‌های من</h1>
       {body}
     </section>
   )

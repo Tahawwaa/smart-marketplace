@@ -47,7 +47,7 @@ export function PaymentPage() {
 
   if (order.loading) {
     return (
-      <p className="flex items-center justify-center gap-2 px-4 py-24 text-sm text-neutral-400">
+      <p className="flex items-center justify-center gap-2 px-4 py-24 text-sm text-fg-muted">
         <Loader2 className="size-4 animate-spin" />
         در حال بارگذاری سفارش…
       </p>
@@ -57,8 +57,8 @@ export function PaymentPage() {
   if (order.error || detail === null) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
-        <p className="text-sm text-neutral-400">{order.error ?? 'سفارش پیدا نشد.'}</p>
-        <Link to="/orders" className="mt-4 inline-block text-xs text-cyan-300 hover:text-cyan-200">
+        <p className="text-sm text-fg-muted">{order.error ?? 'سفارش پیدا نشد.'}</p>
+        <Link to="/orders" className="mt-4 inline-block text-xs font-bold text-brand hover:underline">
           بازگشت به سفارش‌ها
         </Link>
       </div>
@@ -66,17 +66,17 @@ export function PaymentPage() {
   }
 
   return (
-    <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
+    <section className="container-page max-w-2xl py-8">
       <Link
         to={`/orders/${detail.id}`}
-        className="text-xs text-neutral-500 transition hover:text-neutral-200"
+        className="text-xs text-fg-subtle transition hover:text-fg"
       >
         ← سفارش {detail.order_number}
       </Link>
 
-      <h1 className="mt-4 text-base font-extrabold text-white">پرداخت سفارش</h1>
+      <h1 className="mt-4 page-title">پرداخت سفارش</h1>
 
-      <div className="mt-4 rounded-xl border border-amber-400/25 bg-amber-400/[0.06] px-4 py-3 text-xs text-amber-100">
+      <div className="alert alert-warning mt-4">
         <p className="font-bold">درگاه آزمایشی</p>
         <p className="mt-1 text-start leading-5">
           این نسخه به درگاه واقعی متصل نیست و هیچ پولی جابه‌جا نمی‌شود؛ پرداخت همیشه موفق اعلام
@@ -85,18 +85,18 @@ export function PaymentPage() {
       </div>
 
       <dl className="mt-6 grid grid-cols-2 gap-3 text-xs">
-        <div className="rounded-xl border border-white/[0.08] px-4 py-3">
-          <dt className="text-neutral-500">وضعیت پرداخت</dt>
-          <dd className="mt-1 text-neutral-200">{paymentStatusLabel(detail.payment_status)}</dd>
+        <div className="card px-4 py-3">
+          <dt className="text-fg-subtle">وضعیت پرداخت</dt>
+          <dd className="mt-1 text-fg">{paymentStatusLabel(detail.payment_status)}</dd>
         </div>
-        <div className="rounded-xl border border-white/[0.08] px-4 py-3">
-          <dt className="text-neutral-500">مبلغ قابل پرداخت</dt>
-          <dd className="mt-1 tabular-nums text-white">{faPrice(detail.grand_total)}</dd>
+        <div className="card px-4 py-3">
+          <dt className="text-fg-subtle">مبلغ قابل پرداخت</dt>
+          <dd className="mt-1 tabular-nums text-fg">{faPrice(detail.grand_total)}</dd>
         </div>
       </dl>
 
       {payment ? (
-        <div className="mt-4 rounded-xl border border-white/[0.08] px-4 py-3 text-xs text-neutral-300">
+        <div className="mt-4 rounded-xl border border-line px-4 py-3 text-xs text-fg-muted">
           <p>
             شناسه‌ی پرداخت: <span className="tabular-nums">{payment.id}</span>
           </p>
@@ -105,7 +105,7 @@ export function PaymentPage() {
           </p>
           <p className="mt-1">وضعیت: {paymentStatusLabel(payment.status)}</p>
           {payment.paid_at ? (
-            <p className="mt-1 text-emerald-200">
+            <p className="mt-1 text-success-ink">
               پرداخت در {new Date(payment.paid_at).toLocaleString('fa-IR')} ثبت شد.
             </p>
           ) : null}
@@ -113,13 +113,13 @@ export function PaymentPage() {
       ) : null}
 
       {error ? (
-        <p className="mt-4 rounded-xl border border-rose-400/20 bg-rose-400/[0.06] px-4 py-2.5 text-xs text-rose-200">
+        <p className="alert alert-danger mt-4">
           {error}
         </p>
       ) : null}
 
       {alreadyPaid && payment === null ? (
-        <p className="mt-4 text-xs text-emerald-200">این سفارش قبلاً پرداخت شده است.</p>
+        <p className="mt-4 text-xs text-success-ink">این سفارش قبلاً پرداخت شده است.</p>
       ) : null}
 
       <div className="mt-6 flex flex-wrap gap-3">
@@ -127,14 +127,14 @@ export function PaymentPage() {
           type="button"
           disabled={busy || alreadyPaid}
           onClick={() => void pay()}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-50"
+          className="btn btn-primary"
         >
           {busy ? <Loader2 className="size-4 animate-spin" /> : null}
           پرداخت آزمایشی
         </button>
         <Link
           to={`/orders/${detail.id}`}
-          className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-neutral-300 transition hover:border-white/25 hover:text-white"
+          className="btn btn-secondary"
         >
           بازگشت به سفارش
         </Link>

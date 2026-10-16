@@ -11,7 +11,7 @@ export function OrderDetailPage() {
 
   if (order.loading) {
     return (
-      <p className="flex items-center justify-center gap-2 px-4 py-24 text-sm text-neutral-400">
+      <p className="flex items-center justify-center gap-2 px-4 py-24 text-sm text-fg-muted">
         <Loader2 className="size-4 animate-spin" />
         در حال بارگذاری سفارش…
       </p>
@@ -21,8 +21,8 @@ export function OrderDetailPage() {
   if (order.error || !detail) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6">
-        <p className="text-sm text-neutral-400">{order.error ?? 'سفارش پیدا نشد.'}</p>
-        <Link to="/orders" className="mt-4 inline-block text-xs text-cyan-300 hover:text-cyan-200">
+        <p className="text-sm text-fg-muted">{order.error ?? 'سفارش پیدا نشد.'}</p>
+        <Link to="/orders" className="mt-4 inline-block text-xs font-bold text-brand hover:underline">
           بازگشت به سفارش‌ها
         </Link>
       </div>
@@ -30,41 +30,41 @@ export function OrderDetailPage() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <Link to="/orders" className="text-xs text-neutral-500 transition hover:text-neutral-200">
+    <section className="container-page max-w-3xl py-8">
+      <Link to="/orders" className="text-xs text-fg-subtle transition hover:text-fg">
         ← سفارش‌های من
       </Link>
 
-      <h1 className="mt-4 text-base font-extrabold text-white">سفارش {detail.order_number}</h1>
+      <h1 className="mt-4 page-title">سفارش {detail.order_number}</h1>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
-        <div className="rounded-xl border border-white/[0.08] px-4 py-3">
-          <dt className="text-neutral-500">وضعیت سفارش</dt>
-          <dd className="mt-1 text-neutral-200">{detail.status}</dd>
+        <div className="card px-4 py-3">
+          <dt className="text-fg-subtle">وضعیت سفارش</dt>
+          <dd className="mt-1 text-fg">{detail.status}</dd>
         </div>
-        <div className="rounded-xl border border-white/[0.08] px-4 py-3">
-          <dt className="text-neutral-500">وضعیت پرداخت</dt>
-          <dd className="mt-1 text-neutral-200">{detail.payment_status}</dd>
+        <div className="card px-4 py-3">
+          <dt className="text-fg-subtle">وضعیت پرداخت</dt>
+          <dd className="mt-1 text-fg">{detail.payment_status}</dd>
         </div>
-        <div className="rounded-xl border border-white/[0.08] px-4 py-3">
-          <dt className="text-neutral-500">مبلغ کالاها</dt>
-          <dd className="mt-1 tabular-nums text-neutral-200">{faPrice(detail.total_items_price)}</dd>
+        <div className="card px-4 py-3">
+          <dt className="text-fg-subtle">مبلغ کالاها</dt>
+          <dd className="mt-1 tabular-nums text-fg">{faPrice(detail.total_items_price)}</dd>
         </div>
-        <div className="rounded-xl border border-white/[0.08] px-4 py-3">
-          <dt className="text-neutral-500">مبلغ نهایی</dt>
-          <dd className="mt-1 tabular-nums text-neutral-200">{faPrice(detail.grand_total)}</dd>
+        <div className="card px-4 py-3">
+          <dt className="text-fg-subtle">مبلغ نهایی</dt>
+          <dd className="mt-1 tabular-nums text-fg">{faPrice(detail.grand_total)}</dd>
         </div>
       </dl>
 
       {detail.sub_orders?.map((subOrder) => (
         <div key={subOrder.id} className="mt-6">
-          <h2 className="mb-2 text-xs font-bold text-neutral-300">
+          <h2 className="mb-2 text-xs font-bold text-fg-muted">
             {subOrder.vendor?.store_name ?? `زیرسفارش ${subOrder.sub_order_number}`}
           </h2>
-          <ul className="list-none space-y-2 p-0 text-xs text-neutral-300">
+          <ul className="list-none space-y-2 p-0 text-xs text-fg-muted">
             {subOrder.items?.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center justify-between border-b border-white/[0.06] py-2"
+                className="flex items-center justify-between border-b border-line py-2"
               >
                 <span>
                   {item.product_name_snapshot} × {item.quantity}
@@ -76,30 +76,30 @@ export function OrderDetailPage() {
         </div>
       ))}
 
-      <div className="mt-6 rounded-xl border border-white/[0.08] px-4 py-3 text-xs text-neutral-300">
-        <p className="text-neutral-500">نشانی تحویل</p>
+      <div className="mt-6 rounded-xl border border-line px-4 py-3 text-xs text-fg-muted">
+        <p className="text-fg-subtle">نشانی تحویل</p>
         <p className="mt-1">
           {detail.shipping_address_snapshot.recipient_name} —{' '}
           {detail.shipping_address_snapshot.recipient_phone}
         </p>
-        <p className="mt-0.5 text-neutral-400">
+        <p className="mt-0.5 text-fg-muted">
           {detail.shipping_address_snapshot.province}، {detail.shipping_address_snapshot.city}،{' '}
           {detail.shipping_address_snapshot.address_line}
         </p>
       </div>
 
       {detail.payment_status === 'paid' ? (
-        <p className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-3 text-xs text-emerald-200">
+        <p className="alert alert-success mt-6">
           پرداخت این سفارش انجام شده است.
         </p>
       ) : detail.status === 'cancelled' || detail.status === 'refunded' ? (
-        <p className="mt-6 rounded-xl border border-white/[0.08] px-4 py-3 text-xs text-neutral-400">
+        <p className="mt-6 rounded-xl border border-line px-4 py-3 text-xs text-fg-muted">
           این سفارش پرداخت‌شدنی نیست.
         </p>
       ) : (
         <Link
           to={`/orders/${detail.id}/pay`}
-          className="mt-6 inline-flex rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+          className="btn btn-primary mt-6"
         >
           پرداخت سفارش
         </Link>

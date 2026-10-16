@@ -17,12 +17,12 @@ export type CategoryItem = {
 }
 
 export const CATEGORIES: CategoryItem[] = [
-  { slug: 'mobile', name: 'موبایل و گجت', icon: Smartphone, color: '24, 204, 252', tint: 'text-cyan-300' },
-  { slug: 'laptop', name: 'لپ‌تاپ و کامپیوتر', icon: Laptop, color: '99, 102, 241', tint: 'text-indigo-300' },
-  { slug: 'home', name: 'خانه و آشپزخانه', icon: Armchair, color: '251, 191, 36', tint: 'text-amber-300' },
-  { slug: 'fashion', name: 'مد و پوشاک', icon: Shirt, color: '217, 70, 239', tint: 'text-fuchsia-300' },
-  { slug: 'beauty', name: 'زیبایی و سلامت', icon: Sparkles, color: '251, 113, 133', tint: 'text-rose-300' },
-  { slug: 'sport', name: 'ورزش و سفر', icon: Dumbbell, color: '52, 211, 153', tint: 'text-emerald-300' },
+  { slug: 'mobile', name: 'موبایل و گجت', icon: Smartphone, color: '14, 143, 209', tint: 'text-info' },
+  { slug: 'laptop', name: 'لپ‌تاپ و کامپیوتر', icon: Laptop, color: '79, 70, 229', tint: 'text-brand' },
+  { slug: 'home', name: 'خانه و آشپزخانه', icon: Armchair, color: '217, 138, 11', tint: 'text-warning' },
+  { slug: 'fashion', name: 'مد و پوشاک', icon: Shirt, color: '255, 90, 54', tint: 'text-accent' },
+  { slug: 'beauty', name: 'زیبایی و سلامت', icon: Sparkles, color: '224, 54, 78', tint: 'text-danger' },
+  { slug: 'sport', name: 'ورزش و سفر', icon: Dumbbell, color: '18, 160, 92', tint: 'text-success' },
 ]
 
 export const categoryBySlug = (slug: string) => CATEGORIES.find((item) => item.slug === slug)

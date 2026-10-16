@@ -95,7 +95,7 @@ export function AdminDashboardPage() {
           <button
             type="button"
             onClick={retry}
-            className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] text-neutral-300 transition hover:border-white/25 hover:text-white"
+            className="btn btn-secondary btn-sm"
           >
             به‌روزرسانی
           </button>
@@ -106,7 +106,7 @@ export function AdminDashboardPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <AdminPanel title="صف‌های در انتظار مدیر" action={
-          <span className="text-[11px] text-neutral-600">نیازمند اقدام</span>
+          <span className="text-[11px] text-fg-subtle">نیازمند اقدام</span>
         }>
           <ul className="list-none space-y-2 p-0 text-xs">
             {[
@@ -117,10 +117,10 @@ export function AdminDashboardPage() {
               <li key={row.label}>
                 <Link
                   to={row.to}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.08] px-3 py-2.5 transition hover:border-white/20"
+                  className="flex items-center justify-between gap-2 rounded-xl border border-line px-3 py-2.5 transition hover:border-line-strong"
                 >
-                  <span className="text-neutral-300">{row.label}</span>
-                  <span className="tabular-nums text-white">{faNum(row.value)}</span>
+                  <span className="text-fg-muted">{row.label}</span>
+                  <span className="tabular-nums text-fg">{faNum(row.value)}</span>
                 </Link>
               </li>
             ))}
@@ -132,7 +132,7 @@ export function AdminDashboardPage() {
             {dashboard.order_status_breakdown.map((row) => (
               <li key={row.status} className="flex items-center justify-between gap-2">
                 <StatusPill status={row.status} label={adminOrderStatusLabel(row.status)} />
-                <span className="tabular-nums text-neutral-300">{faNum(row.count)}</span>
+                <span className="tabular-nums text-fg-muted">{faNum(row.count)}</span>
               </li>
             ))}
           </ul>
@@ -142,19 +142,19 @@ export function AdminDashboardPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <AdminPanel title="فروشگاه‌های برتر">
           {dashboard.top_vendors.length === 0 ? (
-            <p className="text-xs text-neutral-500">هنوز فروشی ثبت نشده است.</p>
+            <p className="text-xs text-fg-subtle">هنوز فروشی ثبت نشده است.</p>
           ) : (
             <ul className="list-none space-y-2 p-0 text-xs">
               {dashboard.top_vendors.map((row, index) => (
                 <li
                   key={row.vendor?.id ?? index}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/[0.08] px-3 py-2.5"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line px-3 py-2.5"
                 >
-                  <span className="text-neutral-200">{row.vendor?.store_name ?? 'فروشگاه حذف‌شده'}</span>
-                  <span className="text-[11px] text-neutral-500">
+                  <span className="text-fg">{row.vendor?.store_name ?? 'فروشگاه حذف‌شده'}</span>
+                  <span className="text-[11px] text-fg-subtle">
                     {faNum(row.orders)} زیرسفارش • کمیسیون {faPrice(row.commission)}
                   </span>
-                  <span className="tabular-nums text-white">{faPrice(row.gross)}</span>
+                  <span className="tabular-nums text-fg">{faPrice(row.gross)}</span>
                 </li>
               ))}
             </ul>
@@ -164,30 +164,30 @@ export function AdminDashboardPage() {
         <AdminPanel
           title="آخرین سفارش‌ها"
           action={
-            <Link to="/admin/orders" className="text-[11px] text-cyan-300 hover:text-cyan-200">
+            <Link to="/admin/orders" className="text-[11px] text-brand hover:text-brand">
               همه‌ی سفارش‌ها
             </Link>
           }
         >
           {dashboard.recent_orders.length === 0 ? (
-            <p className="text-xs text-neutral-500">سفارشی ثبت نشده است.</p>
+            <p className="text-xs text-fg-subtle">سفارشی ثبت نشده است.</p>
           ) : (
             <ul className="list-none space-y-2 p-0 text-xs">
               {dashboard.recent_orders.map((row) => (
                 <li
                   key={row.id}
-                  className="rounded-xl border border-white/[0.08] px-3 py-2.5"
+                  className="card px-3 py-2.5"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="tabular-nums text-neutral-200">{row.order_number}</span>
-                    <span className="tabular-nums text-white">{faPrice(row.grand_total)}</span>
+                    <span className="tabular-nums text-fg">{row.order_number}</span>
+                    <span className="tabular-nums text-fg">{faPrice(row.grand_total)}</span>
                   </div>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <StatusPill status={row.status} label={adminOrderStatusLabel(row.status)} />
-                    <span className="text-[11px] text-neutral-500">
+                    <span className="text-[11px] text-fg-subtle">
                       پرداخت: {paymentStatusLabel(row.payment_status)}
                     </span>
-                    <span className="text-[11px] text-neutral-500">
+                    <span className="text-[11px] text-fg-subtle">
                       {row.customer?.name ?? 'مشتری حذف‌شده'}
                     </span>
                   </div>

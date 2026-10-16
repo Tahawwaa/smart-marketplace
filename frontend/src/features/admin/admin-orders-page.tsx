@@ -66,7 +66,7 @@ export function AdminOrdersPage() {
         }}
         placeholder="جست‌وجوی شماره سفارش…"
       >
-        <label className="flex items-center gap-2 text-neutral-400">
+        <label className="flex items-center gap-2 text-fg-muted">
           وضعیت
           <select
             value={status}
@@ -74,7 +74,7 @@ export function AdminOrdersPage() {
               setStatus(event.target.value)
               setPage(1)
             }}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white outline-none"
+            className="input"
           >
             {FILTERS.map((value) => (
               <option key={value || 'all'} value={value}>
@@ -115,13 +115,13 @@ export function AdminOrdersPage() {
               )
 
               return (
-                <li key={row.id} className="rounded-xl border border-white/[0.08] px-4 py-3 text-xs">
+                <li key={row.id} className="card px-4 py-3 text-xs">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="tabular-nums text-sm text-white">{row.order_number}</span>
+                    <span className="tabular-nums text-sm text-fg">{row.order_number}</span>
                     <StatusPill status={row.status} label={adminOrderStatusLabel(row.status)} />
                   </div>
 
-                  <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-neutral-500">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-fg-subtle">
                     <span>{row.user ? `${row.user.name} • ${row.user.email}` : 'مشتری حذف‌شده'}</span>
                     <span>پرداخت: {paymentStatusLabel(row.payment_status)}</span>
                     <span className="tabular-nums">
@@ -138,7 +138,7 @@ export function AdminOrdersPage() {
                     <button
                       type="button"
                       onClick={() => setExpanded(expanded === row.id ? null : row.id)}
-                      className="rounded-lg border border-white/10 px-3 py-1.5 text-neutral-300 transition hover:border-white/25 hover:text-white"
+                      className="btn btn-secondary btn-sm"
                     >
                       {expanded === row.id ? 'بستن جزئیات' : 'جزئیات'}
                     </button>
@@ -148,7 +148,7 @@ export function AdminOrdersPage() {
                           type="button"
                           disabled={busyId === row.id}
                           onClick={() => void terminate(row.id, 'cancelled')}
-                          className="rounded-lg border border-white/10 px-3 py-1.5 text-rose-200 transition hover:border-rose-400/40 disabled:opacity-50"
+                          className="btn btn-danger btn-sm"
                         >
                           لغو سفارش
                         </button>
@@ -156,22 +156,22 @@ export function AdminOrdersPage() {
                           type="button"
                           disabled={busyId === row.id}
                           onClick={() => void terminate(row.id, 'refunded')}
-                          className="rounded-lg border border-violet-400/25 bg-violet-400/[0.08] px-3 py-1.5 text-violet-100 transition hover:border-violet-400/40 disabled:opacity-50"
+                          className="alert alert-info"
                         >
                           بازگشت وجه
                         </button>
                       </>
                     ) : (
-                      <span className="self-center text-[11px] text-neutral-600">
+                      <span className="self-center text-[11px] text-fg-subtle">
                         این سفارش در وضعیت پایانی است.
                       </span>
                     )}
                   </div>
 
                   {expanded === row.id ? (
-                    <div className="mt-3 space-y-2 border-t border-white/[0.06] pt-3">
+                    <div className="mt-3 space-y-2 border-t border-line pt-3">
                       {address ? (
-                        <p className="text-start text-neutral-400">
+                        <p className="text-start text-fg-muted">
                           گیرنده: {address.recipient_name} — {address.recipient_phone}
                           <br />
                           {address.province}، {address.city}، {address.address_line}
@@ -182,10 +182,10 @@ export function AdminOrdersPage() {
                         {(row.sub_orders ?? []).map((subOrder) => (
                           <li
                             key={subOrder.id}
-                            className="rounded-lg border border-white/[0.06] px-3 py-2 text-neutral-400"
+                            className="btn btn-secondary btn-sm"
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                              <span className="tabular-nums text-neutral-200">
+                              <span className="tabular-nums text-fg">
                                 {subOrder.sub_order_number}
                               </span>
                               <StatusPill
@@ -193,7 +193,7 @@ export function AdminOrdersPage() {
                                 label={adminOrderStatusLabel(subOrder.status)}
                               />
                             </div>
-                            <p className="mt-1 text-[11px] text-neutral-500">
+                            <p className="mt-1 text-[11px] text-fg-subtle">
                               {subOrder.vendor?.store_name ?? 'فروشگاه حذف‌شده'} • کمیسیون{' '}
                               {faPrice(subOrder.commission_amount)}
                             </p>

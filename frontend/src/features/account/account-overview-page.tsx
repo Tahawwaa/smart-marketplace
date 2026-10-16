@@ -46,45 +46,45 @@ export function AccountOverviewPage() {
   return (
     <div className="space-y-6">
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <p className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <div className="card p-4">
+          <p className="flex items-center gap-1.5 text-xs text-fg-subtle">
             <UserRound className="size-3.5" /> سطح دسترسی حساب
           </p>
-          <p className="mt-2 text-sm font-bold text-white">{adminRoleLabel(user.role ?? 'customer')}</p>
+          <p className="mt-2 text-sm font-bold text-fg">{adminRoleLabel(user.role ?? 'customer')}</p>
           {user.store ? (
-            <p className="mt-1 text-[11px] text-cyan-200">
+            <p className="mt-1 text-[11px] text-brand">
               فروشگاه: {user.store.store_name} ({adminVendorStatusLabel(user.store.status)})
             </p>
           ) : (
-            <p className="mt-1 text-[11px] text-neutral-500">هنوز فروشگاهی باز نکرده‌اید.</p>
+            <p className="mt-1 text-[11px] text-fg-subtle">هنوز فروشگاهی باز نکرده‌اید.</p>
           )}
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <p className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <div className="card p-4">
+          <p className="flex items-center gap-1.5 text-xs text-fg-subtle">
             <ShoppingBag className="size-3.5" /> سفارش‌های من
           </p>
-          <p className="mt-2 text-lg font-extrabold tabular-nums text-white">
+          <p className="mt-2 text-lg font-extrabold tabular-nums text-fg">
             {orders.loading ? '…' : faNum(orderCount)}
           </p>
           <Link
             to="/account/orders"
-            className="mt-1 inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200"
+            className="mt-1 inline-flex items-center gap-1 text-[11px] text-brand hover:text-brand"
           >
             مشاهده‌ی سفارش‌ها <ArrowLeft className="size-3" />
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <p className="flex items-center gap-1.5 text-xs text-neutral-500">
+        <div className="card p-4">
+          <p className="flex items-center gap-1.5 text-xs text-fg-subtle">
             <Store className="size-3.5" /> فروشندگی
           </p>
-          <p className="mt-2 text-sm font-bold text-white">
+          <p className="mt-2 text-sm font-bold text-fg">
             {user.store ? 'فروشنده هستید' : 'فروشنده نیستید'}
           </p>
           <Link
             to={user.store ? '/vendor' : '/account/store'}
-            className="mt-1 inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200"
+            className="mt-1 inline-flex items-center gap-1 text-[11px] text-brand hover:text-brand"
           >
             {user.store ? 'ورود به پنل فروشنده' : 'فروشنده شوید'} <ArrowLeft className="size-3" />
           </Link>
@@ -92,22 +92,22 @@ export function AccountOverviewPage() {
       </div>
 
       {user.role === 'admin' ? (
-        <div className="rounded-2xl border border-violet-400/20 bg-violet-400/[0.06] px-4 py-3 text-xs text-violet-100">
+        <div className="alert alert-info">
           <p className="flex items-center gap-1.5 font-bold">
             <ShieldCheck className="size-4" /> این حساب مدیر است
           </p>
-          <p className="mt-1 text-violet-200/80">
+          <p className="mt-1 text-brand-ink">
             نقش مدیر با باز کردن فروشگاه تغییر نمی‌کند؛ می‌توانید هم‌زمان مدیر، فروشنده و خریدار باشید.
           </p>
-          <Link to="/admin" className="mt-2 inline-flex items-center gap-1 text-violet-100 hover:text-white">
+          <Link to="/admin" className="mt-2 inline-flex items-center gap-1 text-brand-ink hover:text-fg">
             رفتن به پنل مدیریت <ArrowLeft className="size-3" />
           </Link>
         </div>
       ) : null}
 
-      <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-        <h2 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-white">
-          <Sparkles className="size-4 text-cyan-300" /> مشخصات من
+      <section className="card p-4">
+        <h2 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-fg">
+          <Sparkles className="size-4 text-brand" /> مشخصات من
         </h2>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -122,21 +122,21 @@ export function AccountOverviewPage() {
               className={inputClass}
             />
           </Field>
-          <div className="text-xs text-neutral-400">
+          <div className="text-xs text-fg-muted">
             ایمیل
-            <p className="mt-1 flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-400">
+            <p className="mt-1 flex items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-sm text-fg-muted">
               <Mail className="size-3.5" />
               <span dir="ltr">{user.email}</span>
             </p>
-            <span className="mt-1 block text-[11px] text-neutral-500">ایمیل حساب قابل تغییر نیست.</span>
+            <span className="mt-1 block text-[11px] text-fg-subtle">ایمیل حساب قابل تغییر نیست.</span>
           </div>
-          <div className="text-xs text-neutral-400">
+          <div className="text-xs text-fg-muted">
             نقش حساب
-            <p className="mt-1 flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-400">
+            <p className="mt-1 flex items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-sm text-fg-muted">
               <IdCard className="size-3.5" />
               {adminRoleLabel(user.role ?? 'customer')}
             </p>
-            <span className="mt-1 block text-[11px] text-neutral-500">
+            <span className="mt-1 block text-[11px] text-fg-subtle">
               نقش را فقط مدیر سامانه تغییر می‌دهد.
             </span>
           </div>

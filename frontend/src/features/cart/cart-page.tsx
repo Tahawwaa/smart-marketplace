@@ -7,18 +7,18 @@ export function CartPage() {
   const { items, total, loading, error, setQuantity, remove, clear } = useCart()
 
   return (
-    <section className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <h1 className="mb-6 text-base font-extrabold text-white">سبد خرید</h1>
+    <section className="container-page max-w-3xl py-8">
+      <h1 className="mb-6 page-title">سبد خرید</h1>
 
       {loading ? (
-        <p className="flex items-center gap-2 text-sm text-neutral-400">
+        <p className="flex items-center gap-2 text-sm text-fg-muted">
           <Loader2 className="size-4 animate-spin" />
           در حال بارگذاری…
         </p>
       ) : items.length === 0 ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] py-20 text-center">
-          <p className="text-sm text-neutral-400">{error ?? 'سبد خرید خالی است.'}</p>
-          <Link to="/products" className="mt-4 inline-block text-xs text-cyan-300 hover:text-cyan-200">
+        <div className="card py-20 text-center">
+          <p className="text-sm text-fg-muted">{error ?? 'سبد خرید خالی است.'}</p>
+          <Link to="/products" className="mt-4 inline-block text-xs font-bold text-brand hover:underline">
             رفتن به فهرست کالاها
           </Link>
         </div>
@@ -28,11 +28,11 @@ export function CartPage() {
             {items.map((item) => (
               <li
                 key={item.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3"
               >
                 <Link
                   to={`/products/${item.product?.slug ?? ''}`}
-                  className="text-sm text-white hover:text-cyan-200"
+                  className="text-sm text-fg hover:text-brand"
                 >
                   {item.product?.name ?? 'کالا'}
                 </Link>
@@ -43,16 +43,16 @@ export function CartPage() {
                     value={item.quantity}
                     aria-label={`تعداد ${item.product?.name ?? ''}`}
                     onChange={(event) => setQuantity(item.id, Number(event.target.value) || 0)}
-                    className="w-16 rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-sm text-white outline-none"
+                    className="input !w-20 !py-1.5"
                   />
-                  <span className="min-w-28 text-end text-xs tabular-nums text-neutral-300">
+                  <span className="min-w-28 text-end text-xs tabular-nums text-fg-muted">
                     {faPrice(item.total_price)}
                   </span>
                   <button
                     type="button"
                     aria-label={`حذف ${item.product?.name ?? ''}`}
                     onClick={() => remove(item.id)}
-                    className="grid size-8 place-items-center rounded-lg border border-white/10 text-neutral-400 transition hover:text-rose-300"
+                    className="btn btn-danger btn-icon btn-sm"
                   >
                     <Trash2 className="size-3.5" />
                   </button>
@@ -62,27 +62,27 @@ export function CartPage() {
           </ul>
 
           {error ? (
-            <p className="mt-4 rounded-xl border border-rose-400/20 bg-rose-400/[0.06] px-4 py-2.5 text-xs text-rose-200">
+            <p className="alert alert-danger mt-4">
               {error}
             </p>
           ) : null}
 
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5">
-            <span className="text-sm text-neutral-300">
-              مجموع: <span className="font-bold tabular-nums text-white">{faPrice(total)}</span>{' '}
-              <span className="text-neutral-500">({faNum(items.length)} قلم)</span>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+            <span className="text-sm text-fg-muted">
+              مجموع: <span className="font-bold tabular-nums text-fg">{faPrice(total)}</span>{' '}
+              <span className="text-fg-subtle">({faNum(items.length)} قلم)</span>
             </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={clear}
-                className="rounded-xl border border-white/10 px-4 py-2 text-xs text-neutral-300 transition hover:text-white"
+                className="btn btn-secondary btn-sm"
               >
                 خالی‌کردن سبد
               </button>
               <Link
                 to="/checkout"
-                className="rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2 text-xs font-bold text-white transition hover:bg-white/10"
+                className="btn btn-primary"
               >
                 ادامه سفارش
               </Link>

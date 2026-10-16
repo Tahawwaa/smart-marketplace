@@ -1,5 +1,4 @@
-import { motion, useMotionTemplate, useMotionValue } from 'motion/react'
-import type { MouseEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 type Props = {
@@ -8,32 +7,19 @@ type Props = {
   color?: string
 }
 
-export function GlowCard({ children, className, color = '139, 92, 246' }: Props) {
-  const mouseX = useMotionValue(-300)
-  const mouseY = useMotionValue(-300)
-  const background = useMotionTemplate`radial-gradient(320px circle at ${mouseX}px ${mouseY}px, rgba(${color}, 0.18), transparent 80%)`
-  const border = useMotionTemplate`radial-gradient(240px circle at ${mouseX}px ${mouseY}px, rgba(${color}, 0.7), transparent 80%)`
-
-  function handleMove({ currentTarget, clientX, clientY }: MouseEvent<HTMLDivElement>) {
-    const { left, top } = currentTarget.getBoundingClientRect()
-    mouseX.set(clientX - left)
-    mouseY.set(clientY - top)
-  }
-
+export function GlowCard({ children, className, color = '79, 70, 229' }: Props) {
   return (
     <div
-      onMouseMove={handleMove}
-      className={cn('group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-neutral-950', className)}
+      style={{ '--glow': color } as React.CSSProperties}
+      className={cn(
+        'group relative overflow-hidden card shadow-[var(--shadow-sm)] transition duration-300 hover:-translate-y-1 hover:border-line-strong hover:shadow-[var(--shadow-md)]',
+        className,
+      )}
     >
-      <motion.div
+      <div
         aria-hidden
-        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-300 group-hover:opacity-100"
-        style={{ background }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-3xl p-px opacity-0 transition duration-300 group-hover:opacity-100 [mask-composite:exclude] [mask-image:linear-gradient(#000_0_0),linear-gradient(#000_0_0)] [mask-clip:content-box,border-box]"
-        style={{ background: border }}
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition duration-300 group-hover:opacity-100"
+        style={{ background: 'linear-gradient(90deg, transparent, rgb(var(--glow)), transparent)' }}
       />
       <div className="relative h-full">{children}</div>
     </div>

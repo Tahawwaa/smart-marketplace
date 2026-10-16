@@ -4,7 +4,7 @@ import { SiteHeader } from '../components/layout/site-header'
 
 export function MarketplaceLayout() {
   return (
-    <div className="flex min-h-screen flex-col bg-ink font-sans text-neutral-200">
+    <div className="flex min-h-screen flex-col bg-bg font-sans text-fg">
       <SiteHeader />
       <main className="flex-1">
         <Outlet />

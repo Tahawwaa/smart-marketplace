@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { Loader2, PackageSearch, RefreshCw, SlidersHorizontal } from 'lucide-react'
+import { Loader2, PackageSearch, RefreshCw, ShoppingBag, SlidersHorizontal } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { cn } from '../../lib/cn'
@@ -25,7 +25,7 @@ function GridSkeleton() {
       {Array.from({ length: PER_PAGE }, (_, index) => (
         <div
           key={index}
-          className="h-72 animate-pulse rounded-2xl border border-white/[0.06] bg-white/[0.03]"
+          className="skeleton h-72 rounded-2xl"
         />
       ))}
     </div>
@@ -110,18 +110,29 @@ export function Catalog() {
   }
 
   return (
-    <section id="products" className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] pb-4">
+    <section id="products" className="container-page py-12 sm:py-16">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="eyebrow">ویترین فروشگاه</p>
+          <h2 className="mt-2 text-2xl font-black tracking-tight text-fg sm:text-3xl">
+            برای انتخاب بهتر آماده‌اید؟
+          </h2>
+          <p className="mt-2 max-w-xl text-xs leading-7 text-fg-muted sm:text-sm">
+            دسته‌بندی موردنظر را انتخاب کنید یا بین پیشنهادهای امروز جست‌وجو کنید.
+          </p>
+        </div>
+        <span className="badge badge-neutral self-start sm:self-auto">
+          <ShoppingBag className="size-3.5" />
+          انتخاب‌های روزانه شما
+        </span>
+      </div>
+
+      <div className="scrollbar-none -mx-4 flex items-center gap-2 overflow-x-auto border-b border-line px-4 pb-5 sm:mx-0 sm:px-0">
         <button
           type="button"
           aria-pressed={category === ''}
           onClick={() => onSelectCategory('')}
-          className={cn(
-            'rounded-full border px-3.5 py-1.5 text-xs transition',
-            category === ''
-              ? 'border-white/25 bg-white/10 font-bold text-white'
-              : 'border-white/[0.08] text-neutral-400 hover:border-white/20 hover:text-white',
-          )}
+          className="chip"
         >
           همه کالاها
         </button>
@@ -131,31 +142,26 @@ export function Catalog() {
             type="button"
             aria-pressed={category === item.slug}
             onClick={() => onSelectCategory(item.slug)}
-            className={cn(
-              'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs transition',
-              category === item.slug
-                ? 'border-white/25 bg-white/10 font-bold text-white'
-                : 'border-white/[0.08] text-neutral-400 hover:border-white/20 hover:text-white',
-            )}
+            className="chip"
           >
-            <item.icon className={cn('size-3.5', category === item.slug ? 'text-white' : item.tint)} />
+            <item.icon className={cn('size-3.5', category === item.slug ? 'text-bg' : item.tint)} />
             {item.name}
           </button>
         ))}
       </div>
 
-      <div className="flex flex-col gap-3 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <p className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-neutral-500">
+      <div className="flex flex-col gap-4 py-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <p className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-fg-subtle">
           <SlidersHorizontal className="size-3.5 shrink-0" />
           <span className="truncate">
             {activeCategory ? activeCategory.name : 'همه دسته‌بندی‌ها'}
-            {search ? <span className="text-neutral-400"> • «{search}»</span> : null}
-            {total > 0 ? <span className="text-neutral-600"> • {faNum(total)} کالا</span> : null}
+            {search ? <span className="text-fg-muted"> • «{search}»</span> : null}
+            {total > 0 ? <span className="text-fg-subtle"> • {faNum(total)} کالا</span> : null}
           </span>
         </p>
 
         {/* On narrow phones the four sort pills would overflow, so the group scrolls sideways. */}
-        <div className="-mx-4 flex max-w-[calc(100%+2rem)] items-center gap-0.5 overflow-x-auto rounded-none border-white/[0.08] px-4 py-0.5 sm:mx-0 sm:max-w-full sm:gap-1 sm:rounded-full sm:border sm:p-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+        <div className="scrollbar-none -mx-4 flex max-w-[calc(100%+2rem)] items-center gap-0.5 overflow-x-auto rounded-none border-line px-4 py-0.5 sm:mx-0 sm:max-w-full sm:gap-1 sm:rounded-full sm:border sm:bg-surface sm:p-1">
           {SORTS.map((option) => (
             <button
               key={option.value}
@@ -165,8 +171,8 @@ export function Catalog() {
               className={cn(
                 'shrink-0 rounded-full px-3 py-1 text-xs whitespace-nowrap transition',
                 sort === option.value
-                  ? 'bg-white font-bold text-black'
-                  : 'text-neutral-400 hover:text-white',
+                  ? 'bg-brand font-bold text-brand-fg shadow-[var(--shadow-sm)]'
+                  : 'text-fg-muted hover:text-fg',
               )}
             >
               {option.label}
@@ -178,21 +184,19 @@ export function Catalog() {
       {products.loading ? (
         <GridSkeleton />
       ) : products.error && usingSample ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] py-16 text-center">
-          <p className="text-sm text-neutral-400">{products.error}</p>
-          <button
-            type="button"
-            onClick={products.retry}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-xs font-bold text-white transition hover:bg-white/10"
-          >
+        <div className="card flex flex-col items-center gap-4 py-16 text-center">
+          <p className="text-sm text-fg-muted">{products.error}</p>
+          <button type="button" onClick={products.retry} className="btn btn-secondary btn-sm">
             <RefreshCw className="size-3.5" />
             تلاش دوباره
           </button>
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] py-20 text-center">
-          <PackageSearch className="size-8 text-neutral-600" />
-          <p className="text-sm text-neutral-400">
+        <div className="card flex flex-col items-center gap-3 py-20 text-center">
+          <span className="grid size-14 place-items-center rounded-2xl bg-surface-2 text-fg-subtle">
+            <PackageSearch className="size-7" />
+          </span>
+          <p className="text-sm text-fg-muted">
             کالایی با این فیلترها پیدا نشد.
             {search ? ' عبارت دیگری را جست‌وجو کنید.' : ''}
           </p>
@@ -200,7 +204,7 @@ export function Catalog() {
       ) : (
         <>
           {usingSample && (
-            <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 py-2.5 text-[11px] leading-6 text-amber-200/90">
+            <p className="alert alert-warning mb-4 text-[11px]">
               کالایی از سرویس API دریافت نشد؛ نمونهٔ نمایشی چیدمان نمایش داده می‌شود.
             </p>
           )}
@@ -216,7 +220,7 @@ export function Catalog() {
                 type="button"
                 disabled={products.loading}
                 onClick={() => setPerPage((value) => value + PER_PAGE)}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-6 py-2.5 text-xs font-bold text-white transition hover:bg-white/10 disabled:opacity-50"
+                className="btn btn-secondary px-8"
               >
                 {products.loading ? <Loader2 className="size-3.5 animate-spin" /> : null}
                 نمایش کالاهای بیشتر

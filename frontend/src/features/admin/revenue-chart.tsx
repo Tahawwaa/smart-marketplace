@@ -26,7 +26,7 @@ export function RevenueChart({ points }: { points: Point[] }) {
   const gradientId = useId()
 
   if (points.length === 0) {
-    return <p className="py-10 text-center text-xs text-neutral-500">داده‌ای برای نمایش نیست.</p>
+    return <p className="py-10 text-center text-xs text-fg-subtle">داده‌ای برای نمایش نیست.</p>
   }
 
   const max = Math.max(...points.map((point) => point.revenue), 1)
@@ -49,12 +49,12 @@ export function RevenueChart({ points }: { points: Point[] }) {
 
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-neutral-500">
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-fg-subtle">
         <span>
-          جمع بازه: <span className="tabular-nums text-neutral-200">{faPrice(total)}</span>
+          جمع بازه: <span className="tabular-nums text-fg">{faPrice(total)}</span>
         </span>
         <span>
-          اوج: <span className="tabular-nums text-neutral-200">{faPrice(peak.revenue)}</span>
+          اوج: <span className="tabular-nums text-fg">{faPrice(peak.revenue)}</span>
           {peak.revenue > 0 ? ` (${shortDate(peak.date)})` : ''}
         </span>
       </div>
@@ -104,7 +104,7 @@ export function RevenueChart({ points }: { points: Point[] }) {
         </svg>
       </div>
 
-      <p className="mt-1 text-[11px] text-neutral-600">
+      <p className="mt-1 text-[11px] text-fg-subtle">
         از {shortDate(points[0].date)} تا {shortDate(points[points.length - 1].date)} — بازه‌ی{' '}
         {faNum(points.length)} روزه
       </p>

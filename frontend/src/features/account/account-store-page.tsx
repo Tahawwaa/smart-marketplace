@@ -46,7 +46,7 @@ export function AccountStorePage() {
 
   if (store.loading) {
     return (
-      <p className="flex items-center gap-2 text-sm text-neutral-400">
+      <p className="flex items-center gap-2 text-sm text-fg-muted">
         <Loader2 className="size-4 animate-spin" /> در حال بارگذاری وضعیت فروشگاه…
       </p>
     )
@@ -55,28 +55,28 @@ export function AccountStorePage() {
   if (mine) {
     return (
       <div className="space-y-4">
-        <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+        <section className="card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="flex items-center gap-1.5 text-sm font-bold text-white">
-              <Store className="size-4 text-cyan-300" /> فروشگاه من
+            <h2 className="flex items-center gap-1.5 text-sm font-bold text-fg">
+              <Store className="size-4 text-brand" /> فروشگاه من
             </h2>
             <StatusPill status={mine.status} label={adminVendorStatusLabel(mine.status)} />
           </div>
 
           <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
             <div>
-              <dt className="text-neutral-500">نام فروشگاه</dt>
-              <dd className="mt-0.5 text-sm text-white">{mine.store_name}</dd>
+              <dt className="text-fg-subtle">نام فروشگاه</dt>
+              <dd className="mt-0.5 text-sm text-fg">{mine.store_name}</dd>
             </div>
             <div>
-              <dt className="text-neutral-500">نشانی فروشگاه</dt>
-              <dd className="mt-0.5 text-sm text-neutral-300" dir="ltr">
+              <dt className="text-fg-subtle">نشانی فروشگاه</dt>
+              <dd className="mt-0.5 text-sm text-fg-muted" dir="ltr">
                 /products?store={mine.slug}
               </dd>
             </div>
             <div>
-              <dt className="text-neutral-500">شماره شبا</dt>
-              <dd className="mt-0.5 text-sm text-neutral-300" dir="ltr">
+              <dt className="text-fg-subtle">شماره شبا</dt>
+              <dd className="mt-0.5 text-sm text-fg-muted" dir="ltr">
                 {mine.bank_sheba ?? '—'}
               </dd>
             </div>
@@ -92,7 +92,7 @@ export function AccountStorePage() {
           ) : null}
 
           {mine.status === 'pending' ? (
-            <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3 text-xs text-amber-100">
+            <p className="alert alert-warning mt-4">
               <ShieldAlert className="mt-0.5 size-4 shrink-0" />
               فروشگاه شما در انتظار تأیید مدیر است؛ پس از تأیید می‌توانید کالا ثبت کنید. تا آن زمان پنل فروشنده
               فقط وضعیت فروشگاه را نشان می‌دهد.
@@ -100,7 +100,7 @@ export function AccountStorePage() {
           ) : null}
 
           {mine.status === 'rejected' || mine.status === 'suspended' ? (
-            <p className="mt-4 flex items-start gap-2 rounded-xl border border-rose-400/20 bg-rose-400/[0.06] px-4 py-3 text-xs text-rose-200">
+            <p className="alert alert-danger mt-4">
               <ShieldAlert className="mt-0.5 size-4 shrink-0" />
               وضعیت فروشگاه «{adminVendorStatusLabel(mine.status)}» است؛ برای پیگیری با پشتیبانی تماس بگیرید.
             </p>
@@ -108,7 +108,7 @@ export function AccountStorePage() {
 
           <Link
             to="/vendor"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] px-4 py-2.5 text-xs font-bold text-cyan-100 transition hover:border-cyan-400/40"
+            className="btn btn-secondary btn-sm mt-4"
           >
             ورود به پنل فروشنده <ArrowLeft className="size-3.5" />
           </Link>
@@ -118,11 +118,11 @@ export function AccountStorePage() {
   }
 
   return (
-    <section className="max-w-xl rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-      <h2 className="flex items-center gap-1.5 text-sm font-bold text-white">
-        <Store className="size-4 text-cyan-300" /> فروشنده شوید
+    <section className="max-w-xl card p-4">
+      <h2 className="flex items-center gap-1.5 text-sm font-bold text-fg">
+        <Store className="size-4 text-brand" /> فروشنده شوید
       </h2>
-      <p className="mt-1 text-[11px] text-neutral-500">
+      <p className="mt-1 text-[11px] text-fg-subtle">
         با ساخت فروشگاه، همان حساب فعلی شما ({user?.email}) فروشنده هم می‌شود و دسترسی خریدار یا مدیرتان از
         دست نمی‌رود.
       </p>
@@ -147,7 +147,7 @@ export function AccountStorePage() {
         </Field>
       </div>
 
-      <p className="mt-4 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-[11px] text-neutral-400">
+      <p className="mt-4 rounded-xl border border-line bg-surface px-4 py-3 text-[11px] text-fg-muted">
         پس از ساخت، فروشگاه در وضعیت «در انتظار تأیید» قرار می‌گیرد و مدیر آن را بررسی می‌کند.
       </p>
 

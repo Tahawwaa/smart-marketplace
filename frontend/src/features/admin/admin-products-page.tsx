@@ -60,7 +60,7 @@ export function AdminProductsPage() {
         }}
         placeholder="جست‌وجوی نام کالا…"
       >
-        <label className="flex items-center gap-2 text-neutral-400">
+        <label className="flex items-center gap-2 text-fg-muted">
           وضعیت
           <select
             value={status}
@@ -68,7 +68,7 @@ export function AdminProductsPage() {
               setStatus(event.target.value)
               setPage(1)
             }}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white outline-none"
+            className="input"
           >
             {FILTERS.map((value) => (
               <option key={value || 'all'} value={value}>
@@ -103,12 +103,12 @@ export function AdminProductsPage() {
         ) : (
           <ul className="list-none space-y-2 p-0">
             {rows.map((row) => (
-              <li key={row.id} className="rounded-xl border border-white/[0.08] px-4 py-3 text-xs">
+              <li key={row.id} className="card px-4 py-3 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm text-white">{row.name}</span>
+                  <span className="text-sm text-fg">{row.name}</span>
                   <div className="flex items-center gap-2">
                     {row.is_active ? null : (
-                      <span className="rounded-lg border border-white/10 px-2 py-1 text-[11px] text-neutral-500">
+                      <span className="badge badge-neutral">
                         پنهان از فروشگاه
                       </span>
                     )}
@@ -116,7 +116,7 @@ export function AdminProductsPage() {
                   </div>
                 </div>
 
-                <p className="mt-1 text-neutral-500">
+                <p className="mt-1 text-fg-subtle">
                   {row.vendor?.store_name ?? 'بدون فروشنده'} • {row.category?.name ?? 'بدون دسته‌بندی'}
                   {row.brand ? ` • ${row.brand.name}` : ''}
                 </p>
@@ -127,7 +127,7 @@ export function AdminProductsPage() {
                       type="button"
                       disabled={busyId === row.id}
                       onClick={() => void decide(row.id, 'approved')}
-                      className="rounded-lg border border-emerald-400/25 bg-emerald-400/[0.08] px-3 py-1.5 text-emerald-100 transition hover:border-emerald-400/40 disabled:opacity-50"
+                      className="alert alert-success"
                     >
                       تأیید و انتشار
                     </button>
@@ -137,7 +137,7 @@ export function AdminProductsPage() {
                       type="button"
                       disabled={busyId === row.id}
                       onClick={() => void decide(row.id, 'rejected')}
-                      className="rounded-lg border border-white/10 px-3 py-1.5 text-rose-200 transition hover:border-rose-400/40 disabled:opacity-50"
+                      className="btn btn-danger btn-sm"
                     >
                       رد
                     </button>
@@ -145,23 +145,23 @@ export function AdminProductsPage() {
                   <button
                     type="button"
                     onClick={() => setExpanded(expanded === row.id ? null : row.id)}
-                    className="rounded-lg border border-white/10 px-3 py-1.5 text-neutral-300 transition hover:border-white/25 hover:text-white"
+                    className="btn btn-secondary btn-sm"
                   >
                     {expanded === row.id ? 'بستن جزئیات' : 'جزئیات'}
                   </button>
                 </div>
 
                 {expanded === row.id ? (
-                  <div className="mt-3 space-y-2 border-t border-white/[0.06] pt-3">
-                    <p className="text-neutral-500">
-                      نشانی: <span className="tabular-nums text-neutral-300">/{row.slug}</span>
+                  <div className="mt-3 space-y-2 border-t border-line pt-3">
+                    <p className="text-fg-subtle">
+                      نشانی: <span className="tabular-nums text-fg-muted">/{row.slug}</span>
                     </p>
                     {row.description ? (
-                      <p className="text-start leading-6 text-neutral-400">{row.description}</p>
+                      <p className="text-start leading-6 text-fg-muted">{row.description}</p>
                     ) : (
-                      <p className="text-neutral-600">توضیحی ثبت نشده است.</p>
+                      <p className="text-fg-subtle">توضیحی ثبت نشده است.</p>
                     )}
-                    <ul className="list-none space-y-1 p-0 text-neutral-400">
+                    <ul className="list-none space-y-1 p-0 text-fg-muted">
                       {(row.variants ?? []).map((variant) => (
                         <li key={variant.id} className="flex flex-wrap items-center justify-between gap-2">
                           <span className="tabular-nums">{variant.sku ?? 'بدون کد'}</span>

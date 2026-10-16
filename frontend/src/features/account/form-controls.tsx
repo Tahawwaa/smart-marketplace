@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 export const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none transition focus:border-white/25 disabled:opacity-50'
+  'input mt-1'
 
 export function Field({
   label,
@@ -17,11 +17,11 @@ export function Field({
   children: ReactNode
 }) {
   return (
-    <label className="block text-xs text-neutral-400">
+    <label className="block text-xs text-fg-muted">
       {label}
-      {required ? <span className="text-rose-300"> *</span> : null}
+      {required ? <span className="text-danger-ink"> *</span> : null}
       {children}
-      {hint ? <span className="mt-1 block text-[11px] text-neutral-500">{hint}</span> : null}
+      {hint ? <span className="mt-1 block text-[11px] text-fg-subtle">{hint}</span> : null}
     </label>
   )
 }
@@ -30,7 +30,7 @@ export function FormError({ message }: { message: string | null }) {
   if (!message) return null
 
   return (
-    <p className="rounded-xl border border-rose-400/20 bg-rose-400/[0.06] px-4 py-2.5 text-xs text-rose-200">
+    <p className="alert alert-danger">
       {message}
     </p>
   )
@@ -42,8 +42,8 @@ export function FormNotice({ message, tone = 'emerald' }: { message: string; ton
       className={cn(
         'rounded-xl border px-4 py-2.5 text-xs',
         tone === 'emerald'
-          ? 'border-emerald-400/20 bg-emerald-400/[0.06] text-emerald-200'
-          : 'border-amber-400/20 bg-amber-400/[0.06] text-amber-100',
+          ? 'border-success/30 bg-success-soft text-success-ink'
+          : 'border-warning/30 bg-warning-soft text-warning-ink',
       )}
     >
       {message}
@@ -65,7 +65,7 @@ export function SubmitButton({
       type="button"
       disabled={busy}
       onClick={onClick}
-      className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-50"
+      className="btn btn-primary"
     >
       {busy ? <Loader2 className="size-4 animate-spin" /> : null}
       {label}

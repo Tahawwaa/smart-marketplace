@@ -32,11 +32,11 @@ export function AccountPasswordPage() {
   }
 
   return (
-    <section className="max-w-xl rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-      <h2 className="mb-1 flex items-center gap-1.5 text-sm font-bold text-white">
-        <Lock className="size-4 text-cyan-300" /> تغییر گذرواژه
+    <section className="max-w-xl card p-4">
+      <h2 className="mb-1 flex items-center gap-1.5 text-sm font-bold text-fg">
+        <Lock className="size-4 text-brand" /> تغییر گذرواژه
       </h2>
-      <p className="mb-4 text-[11px] text-neutral-500">
+      <p className="mb-4 text-[11px] text-fg-subtle">
         پس از تغییر گذرواژه، نشست‌های دیگر روی دستگاه‌های دیگر بسته می‌شوند و همین نشست فعال می‌ماند.
       </p>
 

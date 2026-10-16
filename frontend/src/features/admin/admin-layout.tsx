@@ -25,11 +25,11 @@ export function AdminLayout() {
   const { user } = useAuth()
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <section className="container-page py-8">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-base font-extrabold text-white">پنل مدیریت بازار هوشمند</h1>
-        <p className="text-xs text-neutral-500">
-          وارد‌شده به‌عنوان <span className="text-neutral-300">{user?.name}</span>
+        <h1 className="page-title">پنل مدیریت بازار هوشمند</h1>
+        <p className="text-xs text-fg-subtle">
+          وارد‌شده به‌عنوان <span className="text-fg-muted">{user?.name}</span>
         </p>
       </header>
 
@@ -40,12 +40,7 @@ export function AdminLayout() {
             to={tab.to}
             end={tab.end}
             className={({ isActive }) =>
-              cn(
-                'flex items-center gap-1.5 rounded-xl border px-3 py-2 transition',
-                isActive
-                  ? 'border-white/25 bg-white/10 text-white'
-                  : 'border-white/[0.08] text-neutral-400 hover:border-white/20 hover:text-white',
-              )
+              cn('chip', isActive && 'border-brand bg-brand text-brand-fg hover:text-brand-fg')
             }
           >
             <tab.icon className="size-4" />

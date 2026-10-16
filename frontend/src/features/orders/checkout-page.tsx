@@ -66,7 +66,7 @@ export function CheckoutPage() {
 
   if (loading) {
     return (
-      <p className="flex items-center justify-center gap-2 px-4 py-24 text-sm text-neutral-400">
+      <p className="flex items-center justify-center gap-2 px-4 py-24 text-sm text-fg-muted">
         <Loader2 className="size-4 animate-spin" />
         در حال بارگذاری…
       </p>
@@ -76,8 +76,8 @@ export function CheckoutPage() {
   if (items.length === 0) {
     return (
       <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
-        <p className="text-sm text-neutral-400">سبد خرید خالی است.</p>
-        <Link to="/products" className="mt-4 inline-block text-xs text-cyan-300 hover:text-cyan-200">
+        <p className="text-sm text-fg-muted">سبد خرید خالی است.</p>
+        <Link to="/products" className="mt-4 inline-block text-xs font-bold text-brand hover:underline">
           رفتن به فهرست کالاها
         </Link>
       </section>
@@ -85,12 +85,12 @@ export function CheckoutPage() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <h1 className="mb-6 text-base font-extrabold text-white">تکمیل سفارش</h1>
+    <section className="container-page max-w-3xl py-8">
+      <h1 className="mb-6 page-title">تکمیل سفارش</h1>
 
-      <ul className="list-none space-y-2 p-0 text-xs text-neutral-300">
+      <ul className="list-none space-y-2 p-0 text-xs text-fg-muted">
         {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between border-b border-white/[0.06] py-2">
+          <li key={item.id} className="flex items-center justify-between border-b border-line py-2">
             <span>
               {item.product?.name ?? 'کالا'} × {item.quantity}
             </span>
@@ -99,17 +99,17 @@ export function CheckoutPage() {
         ))}
       </ul>
 
-      <p className="mt-4 text-sm text-neutral-300">
-        مبلغ قابل پرداخت: <span className="font-bold tabular-nums text-white">{faPrice(total)}</span>
+      <p className="mt-4 text-sm text-fg-muted">
+        مبلغ قابل پرداخت: <span className="font-bold tabular-nums text-fg">{faPrice(total)}</span>
       </p>
 
-      <h2 className="mb-3 mt-8 text-sm font-bold text-white">نشانی تحویل</h2>
+      <h2 className="mb-3 mt-8 text-sm font-bold text-fg">نشانی تحویل</h2>
 
       {saved.length > 0 ? (
         <ul className="list-none space-y-2 p-0 text-xs">
           {saved.map((address) => (
             <li key={address.id}>
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.08] px-4 py-3">
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line px-4 py-3">
                 <input
                   type="radio"
                   name="address"
@@ -117,11 +117,11 @@ export function CheckoutPage() {
                   onChange={() => setChoice(address.id)}
                   className="mt-1"
                 />
-                <span className="text-neutral-300">
-                  <span className="block text-white">
+                <span className="text-fg-muted">
+                  <span className="block text-fg">
                     {address.recipient_name} — {address.recipient_phone}
                   </span>
-                  <span className="mt-0.5 block text-neutral-500">
+                  <span className="mt-0.5 block text-fg-subtle">
                     {address.province}، {address.city}، {address.address_line}
                   </span>
                 </span>
@@ -129,7 +129,7 @@ export function CheckoutPage() {
             </li>
           ))}
           <li>
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.08] px-4 py-3 text-neutral-300">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-4 py-3 text-fg-muted">
               <input
                 type="radio"
                 name="address"
@@ -145,17 +145,17 @@ export function CheckoutPage() {
       {selected === 'new' ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {FIELDS.map((field) => (
-            <label key={field.name} className="text-xs text-neutral-400">
+            <label key={field.name} className="text-xs text-fg-muted">
               {field.label}
-              {field.required ? <span className="text-rose-300"> *</span> : null}
+              {field.required ? <span className="text-danger-ink"> *</span> : null}
               <input
                 value={(form[field.name] as string | undefined) ?? ''}
                 onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))}
-                className="mt-1 w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none"
+                className="input mt-1 w-full"
               />
             </label>
           ))}
-          <label className="flex items-center gap-2 text-xs text-neutral-400">
+          <label className="flex items-center gap-2 text-xs text-fg-muted">
             <input type="checkbox" checked={save} onChange={(event) => setSave(event.target.checked)} />
             ذخیره‌ی این نشانی برای سفارش‌های بعدی
           </label>
@@ -163,7 +163,7 @@ export function CheckoutPage() {
       ) : null}
 
       {error ? (
-        <p className="mt-4 rounded-xl border border-rose-400/20 bg-rose-400/[0.06] px-4 py-2.5 text-xs text-rose-200">
+        <p className="alert alert-danger mt-4">
           {error}
         </p>
       ) : null}
@@ -172,7 +172,7 @@ export function CheckoutPage() {
         type="button"
         disabled={submitting}
         onClick={() => void submit()}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-50"
+        className="btn btn-primary mt-6"
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
         ثبت سفارش
