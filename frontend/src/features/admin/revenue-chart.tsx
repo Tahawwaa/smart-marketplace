@@ -81,7 +81,8 @@ export function RevenueChart({ points }: { points: Point[] }) {
               x2={WIDTH}
               y1={PAD_TOP + innerHeight * ratio}
               y2={PAD_TOP + innerHeight * ratio}
-              stroke="rgb(255 255 255 / 0.06)"
+              stroke="var(--line)"
+              strokeOpacity="0.7"
               strokeWidth={1}
             />
           ))}
@@ -90,14 +91,14 @@ export function RevenueChart({ points }: { points: Point[] }) {
           <polyline
             points={line}
             fill="none"
-            stroke="rgb(34 211 238)"
+            stroke="var(--info)"
             strokeWidth={2}
             strokeLinejoin="round"
             strokeLinecap="round"
           />
 
           {coords.map((point) => (
-            <circle key={point.date} cx={point.x} cy={point.y} r={2.5} fill="rgb(34 211 238)">
+            <circle key={point.date} cx={point.x} cy={point.y} r={2.5} fill="var(--info)">
               <title>{`${shortDate(point.date)} • ${faPrice(point.revenue)} • ${faNum(point.orders)} سفارش`}</title>
             </circle>
           ))}

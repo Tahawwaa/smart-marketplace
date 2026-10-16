@@ -1,5 +1,8 @@
 import {
+  ArrowUpLeft,
   Boxes,
+  CircleUserRound,
+  Home,
   LayoutDashboard,
   ScrollText,
   Shapes,
@@ -7,7 +10,7 @@ import {
   Tags,
   Users,
 } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { cn } from '../../lib/cn'
 
@@ -25,31 +28,78 @@ export function AdminLayout() {
   const { user } = useAuth()
 
   return (
-    <section className="container-page py-8">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="page-title">پنل مدیریت بازار هوشمند</h1>
-        <p className="text-xs text-fg-subtle">
-          وارد‌شده به‌عنوان <span className="text-fg-muted">{user?.name}</span>
-        </p>
+    <section className="container-page py-6 sm:py-8">
+      <header className="relative overflow-hidden rounded-[1.75rem] border border-brand/20 bg-gradient-to-br from-brand-soft via-surface to-accent-soft p-5 shadow-[var(--shadow-md)] sm:p-7">
+        <div className="pointer-events-none absolute -end-16 -top-20 size-56 rounded-full bg-brand/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 start-1/3 size-48 rounded-full bg-accent/10 blur-3xl" />
+        <div className="relative flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px] text-fg-subtle">
+              <Link to="/" className="inline-flex items-center gap-1 transition hover:text-fg">
+                <Home className="size-3.5" />
+                فروشگاه
+              </Link>
+              <ArrowUpLeft className="size-3.5" />
+              <span className="text-brand-ink">مرکز مدیریت</span>
+            </div>
+            <p className="eyebrow">مرکز کنترل بازار هوشمند</p>
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-fg sm:text-3xl">
+              سلام، {user?.name ?? 'مدیر'}
+            </h1>
+            <p className="mt-2 max-w-xl text-xs leading-7 text-fg-muted sm:text-sm">
+              وضعیت فروشگاه، سفارش‌ها و عملکرد فروشندگان را از یکجا مدیریت کنید.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 rounded-2xl border border-line bg-surface/75 px-3 py-2.5 backdrop-blur">
+            <span className="grid size-9 place-items-center rounded-xl bg-brand text-brand-fg">
+              <CircleUserRound className="size-5" />
+            </span>
+            <span>
+              <span className="block text-[10px] text-fg-subtle">حساب مدیریتی</span>
+              <span className="block max-w-40 truncate text-xs font-bold text-fg">{user?.name}</span>
+            </span>
+          </div>
+        </div>
       </header>
 
-      <nav className="mb-6 mt-4 flex flex-wrap gap-2 text-xs">
-        {TABS.map((tab) => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            end={tab.end}
-            className={({ isActive }) =>
-              cn('chip', isActive && 'border-brand bg-brand text-brand-fg hover:text-brand-fg')
-            }
+      <div className="mt-6 grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start">
+        <aside className="panel-muted p-2 lg:sticky lg:top-24">
+          <div className="hidden px-3 py-2 lg:block">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-fg-subtle">مدیریت سامانه</p>
+          </div>
+          <nav aria-label="ناوبری پنل مدیریت" className="scrollbar-none flex gap-1 overflow-x-auto lg:block lg:space-y-1">
+            {TABS.map((tab) => (
+              <NavLink
+                key={tab.to}
+                to={tab.to}
+                end={tab.end}
+                className={({ isActive }) =>
+                  cn(
+                    'group flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition lg:w-full',
+                    isActive
+                      ? 'bg-brand text-brand-fg shadow-[var(--shadow-sm)]'
+                      : 'text-fg-muted hover:bg-surface hover:text-fg',
+                  )
+                }
+              >
+                <tab.icon className="size-4 shrink-0" />
+                {tab.label}
+              </NavLink>
+            ))}
+          </nav>
+          <Link
+            to="/"
+            className="mt-2 hidden items-center gap-2 rounded-xl px-3 py-2.5 text-xs text-fg-subtle transition hover:bg-surface hover:text-fg lg:flex"
           >
-            <tab.icon className="size-4" />
-            {tab.label}
-          </NavLink>
-        ))}
-      </nav>
+            <ArrowUpLeft className="size-4" />
+            بازگشت به فروشگاه
+          </Link>
+        </aside>
 
-      <Outlet />
+        <main className="min-w-0">
+          <Outlet />
+        </main>
+      </div>
     </section>
   )
 }

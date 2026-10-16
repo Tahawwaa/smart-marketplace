@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { GlowCard } from '../../components/ui/glow-card'
 import { cn } from '../../lib/cn'
@@ -38,23 +38,24 @@ type StatCardProps = {
 
 export function StatCard({ label, value, hint, icon: Icon, tone = 'violet' }: StatCardProps) {
   return (
-    <GlowCard className="p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-xs text-fg-subtle">{label}</p>
-        <span className={cn('grid size-9 place-items-center rounded-xl border', TONE_CLASSES[tone])}>
+    <GlowCard className="relative overflow-hidden p-4 sm:p-5">
+      <div className="pointer-events-none absolute -end-8 -top-8 size-24 rounded-full bg-brand/5 blur-2xl" />
+      <div className="relative flex items-start justify-between gap-2">
+        <p className="text-xs font-medium text-fg-subtle">{label}</p>
+        <span className={cn('grid size-10 place-items-center rounded-2xl border', TONE_CLASSES[tone])}>
           <Icon className="size-4" />
         </span>
       </div>
-      <p className="mt-3 text-2xl font-extrabold tabular-nums text-fg">{value}</p>
-      {hint ? <p className="mt-1 text-[11px] text-fg-subtle">{hint}</p> : null}
+      <p className="relative mt-4 text-2xl font-black tabular-nums text-fg sm:text-3xl">{value}</p>
+      {hint ? <p className="relative mt-1.5 text-[11px] text-fg-subtle">{hint}</p> : null}
     </GlowCard>
   )
 }
 
 export function AdminPanel({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="card p-4 sm:p-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <section className="card overflow-hidden p-4 sm:p-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
         <h2 className="section-title text-sm">{title}</h2>
         {action}
       </div>
@@ -97,14 +98,18 @@ type ToolbarProps = {
 
 export function AdminToolbar({ search, onSearch, placeholder, children }: ToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs">
-      <input
-        value={search}
-        onChange={(event) => onSearch(event.target.value)}
-        placeholder={placeholder}
-        className="input max-w-xs"
-      />
-      {children}
+    <div className="panel-muted flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <label className="relative min-w-0 flex-1 sm:max-w-sm">
+        <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-fg-subtle" />
+        <input
+          value={search}
+          onChange={(event) => onSearch(event.target.value)}
+          placeholder={placeholder}
+          aria-label={placeholder}
+          className="input ps-10"
+        />
+      </label>
+      {children ? <div className="flex flex-wrap items-center gap-2 text-xs">{children}</div> : null}
     </div>
   )
 }

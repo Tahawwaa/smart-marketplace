@@ -1,7 +1,10 @@
 import {
   AlertTriangle,
+  ArrowLeft,
   BadgeDollarSign,
   Boxes,
+  CalendarDays,
+  ClipboardCheck,
   ScrollText,
   Store,
   Users,
@@ -32,7 +35,54 @@ export function AdminDashboardPage() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="relative overflow-hidden rounded-[1.5rem] bg-fg p-5 text-bg shadow-[var(--shadow-md)] sm:p-6">
+          <div className="pointer-events-none absolute -end-16 -top-20 size-52 rounded-full bg-brand/30 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 start-1/3 size-48 rounded-full bg-accent/20 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-center gap-2 text-[11px] text-bg/65">
+              <CalendarDays className="size-4" />
+              نمای کلی عملکرد امروز
+            </div>
+            <h2 className="mt-4 max-w-lg text-xl font-black leading-8 sm:text-2xl">
+              همه‌چیز برای تصمیم بعدی شما آماده است.
+            </h2>
+            <p className="mt-2 max-w-xl text-xs leading-7 text-bg/65 sm:text-sm">
+              صف‌های نیازمند بررسی را ببینید و وضعیت سفارش‌های امروز را سریع‌تر مدیریت کنید.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link to="/admin/orders" className="btn btn-secondary border-transparent bg-surface text-fg hover:bg-surface-2">
+                بررسی سفارش‌ها
+                <ArrowLeft className="size-4" />
+              </Link>
+              <Link to="/admin/vendors" className="btn btn-ghost text-bg/80 hover:bg-white/10 hover:text-bg">
+                صف تأیید فروشگاه‌ها
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-2">
+          {[
+            { label: 'فروشگاه‌های در انتظار', value: queues.vendors, to: '/admin/vendors', icon: Store, tone: 'bg-brand-soft text-brand-ink' },
+            { label: 'کالاهای در انتظار', value: queues.products, to: '/admin/products', icon: Boxes, tone: 'bg-warning-soft text-warning-ink' },
+            { label: 'سفارش‌های پرداخت‌نشده', value: queues.unpaid_orders, to: '/admin/orders', icon: ClipboardCheck, tone: 'bg-info-soft text-info-ink' },
+            { label: 'موجودی کم', value: cards.low_stock_variants, to: '/admin/products', icon: AlertTriangle, tone: 'bg-danger-soft text-danger-ink' },
+          ].map((item) => (
+            <Link key={item.label} to={item.to} className="card card-hover flex items-center gap-3 p-4">
+              <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${item.tone}`}>
+                <item.icon className="size-4" />
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-[11px] text-fg-subtle">{item.label}</span>
+                <span className="mt-1 block text-xl font-black tabular-nums text-fg">{faNum(item.value)}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
           label="درآمد کل (پرداخت‌شده)"
           value={faPrice(cards.revenue_total) ?? '۰ تومان'}
