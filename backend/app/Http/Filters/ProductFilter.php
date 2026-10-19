@@ -4,6 +4,7 @@ namespace App\Http\Filters;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\ProductSearchService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,8 @@ class ProductFilter
      * Depth guard so a malformed parent chain cannot loop forever.
      */
     private const MAX_CATEGORY_DEPTH = 10;
+
+    public function __construct(private readonly ProductSearchService $search) {}
 
     /**
      * Normalise the query string into a validated filter array.
@@ -82,13 +85,7 @@ class ProductFilter
                     ->where('is_available', true)
                     ->whereHas('vendor', fn (Builder $vendor) => $vendor->where('slug', $filters['vendor'])),
             ))
-            ->when(isset($filters['search']), function (Builder $query) use ($filters) {
-                $term = '%'.$filters['search'].'%';
-
-                $query->where(fn (Builder $query) => $query
-                    ->where('name', 'like', $term)
-                    ->orWhere('description', 'like', $term));
-            })
+            ->when(isset($filters['search']), fn (Builder $query) => $this->search->apply($query, $filters['search']))
             ->when(
                 isset($filters['min_price']) || isset($filters['max_price']),
                 function (Builder $query) use ($filters) {
@@ -113,7 +110,7 @@ class ProductFilter
 
         $this->applyAttributes($query, $filters['attrs']);
 
-        return $this->applySort($query, $filters['sort'] ?? 'newest');
+        return $this->applySort($query, $filters['sort'] ?? 'newest', $filters['search'] ?? null);
     }
 
     /**
@@ -137,7 +134,7 @@ class ProductFilter
      * @param  Builder<Product>  $query
      * @return Builder<Product>
      */
-    private function applySort(Builder $query, string $sort): Builder
+    private function applySort(Builder $query, string $sort, ?string $search = null): Builder
     {
         if ($sort === 'price_asc' || $sort === 'price_desc') {
             $query->withMin(
@@ -150,7 +147,7 @@ class ProductFilter
             'price_asc' => $query->orderBy('price_from'),
             'price_desc' => $query->orderByDesc('price_from'),
             'name' => $query->orderBy('name'),
-            default => $query->latest('id'),
+            default => $search === null ? $query->latest('id') : $this->search->orderByRelevance($query, $search),
         };
     }
 

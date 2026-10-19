@@ -1,27 +1,13 @@
 import {
   ArrowLeft,
-  BadgeCheck,
-  Boxes,
-  Headphones,
-  ShieldCheck,
   ShoppingBag,
   Sparkles,
-  Star,
-  Truck,
   TrendingUp,
-  Zap,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { RemoteImage } from '../../components/ui/remote-image'
 import { imagePath, type ProductImageKey } from '../products/images'
 import { CATEGORIES } from './data'
-
-const PERKS = [
-  { icon: Truck, title: 'ارسال سریع', text: 'به سراسر کشور' },
-  { icon: ShieldCheck, title: 'پرداخت امن', text: 'درگاه معتبر بانکی' },
-  { icon: BadgeCheck, title: 'اصالت کالا', text: 'فروشندگان تأییدشده' },
-  { icon: Headphones, title: 'پشتیبانی', text: 'پاسخ‌گویی همیشگی' },
-]
 
 const HERO_COLLAGE: Array<{ key: ProductImageKey; position: string; size: string; delay: string }> = [
   { key: 'laptop-pro', position: 'inset-x-0 top-[22%] flex justify-center', size: 'w-[66%] max-w-[20rem]', delay: '0s' },
@@ -46,22 +32,18 @@ export function Hero() {
             <div className="mb-5 flex flex-wrap items-center gap-2">
               <span className="badge badge-brand">
                 <Sparkles className="size-3.5" />
-                بازار آنلاین چندفروشندگی
-              </span>
-              <span className="badge badge-success">
-                <Zap className="size-3.5" />
-                ارسال از امروز
+                فروشگاه آنلاین
               </span>
             </div>
-            <p className="eyebrow mb-3">انتخاب بهتر، خرید مطمئن‌تر</p>
+            <p className="eyebrow mb-3">خوش آمدید</p>
             <h1 className="max-w-2xl text-4xl font-black leading-[1.4] tracking-tight text-fg sm:text-6xl sm:leading-[1.35]">
-              خرید هوشمند،
+              بازار هوشمند،
               <br />
-              <span className="text-gradient">شروع یک انتخاب خوب</span>
+              <span className="text-gradient">فروشگاه کالاهای مورد علاقه شما</span>
             </h1>
             <p className="mt-6 max-w-xl text-sm leading-8 text-fg-muted sm:text-base">
-              کالاهای محبوب را از فروشندگان معتبر پیدا کنید، قیمت‌ها را کنار هم ببینید و با چند
-              کلیک سفارش خود را ثبت کنید.
+              بازار هوشمند مجموعه‌ای گردآوری‌شده از کالاهای متنوع است؛ از موبایل و لپ‌تاپ تا مد،
+              خانه و ورزش.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a href="#products" className="btn btn-primary btn-lg shadow-[0_16px_30px_-14px_var(--brand)]">
@@ -71,20 +53,6 @@ export function Hero() {
               <Link to="/account/store" className="btn btn-secondary btn-lg">
                 فروشنده شوید
               </Link>
-            </div>
-            <div className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-line pt-6">
-              <div>
-                <p className="text-xl font-black tabular-nums text-fg">+۱۰۰۰</p>
-                <p className="mt-1 text-[11px] text-fg-subtle">کالای قابل انتخاب</p>
-              </div>
-              <div>
-                <p className="text-xl font-black tabular-nums text-fg">+۵۰۰</p>
-                <p className="mt-1 text-[11px] text-fg-subtle">فروشنده فعال</p>
-              </div>
-              <div>
-                <p className="text-xl font-black tabular-nums text-fg">۲۴/۷</p>
-                <p className="mt-1 text-[11px] text-fg-subtle">پشتیبانی آنلاین</p>
-              </div>
             </div>
           </div>
 
@@ -117,20 +85,11 @@ export function Hero() {
                     />
                   </div>
                 ))}
-                <span className="absolute start-4 top-4 badge badge-accent">تا ۳۰٪ تخفیف</span>
-                <span className="absolute bottom-4 end-4 flex items-center gap-1 rounded-full bg-surface/90 px-3 py-1.5 text-[11px] font-bold text-warning-ink shadow-[var(--shadow-sm)] backdrop-blur">
-                  <Star className="size-3.5 fill-current" />
-                  ۴.۸ از ۵
-                </span>
-                <span className="absolute bottom-4 start-4 flex items-center gap-1.5 rounded-full bg-surface/90 px-3 py-1.5 text-[11px] font-bold text-fg shadow-[var(--shadow-sm)] backdrop-blur">
-                  <Boxes className="size-3.5 text-brand" />
-                  +۱۰۰۰ کالا
-                </span>
               </div>
               <div className="relative mt-5 flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-xs text-fg-subtle">تجربه‌ای برای خرید روزمره</p>
-                  <p className="mt-1 text-lg font-black text-fg">هر چیزی که لازم دارید</p>
+                  <p className="text-xs text-fg-subtle">فروشگاه آنلاین</p>
+                  <p className="mt-1 text-lg font-black text-fg">بازار هوشمند</p>
                 </div>
                 <div className="grid size-11 place-items-center rounded-xl bg-success-soft text-success-ink">
                   <TrendingUp className="size-5" />
@@ -139,22 +98,6 @@ export function Hero() {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="container-page -mt-6 sm:-mt-8">
-        <ul className="card relative z-10 m-0 grid list-none grid-cols-2 gap-4 p-4 shadow-[var(--shadow-md)] sm:grid-cols-4 sm:p-5">
-          {PERKS.map((perk) => (
-            <li key={perk.title} className="flex items-center gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-ink">
-                <perk.icon className="size-5" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-xs font-bold text-fg">{perk.title}</span>
-                <span className="block truncate text-[11px] text-fg-subtle">{perk.text}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section className="container-page pt-12" aria-labelledby="home-categories">

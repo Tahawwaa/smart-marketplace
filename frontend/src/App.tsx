@@ -28,6 +28,7 @@ import { CheckoutPage } from './features/orders/checkout-page'
 import { PaymentPage } from './features/payments/payment-page'
 import { ProductDetailPage } from './features/products/product-detail-page'
 import { VendorDashboardPage } from './features/vendor/vendor-dashboard-page'
+import { VendorAnalyticsPage } from './features/vendor/vendor-analytics-page'
 import { VendorInventoryPage } from './features/vendor/vendor-inventory-page'
 import { VendorLayout } from './features/vendor/vendor-layout'
 import { VendorOrdersPage } from './features/vendor/vendor-orders-page'
@@ -68,6 +69,7 @@ function App() {
                     <Route path="products/:id/edit" element={<VendorProductFormPage />} />
                     <Route path="inventory" element={<VendorInventoryPage />} />
                     <Route path="orders" element={<VendorOrdersPage />} />
+                    <Route path="analytics" element={<VendorAnalyticsPage />} />
                   </Route>
                 </Route>
                 <Route element={<RequireAdmin />}>

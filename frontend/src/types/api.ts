@@ -20,8 +20,15 @@ export type Product = {
   slug: string
   description: string | null
   price_from?: number | null
+  images?: ProductImage[]
   brand?: { id: number; name: string; slug: string } | null
   category?: { id: number; name: string; slug: string } | null
+}
+
+export type SearchSuggestions = {
+  products: { id: number; name: string; slug: string; category: string | null; image: string | null }[]
+  categories: { id: number; name: string; slug: string }[]
+  brands: { id: number; name: string; slug: string }[]
 }
 
 export type ProductImage = {

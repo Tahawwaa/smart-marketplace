@@ -6,8 +6,9 @@ import { useCart } from '../cart/cart-context'
 import { useAsync } from '../../hooks/use-async'
 import { faNum, faPrice } from '../../lib/format'
 import { RemoteImage } from '../../components/ui/remote-image'
-import { fetchProduct } from './api'
+import { fetchProduct, fetchRecommendations } from './api'
 import { productImageSources } from './images'
+import { ProductCard } from './product-card'
 
 export function ProductDetailPage() {
   const { slug = '' } = useParams()
@@ -18,6 +19,8 @@ export function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null)
 
   const product = useAsync((signal) => fetchProduct(slug, signal), slug)
+  const related = useAsync((signal) => fetchRecommendations(slug, signal), slug)
+  const relatedItems = related.data?.data ?? []
   const detail = product.data?.data ?? null
   const image = detail?.images?.find((item) => item.is_primary) ?? detail?.images?.[0] ?? null
 
@@ -210,6 +213,36 @@ export function ProductDetailPage() {
           ) : null}
         </div>
       </div>
+
+      {relatedItems.length > 0 && (
+        <div className="mt-12">
+          <h2 className="mb-4 text-lg font-black text-fg">پیشنهادهای مشابه</h2>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {relatedItems.slice(0, 4).map((item, index) => (
+              <ProductCard
+                key={item.id}
+                index={index}
+                product={{
+                  id: item.id,
+                  slug: item.slug,
+                  name: item.name,
+                  categorySlug: item.category?.slug ?? '',
+                  categoryName: item.category?.name ?? '',
+                  brandName: item.brand?.name,
+                  price: item.price_from ?? null,
+                  imageSources: [
+                    ...(item.images?.length
+                      ? [(item.images.find((img) => img.is_primary) ?? item.images[0]).path]
+                      : []),
+                    ...productImageSources(item.name, item.category?.slug ?? '', item.id),
+                  ],
+                }}
+                onAdd={() => undefined}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   )
 }

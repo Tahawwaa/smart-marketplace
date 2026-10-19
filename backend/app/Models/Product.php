@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProductStatus;
+use App\Services\ProductSearchService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::saved(function (Product $product) {
+            if ($product->wasRecentlyCreated || $product->wasChanged(['name', 'description', 'brand_id', 'category_id'])) {
+                app(ProductSearchService::class)->reindex($product);
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.

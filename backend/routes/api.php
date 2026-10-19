@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductSearchController;
+use App\Http\Controllers\Api\Vendor\VendorAnalyticsController;
 use App\Http\Controllers\Api\Vendor\VendorInventoryController;
 use App\Http\Controllers\Api\Vendor\VendorOrderController;
 use App\Http\Controllers\Api\Vendor\VendorProductController;
@@ -27,6 +29,9 @@ Route::get('categories', [CategoryController::class, 'index']);
 Route::get('categories/{category:slug}', [CategoryController::class, 'show']);
 
 Route::get('products', [ProductController::class, 'index']);
+Route::get('products/suggest', [ProductSearchController::class, 'suggest'])->middleware('throttle:120,1');
+Route::get('products/popular', [ProductSearchController::class, 'popular']);
+Route::get('products/{product:slug}/recommendations', [ProductSearchController::class, 'recommendations']);
 Route::get('products/{product:slug}', [ProductController::class, 'show']);
 
 Route::get('cart', [CartController::class, 'show']);
@@ -68,6 +73,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('orders', [VendorOrderController::class, 'index']);
         Route::patch('orders/{subOrder}/status', [VendorOrderController::class, 'updateStatus']);
+
+        Route::get('analytics', [VendorAnalyticsController::class, 'show']);
+        Route::get('orders-export', [VendorAnalyticsController::class, 'exportOrders']);
     });
 
     Route::prefix('admin')->middleware('admin')->group(function () {

@@ -1,5 +1,5 @@
 import { api } from '../../lib/api/client'
-import type { ApiItem, ApiList, Category, Product, ProductDetail } from '../../types/api'
+import type { ApiItem, ApiList, Category, Product, ProductDetail, SearchSuggestions } from '../../types/api'
 
 export const fetchCategories = (signal?: AbortSignal) => api<ApiList<Category>>('/categories', { signal })
 
@@ -22,3 +22,11 @@ export const fetchProductCount = async (params: ProductQuery, signal?: AbortSign
 
 export const fetchProduct = (slug: string, signal?: AbortSignal) =>
   api<ApiItem<ProductDetail>>(`/products/${slug}`, { signal })
+
+export const fetchSuggestions = (term: string, signal?: AbortSignal) =>
+  api<{ data: SearchSuggestions }>('/products/suggest', { query: { q: term }, signal })
+
+export const fetchRecommendations = (slug: string, signal?: AbortSignal) =>
+  api<ApiList<Product>>(`/products/${slug}/recommendations`, { signal })
+
+export const fetchPopular = (signal?: AbortSignal) => api<ApiList<Product>>('/products/popular', { signal })
