@@ -5,6 +5,7 @@ import { GlowCard } from '../../components/ui/glow-card'
 import { cn } from '../../lib/cn'
 import { faNum, faPercent, faPrice } from '../../lib/format'
 import { CATEGORIES } from '../home/data'
+import { RemoteImage } from '../../components/ui/remote-image'
 
 export type ProductCardData = {
   id: number
@@ -18,6 +19,7 @@ export type ProductCardData = {
   rating?: number
   sold?: number
   imageUrl?: string | null
+  imageSources?: string[]
 }
 
 const accentOf = (slug: string) => {
@@ -57,21 +59,16 @@ export function ProductCard({ product, index = 0, onAdd }: Props) {
               backgroundImage: `radial-gradient(120% 120% at 20% 0%, rgba(${color}, 0.22), transparent 62%), linear-gradient(165deg, var(--surface-2), var(--surface-3))`,
             }}
           >
-            {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                loading="lazy"
-                className="size-full object-cover transition duration-500 group-hover:scale-105"
-              />
-            ) : (
-              <div className="relative grid size-28 place-items-center rounded-[2rem] border border-white/40 bg-surface/70 shadow-[var(--shadow-md)] backdrop-blur transition duration-500 group-hover:scale-110">
-                <Icon
-                aria-hidden
-                  className={cn('size-14 opacity-80', tint)}
-                />
-              </div>
-            )}
+            <RemoteImage
+              src={product.imageUrl ? [product.imageUrl] : (product.imageSources ?? [])}
+              alt={product.name}
+              className="size-full object-cover transition duration-500 group-hover:scale-105"
+              fallback={
+                <div className="relative grid size-28 place-items-center rounded-[2rem] border border-white/40 bg-surface/70 shadow-[var(--shadow-md)] backdrop-blur transition duration-500 group-hover:scale-110">
+                  <Icon aria-hidden className={cn('size-14 opacity-80', tint)} />
+                </div>
+              }
+            />
 
             <div className="absolute start-2.5 top-2.5 flex flex-col items-start gap-1.5">
               {discount && (

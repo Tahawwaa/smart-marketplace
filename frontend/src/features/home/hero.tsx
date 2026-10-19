@@ -12,7 +12,8 @@ import {
   Zap,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { CATEGORIES } from './data'
+import { RemoteImage } from '../../components/ui/remote-image'
+import { CATEGORIES, HERO_IMAGE } from './data'
 
 const PERKS = [
   { icon: Truck, title: 'ارسال سریع', text: 'به سراسر کشور' },
@@ -94,9 +95,16 @@ export function Hero() {
               </div>
               <div className="relative mt-5 grid aspect-[1.25] place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-brand-soft via-surface-2 to-accent-soft">
                 <div className="absolute inset-0 opacity-50" style={{ background: 'radial-gradient(circle at 50% 40%, var(--surface), transparent 45%)' }} />
-                <div className="relative grid size-32 place-items-center rounded-[2rem] border border-white/40 bg-surface/70 shadow-[var(--shadow-lg)] backdrop-blur sm:size-40">
-                  <Boxes className="size-16 text-brand sm:size-20" />
-                </div>
+                <RemoteImage
+                  src={HERO_IMAGE}
+                  alt=""
+                  className="absolute inset-0 size-full object-cover"
+                  fallback={
+                    <div className="relative grid size-32 place-items-center rounded-[2rem] border border-white/40 bg-surface/70 shadow-[var(--shadow-lg)] backdrop-blur sm:size-40">
+                      <Boxes className="size-16 text-brand sm:size-20" />
+                    </div>
+                  }
+                />
                 <span className="absolute start-4 top-4 badge badge-accent">تا ۳۰٪ تخفیف</span>
                 <span className="absolute bottom-4 end-4 flex items-center gap-1 rounded-full bg-surface/90 px-3 py-1.5 text-[11px] font-bold text-warning-ink shadow-[var(--shadow-sm)]">
                   <Star className="size-3.5 fill-current" />
@@ -153,10 +161,15 @@ export function Hero() {
                 className="card card-hover group flex flex-col items-center gap-3 px-3 py-5 text-center"
               >
                 <span
-                  className="grid size-14 place-items-center rounded-2xl transition group-hover:scale-110"
+                  className="grid size-20 place-items-center overflow-hidden rounded-2xl transition group-hover:scale-105"
                   style={{ background: `rgba(${category.color}, 0.14)` }}
                 >
-                  <category.icon className={`size-7 ${category.tint}`} />
+                  <RemoteImage
+                    src={category.image}
+                    alt={category.name}
+                    className="size-full object-cover"
+                    fallback={<category.icon className={`size-7 ${category.tint}`} />}
+                  />
                 </span>
                 <span className="text-xs font-bold text-fg">{category.name}</span>
               </Link>
