@@ -9,7 +9,7 @@ import { CATEGORIES } from '../home/data'
 import { fetchProducts } from './api'
 import { ProductCard, type ProductCardData } from './product-card'
 import { SAMPLE_PRODUCTS } from './sample'
-import { categoryImageSources, sampleImageSources } from './images'
+import { imagePath, productImageSources } from './images'
 
 const SORTS = [
   { value: 'newest', label: 'جدیدترین' },
@@ -53,7 +53,7 @@ function sampleAsCards(category: string, search: string): ProductCardData[] {
     oldPrice: product.oldPrice,
     rating: product.rating,
     sold: product.sold,
-    imageSources: sampleImageSources(product.id),
+    imageSources: [imagePath(product.image)],
   }))
 }
 
@@ -98,7 +98,7 @@ export function Catalog() {
     categoryName: product.category?.name ?? '',
     brandName: product.brand?.name,
     price: product.price_from ?? null,
-    imageSources: categoryImageSources(product.category?.slug ?? ''),
+    imageSources: productImageSources(product.name, product.category?.slug ?? '', product.id),
   }))
 
   const usingSample = live.length === 0

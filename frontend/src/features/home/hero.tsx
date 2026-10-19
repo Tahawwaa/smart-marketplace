@@ -13,13 +13,22 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { RemoteImage } from '../../components/ui/remote-image'
-import { CATEGORIES, HERO_IMAGE } from './data'
+import { imagePath, type ProductImageKey } from '../products/images'
+import { CATEGORIES } from './data'
 
 const PERKS = [
   { icon: Truck, title: 'ارسال سریع', text: 'به سراسر کشور' },
   { icon: ShieldCheck, title: 'پرداخت امن', text: 'درگاه معتبر بانکی' },
   { icon: BadgeCheck, title: 'اصالت کالا', text: 'فروشندگان تأییدشده' },
   { icon: Headphones, title: 'پشتیبانی', text: 'پاسخ‌گویی همیشگی' },
+]
+
+const HERO_COLLAGE: Array<{ key: ProductImageKey; position: string; size: string; delay: string }> = [
+  { key: 'laptop-pro', position: 'inset-x-0 top-[22%] flex justify-center', size: 'w-[66%] max-w-[20rem]', delay: '0s' },
+  { key: 'headphones-max', position: 'end-[5%] top-[6%]', size: 'size-24 sm:size-28', delay: '1.2s' },
+  { key: 'smartwatch', position: 'start-[6%] top-[12%]', size: 'size-20 sm:size-24', delay: '2.4s' },
+  { key: 'sneakers', position: 'start-[10%] bottom-[16%]', size: 'w-28 sm:w-36', delay: '0.6s' },
+  { key: 'perfume', position: 'end-[14%] bottom-[14%]', size: 'size-20 sm:size-24', delay: '1.8s' },
 ]
 
 export function Hero() {
@@ -93,22 +102,29 @@ export function Hero() {
                   <ShoppingBag className="size-5" />
                 </span>
               </div>
-              <div className="relative mt-5 grid aspect-[1.25] place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-brand-soft via-surface-2 to-accent-soft">
-                <div className="absolute inset-0 opacity-50" style={{ background: 'radial-gradient(circle at 50% 40%, var(--surface), transparent 45%)' }} />
-                <RemoteImage
-                  src={HERO_IMAGE}
-                  alt=""
-                  className="absolute inset-0 size-full object-cover"
-                  fallback={
-                    <div className="relative grid size-32 place-items-center rounded-[2rem] border border-white/40 bg-surface/70 shadow-[var(--shadow-lg)] backdrop-blur sm:size-40">
-                      <Boxes className="size-16 text-brand sm:size-20" />
-                    </div>
-                  }
-                />
+              <div className="relative mt-5 aspect-[1.1] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-soft via-surface-2 to-accent-soft">
+                <div className="absolute inset-0 opacity-60" style={{ background: 'radial-gradient(circle at 50% 46%, var(--surface), transparent 52%)' }} />
+                {HERO_COLLAGE.map((item) => (
+                  <div
+                    key={item.key}
+                    className={`animate-float absolute ${item.position}`}
+                    style={{ animationDelay: item.delay }}
+                  >
+                    <RemoteImage
+                      src={[imagePath(item.key)]}
+                      alt=""
+                      className={`${item.size} object-contain drop-shadow-[0_18px_22px_rgba(15,23,42,0.28)]`}
+                    />
+                  </div>
+                ))}
                 <span className="absolute start-4 top-4 badge badge-accent">تا ۳۰٪ تخفیف</span>
-                <span className="absolute bottom-4 end-4 flex items-center gap-1 rounded-full bg-surface/90 px-3 py-1.5 text-[11px] font-bold text-warning-ink shadow-[var(--shadow-sm)]">
+                <span className="absolute bottom-4 end-4 flex items-center gap-1 rounded-full bg-surface/90 px-3 py-1.5 text-[11px] font-bold text-warning-ink shadow-[var(--shadow-sm)] backdrop-blur">
                   <Star className="size-3.5 fill-current" />
                   ۴.۸ از ۵
+                </span>
+                <span className="absolute bottom-4 start-4 flex items-center gap-1.5 rounded-full bg-surface/90 px-3 py-1.5 text-[11px] font-bold text-fg shadow-[var(--shadow-sm)] backdrop-blur">
+                  <Boxes className="size-3.5 text-brand" />
+                  +۱۰۰۰ کالا
                 </span>
               </div>
               <div className="relative mt-5 flex items-end justify-between gap-4">
@@ -161,13 +177,15 @@ export function Hero() {
                 className="card card-hover group flex flex-col items-center gap-3 px-3 py-5 text-center"
               >
                 <span
-                  className="grid size-20 place-items-center overflow-hidden rounded-2xl transition group-hover:scale-105"
-                  style={{ background: `rgba(${category.color}, 0.14)` }}
+                  className="grid size-24 place-items-center overflow-hidden rounded-2xl p-2.5"
+                  style={{
+                    background: `radial-gradient(circle at 50% 35%, rgba(${category.color}, 0.08), rgba(${category.color}, 0.22))`,
+                  }}
                 >
                   <RemoteImage
                     src={category.image}
                     alt={category.name}
-                    className="size-full object-cover"
+                    className="size-full object-contain drop-shadow-[0_8px_10px_rgba(15,23,42,0.25)] transition duration-300 group-hover:-translate-y-1 group-hover:scale-110"
                     fallback={<category.icon className={`size-7 ${category.tint}`} />}
                   />
                 </span>

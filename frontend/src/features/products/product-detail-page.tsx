@@ -5,7 +5,9 @@ import { ApiError } from '../../lib/api/client'
 import { useCart } from '../cart/cart-context'
 import { useAsync } from '../../hooks/use-async'
 import { faNum, faPrice } from '../../lib/format'
+import { RemoteImage } from '../../components/ui/remote-image'
 import { fetchProduct } from './api'
+import { productImageSources } from './images'
 
 export function ProductDetailPage() {
   const { slug = '' } = useParams()
@@ -18,6 +20,13 @@ export function ProductDetailPage() {
   const product = useAsync((signal) => fetchProduct(slug, signal), slug)
   const detail = product.data?.data ?? null
   const image = detail?.images?.find((item) => item.is_primary) ?? detail?.images?.[0] ?? null
+
+  const imageSources = detail
+    ? [
+        ...(image ? [image.path] : []),
+        ...productImageSources(detail.name, detail.category?.slug ?? '', detail.id),
+      ]
+    : []
 
   // موجودی‌ها زیر هر تنوع می‌آیند؛ ارزان‌ترین موجودی قابل خرید انتخاب می‌شود.
   const offers = (detail?.variants ?? []).flatMap((variant) => variant.inventories ?? [])
@@ -67,12 +76,13 @@ export function ProductDetailPage() {
       </nav>
 
       <div className="grid gap-8 md:grid-cols-2 md:items-start">
-        <div className="card grid aspect-square place-items-center overflow-hidden md:sticky md:top-24">
-          {image ? (
-            <img src={image.path} alt={image.alt ?? detail.name} className="size-full object-cover" />
-          ) : (
-            <PackageSearch className="size-16 text-fg-subtle" />
-          )}
+        <div className="card grid aspect-square place-items-center overflow-hidden bg-gradient-to-br from-surface-2 to-surface-3 md:sticky md:top-24">
+          <RemoteImage
+            src={imageSources}
+            alt={image?.alt ?? detail.name}
+            className="size-full object-contain p-8 drop-shadow-[0_24px_28px_rgba(15,23,42,0.25)]"
+            fallback={<PackageSearch className="size-16 text-fg-subtle" />}
+          />
         </div>
 
         <div>

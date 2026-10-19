@@ -62,7 +62,7 @@ export function ProductCard({ product, index = 0, onAdd }: Props) {
             <RemoteImage
               src={product.imageUrl ? [product.imageUrl] : (product.imageSources ?? [])}
               alt={product.name}
-              className="size-full object-cover transition duration-500 group-hover:scale-105"
+              className="size-full object-contain p-5 drop-shadow-[0_14px_16px_rgba(15,23,42,0.22)] transition duration-500 group-hover:scale-110"
               fallback={
                 <div className="relative grid size-28 place-items-center rounded-[2rem] border border-white/40 bg-surface/70 shadow-[var(--shadow-md)] backdrop-blur transition duration-500 group-hover:scale-110">
                   <Icon aria-hidden className={cn('size-14 opacity-80', tint)} />
