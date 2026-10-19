@@ -69,8 +69,8 @@ export function ProductDetailPage() {
   }
 
   return (
-    <section className="container-page py-8">
-      <nav className="mb-6 flex items-center gap-2 text-xs text-fg-subtle">
+    <section className="container-page py-5 sm:py-8">
+      <nav className="mb-4 flex min-w-0 items-center gap-2 text-xs text-fg-subtle sm:mb-6">
         <Link to="/products" className="transition hover:text-fg">
           کالاها
         </Link>
@@ -78,12 +78,12 @@ export function ProductDetailPage() {
         <span className="truncate text-fg-muted">{detail.name}</span>
       </nav>
 
-      <div className="grid gap-8 md:grid-cols-2 md:items-start">
-        <div className="card grid aspect-square place-items-center overflow-hidden bg-gradient-to-br from-surface-2 to-surface-3 md:sticky md:top-24">
+      <div className="grid gap-5 sm:gap-8 md:grid-cols-2 md:items-start">
+        <div className="card mx-auto grid aspect-square w-full max-w-sm place-items-center overflow-hidden bg-gradient-to-br from-surface-2 to-surface-3 md:sticky md:top-24 md:max-w-none">
           <RemoteImage
             src={imageSources}
             alt={image?.alt ?? detail.name}
-            className="size-full object-contain p-8 drop-shadow-[0_24px_28px_rgba(15,23,42,0.25)]"
+            className="size-full object-contain p-5 drop-shadow-[0_24px_28px_rgba(15,23,42,0.25)] sm:p-8"
             fallback={<PackageSearch className="size-16 text-fg-subtle" />}
           />
         </div>
@@ -97,7 +97,7 @@ export function ProductDetailPage() {
 
           <div className="panel mt-5">
             <p className="text-xs text-fg-subtle">قیمت</p>
-            <p className="mt-1 text-3xl font-black tabular-nums text-fg">
+            <p className="mt-1 text-2xl font-black tabular-nums text-fg sm:text-3xl">
               {price === null ? 'قیمت پس از انتخاب تنوع' : faPrice(price)}
             </p>
 
@@ -175,13 +175,13 @@ export function ProductDetailPage() {
                         {variant.inventories.map((offer) => (
                           <li key={offer.id}>
                             <label
-                              className={`flex cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 py-2 transition ${
+                              className={`flex cursor-pointer flex-col items-start gap-1.5 rounded-xl border px-3 py-2.5 transition sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:py-2 ${
                                 selected?.id === offer.id
                                   ? 'border-brand bg-brand-soft'
                                   : 'border-line bg-surface hover:border-line-strong'
                               }`}
                             >
-                              <span className="flex items-center gap-2">
+                              <span className="flex min-w-0 items-center gap-2">
                                 <input
                                   type="radio"
                                   name="offer"
@@ -190,11 +190,11 @@ export function ProductDetailPage() {
                                   className="accent-[var(--brand)]"
                                 />
                                 <Store className="size-3.5 text-fg-subtle" />
-                                <span className="text-fg">
+                                <span className="truncate text-fg">
                                   {offer.vendor?.store_name ?? 'فروشنده'}
                                 </span>
                               </span>
-                              <span className="font-bold tabular-nums text-fg">
+                              <span className="ps-6 font-bold tabular-nums text-fg sm:ps-0">
                                 {faPrice(offer.effective_price)}
                                 <span className="text-fg-subtle">
                                   {' '}
@@ -215,9 +215,9 @@ export function ProductDetailPage() {
       </div>
 
       {relatedItems.length > 0 && (
-        <div className="mt-12">
+        <div className="mt-10 sm:mt-12">
           <h2 className="mb-4 text-lg font-black text-fg">پیشنهادهای مشابه</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
             {relatedItems.slice(0, 4).map((item, index) => (
               <ProductCard
                 key={item.id}

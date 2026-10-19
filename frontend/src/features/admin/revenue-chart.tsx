@@ -62,7 +62,7 @@ export function RevenueChart({ points }: { points: Point[] }) {
       <div dir="ltr" className="w-full overflow-hidden">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          className="h-56 w-full"
+          className="h-40 w-full sm:h-56"
           role="img"
           aria-label="نمودار روند درآمد"
           preserveAspectRatio="none"

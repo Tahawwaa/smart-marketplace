@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
+    <script>
+      (function () {
+        var theme = new URLSearchParams(location.search).get('theme');
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+      })();
+    </script>
+    <title>preview</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/cards-preview.tsx"></script>
+  </body>
+</html>

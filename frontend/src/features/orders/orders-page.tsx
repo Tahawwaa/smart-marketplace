@@ -64,8 +64,8 @@ export function OrdersPage({ embedded = false }: { embedded?: boolean } = {}) {
   if (embedded) return body
 
   return (
-    <section className="container-page max-w-3xl py-8">
-      <h1 className="mb-6 page-title">سفارش‌های من</h1>
+    <section className="container-page max-w-3xl py-6 sm:py-8">
+      <h1 className="mb-5 page-title sm:mb-6">سفارش‌های من</h1>
       {body}
     </section>
   )

@@ -29,11 +29,11 @@ export function AdminLayout() {
 
   return (
     <section className="container-page py-6 sm:py-8">
-      <header className="relative overflow-hidden rounded-[1.75rem] border border-brand/20 bg-gradient-to-br from-brand-soft via-surface to-accent-soft p-5 shadow-[var(--shadow-md)] sm:p-7">
+      <header className="relative overflow-hidden rounded-2xl border border-brand/20 bg-gradient-to-br from-brand-soft via-surface to-accent-soft p-4 shadow-[var(--shadow-md)] sm:rounded-[1.75rem] sm:p-7">
         <div className="pointer-events-none absolute -end-16 -top-20 size-56 rounded-full bg-brand/15 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 start-1/3 size-48 rounded-full bg-accent/10 blur-3xl" />
-        <div className="relative flex flex-wrap items-end justify-between gap-5">
-          <div>
+        <div className="relative flex flex-wrap items-end justify-between gap-4 sm:gap-5">
+          <div className="min-w-0">
             <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px] text-fg-subtle">
               <Link to="/" className="inline-flex items-center gap-1 transition hover:text-fg">
                 <Home className="size-3.5" />
@@ -50,7 +50,7 @@ export function AdminLayout() {
               وضعیت فروشگاه، سفارش‌ها و عملکرد فروشندگان را از یکجا مدیریت کنید.
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-2xl border border-line bg-surface/75 px-3 py-2.5 backdrop-blur">
+          <div className="hidden items-center gap-2 rounded-2xl border border-line bg-surface/75 px-3 py-2.5 backdrop-blur sm:flex">
             <span className="grid size-9 place-items-center rounded-xl bg-brand text-brand-fg">
               <CircleUserRound className="size-5" />
             </span>
@@ -62,8 +62,8 @@ export function AdminLayout() {
         </div>
       </header>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start">
-        <aside className="panel-muted p-2 lg:sticky lg:top-24">
+      <div className="mt-4 grid gap-4 sm:mt-6 sm:gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start">
+        <aside className="panel-muted min-w-0 p-2 lg:sticky lg:top-24">
           <div className="hidden px-3 py-2 lg:block">
             <p className="text-[10px] font-bold uppercase tracking-wider text-fg-subtle">مدیریت سامانه</p>
           </div>

@@ -137,12 +137,12 @@ export function SiteHeader() {
       ref={panelRef}
       className="sticky top-0 z-50 border-b border-line bg-surface/80 backdrop-blur-xl"
     >
-      <div className="container-page flex items-center gap-2 py-3 sm:gap-3">
-        <Link to="/" className="flex shrink-0 items-center gap-2 text-sm font-extrabold text-fg">
+      <div className="container-page flex flex-wrap items-center gap-x-2 gap-y-2.5 py-2.5 sm:flex-nowrap sm:gap-3 sm:py-3">
+        <Link to="/" className="me-auto flex shrink-0 items-center gap-2 text-sm font-extrabold text-fg sm:me-0">
           <span className="grid size-9 place-items-center rounded-xl bg-brand text-brand-fg shadow-[var(--shadow-md)]">
             <ShoppingBag className="size-5" />
           </span>
-          <span className="hidden sm:inline">بازار هوشمند</span>
+          <span>بازار هوشمند</span>
         </Link>
 
         <form
@@ -152,7 +152,7 @@ export function SiteHeader() {
           onBlur={(event) => {
             if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false)
           }}
-          className="relative flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2 transition focus-within:border-brand focus-within:bg-surface focus-within:shadow-[0_0_0_4px_var(--ring)]"
+          className="relative order-last flex w-full min-w-0 items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2 transition focus-within:border-brand focus-within:bg-surface focus-within:shadow-[0_0_0_4px_var(--ring)] sm:order-none sm:w-auto sm:flex-1"
         >
           <Search className="size-4 shrink-0 text-fg-subtle" />
           <input
@@ -162,7 +162,7 @@ export function SiteHeader() {
             autoComplete="off"
             placeholder="جست‌وجوی نام کالا یا برند…"
             aria-label="جست‌وجوی کالا"
-            className="min-w-0 flex-1 bg-transparent text-sm text-fg outline-none placeholder:text-fg-subtle"
+            className="min-w-0 flex-1 bg-transparent text-base text-fg outline-none placeholder:text-fg-subtle sm:text-sm"
           />
           {input && (
             <button
@@ -172,7 +172,7 @@ export function SiteHeader() {
                 setInput('')
                 navigate('/products')
               }}
-              className="grid size-6 shrink-0 place-items-center rounded-full text-fg-subtle transition hover:bg-surface-3 hover:text-fg"
+              className="grid size-8 shrink-0 place-items-center rounded-full text-fg-subtle transition hover:bg-surface-3 hover:text-fg sm:size-6"
             >
               <X className="size-3.5" />
             </button>
@@ -180,7 +180,7 @@ export function SiteHeader() {
           {showSuggestions && (
             <ul
               role="listbox"
-              className="absolute inset-x-0 top-full z-50 mt-2 list-none overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-[var(--shadow-md)]"
+              className="absolute inset-x-0 top-full z-50 mt-2 max-h-[60vh] list-none overflow-y-auto rounded-xl border border-line bg-surface p-1 shadow-[var(--shadow-md)]"
             >
               {suggestionLinks.map((item, index) => (
                 <li key={item.key} role="option" aria-selected={index === active}>
@@ -189,7 +189,7 @@ export function SiteHeader() {
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => goTo(item.to)}
                     className={cn(
-                      'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-start text-xs transition',
+                      'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-start text-xs transition sm:py-2',
                       index === active ? 'bg-surface-3 text-fg' : 'text-fg-muted hover:bg-surface-2',
                     )}
                   >
@@ -222,10 +222,9 @@ export function SiteHeader() {
               <Link
                 to="/admin"
                 title="پنل مدیریت"
-                className="alert alert-info"
+                className="alert alert-info hidden !py-2 !text-xs sm:block"
               >
-                <LayoutDashboard className="size-4 sm:hidden" />
-                <span className="hidden sm:inline">پنل مدیریت</span>
+                پنل مدیریت
               </Link>
             ) : null}
 
@@ -234,19 +233,17 @@ export function SiteHeader() {
               <Link
                 to="/vendor"
                 title="پنل فروشنده"
-                className="alert alert-info"
+                className="alert alert-info hidden !py-2 !text-xs sm:block"
               >
-                <Store className="size-4 sm:hidden" />
-                <span className="hidden sm:inline">پنل فروشنده</span>
+                پنل فروشنده
               </Link>
             ) : (
               <Link
                 to="/account/store"
                 title="فروشنده شوید"
-                className="flex items-center gap-1.5 rounded-xl border border-line px-2.5 py-2 text-xs text-fg-muted transition hover:border-info hover:text-info-ink sm:px-3"
+                className="hidden items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-xs text-fg-muted transition hover:border-info hover:text-info-ink sm:flex"
               >
-                <Store className="size-4 sm:hidden" />
-                <span className="hidden sm:inline">فروشنده شوید</span>
+                فروشنده شوید
               </Link>
             )}
 
@@ -267,20 +264,12 @@ export function SiteHeader() {
               </button>
             </div>
 
-            {/* در موبایل، دکمه‌های بالا فشرده می‌شوند و ورود به پنل از این آیکن انجام می‌شود. */}
-            <Link
-              to="/account"
-              aria-label="پنل کاربری"
-              className="grid size-9 place-items-center rounded-xl border border-line bg-surface text-fg-muted transition hover:border-line-strong hover:text-fg sm:hidden"
-            >
-              <User className="size-4" />
-            </Link>
           </div>
         ) : (
           <Link
             to="/login"
             aria-label="ورود / ثبت‌نام"
-            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-line px-2.5 py-2 text-xs text-fg-muted transition hover:border-line-strong hover:text-fg sm:px-3"
+            className="flex size-9 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-line text-xs text-fg-muted transition hover:border-line-strong hover:text-fg sm:size-auto sm:px-3 sm:py-2"
           >
             <User className="size-4" />
             <span className="hidden sm:inline">ورود</span>
@@ -303,7 +292,7 @@ export function SiteHeader() {
 
       {open && (
         <nav aria-label="دسته‌بندی‌ها" className="border-t border-line bg-surface/95 backdrop-blur-xl">
-          <ul className="container-page grid list-none grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-6">
+          <ul className="container-page grid max-h-[65vh] list-none grid-cols-2 gap-2 overflow-y-auto p-4 sm:grid-cols-3 lg:grid-cols-6">
             <li>
               <button
                 type="button"
@@ -337,6 +326,45 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
+          {user ? (
+            <div className="container-page flex flex-col gap-2 border-t border-line pb-4 pt-3 sm:hidden">
+              <p className="truncate text-xs text-fg-subtle">{user.name}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Link to="/account" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm">
+                  <User className="size-4" />
+                  پنل کاربری
+                </Link>
+                {user.role === 'admin' ? (
+                  <Link to="/admin" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm">
+                    <LayoutDashboard className="size-4" />
+                    پنل مدیریت
+                  </Link>
+                ) : null}
+                {user.store ? (
+                  <Link to="/vendor" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm">
+                    <Store className="size-4" />
+                    پنل فروشنده
+                  </Link>
+                ) : (
+                  <Link to="/account/store" onClick={() => setOpen(false)} className="btn btn-secondary btn-sm">
+                    <Store className="size-4" />
+                    فروشنده شوید
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false)
+                    void logout()
+                  }}
+                  className="btn btn-danger btn-sm"
+                >
+                  <LogOut className="size-4" />
+                  خروج
+                </button>
+              </div>
+            </div>
+          ) : null}
         </nav>
       )}
     </header>

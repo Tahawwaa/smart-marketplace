@@ -36,7 +36,7 @@ export function AdminDashboardPage() {
   return (
     <div className="space-y-5">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-        <div className="relative overflow-hidden rounded-[1.5rem] bg-fg p-5 text-bg shadow-[var(--shadow-md)] sm:p-6">
+        <div className="relative overflow-hidden rounded-2xl bg-fg p-4 text-bg shadow-[var(--shadow-md)] sm:rounded-[1.5rem] sm:p-6">
           <div className="pointer-events-none absolute -end-16 -top-20 size-52 rounded-full bg-brand/30 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 start-1/3 size-48 rounded-full bg-accent/20 blur-3xl" />
           <div className="relative">
@@ -50,7 +50,7 @@ export function AdminDashboardPage() {
             <p className="mt-2 max-w-xl text-xs leading-7 text-bg/65 sm:text-sm">
               صف‌های نیازمند بررسی را ببینید و وضعیت سفارش‌های امروز را سریع‌تر مدیریت کنید.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Link to="/admin/orders" className="btn btn-secondary border-transparent bg-surface text-fg hover:bg-surface-2">
                 بررسی سفارش‌ها
                 <ArrowLeft className="size-4" />
@@ -62,7 +62,7 @@ export function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:grid-cols-4 xl:grid-cols-2">
           {[
             { label: 'فروشگاه‌های در انتظار', value: queues.vendors, to: '/admin/vendors', icon: Store, tone: 'bg-brand-soft text-brand-ink' },
             { label: 'کالاهای در انتظار', value: queues.products, to: '/admin/products', icon: Boxes, tone: 'bg-warning-soft text-warning-ink' },
@@ -75,7 +75,7 @@ export function AdminDashboardPage() {
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-[11px] text-fg-subtle">{item.label}</span>
-                <span className="mt-1 block text-xl font-black tabular-nums text-fg">{faNum(item.value)}</span>
+                <span className="mt-1 block text-lg font-black tabular-nums text-fg sm:text-xl">{faNum(item.value)}</span>
               </span>
             </Link>
           ))}
@@ -200,8 +200,8 @@ export function AdminDashboardPage() {
                   key={row.vendor?.id ?? index}
                   className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line px-3 py-2.5"
                 >
-                  <span className="text-fg">{row.vendor?.store_name ?? 'فروشگاه حذف‌شده'}</span>
-                  <span className="text-[11px] text-fg-subtle">
+                  <span className="min-w-0 break-words text-fg">{row.vendor?.store_name ?? 'فروشگاه حذف‌شده'}</span>
+                  <span className="order-last w-full text-[11px] text-fg-subtle sm:order-none sm:w-auto">
                     {faNum(row.orders)} زیرسفارش • کمیسیون {faPrice(row.commission)}
                   </span>
                   <span className="tabular-nums text-fg">{faPrice(row.gross)}</span>

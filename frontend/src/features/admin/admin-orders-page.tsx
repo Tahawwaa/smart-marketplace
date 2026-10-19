@@ -117,12 +117,12 @@ export function AdminOrdersPage() {
               return (
                 <li key={row.id} className="card px-4 py-3 text-xs">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="tabular-nums text-sm text-fg">{row.order_number}</span>
+                    <span className="min-w-0 break-all tabular-nums text-sm text-fg">{row.order_number}</span>
                     <StatusPill status={row.status} label={adminOrderStatusLabel(row.status)} />
                   </div>
 
                   <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-fg-subtle">
-                    <span>{row.user ? `${row.user.name} • ${row.user.email}` : 'مشتری حذف‌شده'}</span>
+                    <span className="min-w-0 break-all">{row.user ? `${row.user.name} • ${row.user.email}` : 'مشتری حذف‌شده'}</span>
                     <span>پرداخت: {paymentStatusLabel(row.payment_status)}</span>
                     <span className="tabular-nums">
                       {faPrice(row.grand_total)} • {faNum(row.items_count ?? 0)} زیرسفارش
@@ -156,7 +156,7 @@ export function AdminOrdersPage() {
                           type="button"
                           disabled={busyId === row.id}
                           onClick={() => void terminate(row.id, 'refunded')}
-                          className="alert alert-info"
+                          className="btn btn-secondary btn-sm"
                         >
                           بازگشت وجه
                         </button>
@@ -182,7 +182,7 @@ export function AdminOrdersPage() {
                         {(row.sub_orders ?? []).map((subOrder) => (
                           <li
                             key={subOrder.id}
-                            className="btn btn-secondary btn-sm"
+                            className="panel-muted !p-3"
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <span className="tabular-nums text-fg">
@@ -193,19 +193,19 @@ export function AdminOrdersPage() {
                                 label={adminOrderStatusLabel(subOrder.status)}
                               />
                             </div>
-                            <p className="mt-1 text-[11px] text-fg-subtle">
+                            <p className="mt-1 break-words text-[11px] text-fg-subtle">
                               {subOrder.vendor?.store_name ?? 'فروشگاه حذف‌شده'} • کمیسیون{' '}
                               {faPrice(subOrder.commission_amount)}
                             </p>
                             <ul className="mt-1 list-none space-y-1 p-0 text-[11px]">
                               {(subOrder.items ?? []).map((item) => (
                                 <li key={item.id} className="flex justify-between gap-2 text-start">
-                                  <span>
+                                  <span className="min-w-0 break-words">
                                     {item.product_name_snapshot}
                                     {item.variant_sku_snapshot ? ` (${item.variant_sku_snapshot})` : ''} ×{' '}
                                     {faNum(item.quantity)}
                                   </span>
-                                  <span className="tabular-nums">{faPrice(item.total_price)}</span>
+                                  <span className="shrink-0 tabular-nums">{faPrice(item.total_price)}</span>
                                 </li>
                               ))}
                             </ul>

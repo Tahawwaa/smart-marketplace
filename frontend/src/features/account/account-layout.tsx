@@ -24,7 +24,7 @@ export function AccountLayout() {
   }
 
   return (
-    <section className="container-page max-w-4xl py-8">
+    <section className="container-page max-w-4xl py-6 sm:py-8">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="page-title">پنل کاربری</h1>
         <p className="text-xs text-fg-subtle">
@@ -32,7 +32,7 @@ export function AccountLayout() {
         </p>
       </header>
 
-      <nav className="mb-6 mt-4 flex flex-wrap gap-2 text-xs">
+      <nav className="scrollbar-none -mx-4 mb-5 mt-4 flex gap-2 overflow-x-auto px-4 text-xs sm:mx-0 sm:mb-6 sm:flex-wrap sm:px-0">
         {TABS.map((tab) => (
           <NavLink
             key={tab.to}

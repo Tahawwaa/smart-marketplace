@@ -273,6 +273,17 @@ body {
   .scrollbar-none::-webkit-scrollbar { display: none; }
 }
 
+@media (max-width: 639px) {
+  .input, .select, .textarea { font-size: 1rem; }
+  .page-title { font-size: 1.3rem; line-height: 2rem; }
+  .card { border-radius: 1rem; }
+}
+
+@media (pointer: coarse) {
+  .btn-sm { min-height: 2.5rem; }
+  .chip { min-height: 2.25rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

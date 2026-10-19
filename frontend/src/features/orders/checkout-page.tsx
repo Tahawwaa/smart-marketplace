@@ -85,16 +85,16 @@ export function CheckoutPage() {
   }
 
   return (
-    <section className="container-page max-w-3xl py-8">
+    <section className="container-page max-w-3xl py-6 sm:py-8">
       <h1 className="mb-6 page-title">تکمیل سفارش</h1>
 
       <ul className="list-none space-y-2 p-0 text-xs text-fg-muted">
         {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between border-b border-line py-2">
-            <span>
+          <li key={item.id} className="flex items-center justify-between gap-3 border-b border-line py-2">
+            <span className="min-w-0 break-words">
               {item.product?.name ?? 'کالا'} × {item.quantity}
             </span>
-            <span className="tabular-nums">{faPrice(item.total_price)}</span>
+            <span className="shrink-0 tabular-nums">{faPrice(item.total_price)}</span>
           </li>
         ))}
       </ul>
@@ -117,7 +117,7 @@ export function CheckoutPage() {
                   onChange={() => setChoice(address.id)}
                   className="mt-1"
                 />
-                <span className="text-fg-muted">
+                <span className="min-w-0 break-words text-fg-muted">
                   <span className="block text-fg">
                     {address.recipient_name} — {address.recipient_phone}
                   </span>
@@ -172,7 +172,7 @@ export function CheckoutPage() {
         type="button"
         disabled={submitting}
         onClick={() => void submit()}
-        className="btn btn-primary mt-6"
+        className="btn btn-primary mt-6 w-full sm:w-auto"
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
         ثبت سفارش

@@ -10,6 +10,7 @@ const INTERVAL_MS = 5500
 export function BannerSlider() {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [touchStart, setTouchStart] = useState<number | null>(null)
   const count = BANNERS.length
 
   const go = useCallback((next: number) => setIndex((next + count) % count), [count])
@@ -30,9 +31,17 @@ export function BannerSlider() {
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
+      onTouchStart={(event) => setTouchStart(event.touches[0].clientX)}
+      onTouchEnd={(event) => {
+        if (touchStart === null) return
+        const delta = event.changedTouches[0].clientX - touchStart
+        setTouchStart(null)
+        if (Math.abs(delta) < 40) return
+        go(delta > 0 ? index - 1 : index + 1)
+      }}
     >
-      <div className="relative overflow-hidden rounded-3xl shadow-[var(--shadow-lg)]">
-        <div className="relative h-[19rem] sm:h-[22rem] lg:h-[26rem]">
+      <div className="relative overflow-hidden rounded-2xl shadow-[var(--shadow-lg)] sm:rounded-3xl">
+        <div className="grid sm:min-h-[22rem] lg:min-h-[26rem]">
           {BANNERS.map((banner, position) => {
             const active = position === index
             return (
@@ -42,34 +51,38 @@ export function BannerSlider() {
                 aria-roledescription="slide"
                 aria-label={`${position + 1} از ${count}`}
                 aria-hidden={!active}
-                className={`absolute inset-0 transition-opacity duration-700 motion-reduce:transition-none ${
+                className={`col-start-1 row-start-1 transition-opacity duration-700 motion-reduce:transition-none ${
                   active ? 'opacity-100' : 'pointer-events-none opacity-0'
                 }`}
                 style={{ background: banner.gradient }}
               >
-                <div className="grid h-full items-center gap-4 px-6 py-8 text-white sm:px-12 lg:grid-cols-2 lg:px-16">
-                  <div className="relative z-10 max-w-xl">
-                    <p className="mb-3 text-xs font-bold text-white/80 sm:text-sm">{banner.eyebrow}</p>
-                    <h2 className="text-2xl font-black leading-[1.5] sm:text-4xl lg:text-5xl lg:leading-[1.4]">
+                <div className="grid h-full grid-cols-1 content-center items-center gap-3 px-5 pb-12 pt-5 text-white sm:grid-cols-2 sm:gap-6 sm:px-10 sm:py-10 lg:px-16">
+                  <div className="relative z-10 max-w-xl sm:col-start-1 sm:row-start-1">
+                    <p className="mb-2 text-xs font-bold text-white/80 sm:mb-3 sm:text-sm">{banner.eyebrow}</p>
+                    <h2 className="text-xl font-black leading-[1.6] min-[400px]:text-2xl sm:text-3xl sm:leading-[1.5] lg:text-5xl lg:leading-[1.4]">
                       {banner.title}
                     </h2>
-                    <p className="mt-3 text-sm leading-7 text-white/85 sm:text-base">{banner.text}</p>
+                    <p className="mt-2 text-sm leading-7 text-white/85 sm:mt-3 sm:text-base">{banner.text}</p>
                     <Link
                       to={banner.to}
                       tabIndex={active ? 0 : -1}
-                      className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-white px-6 text-sm font-bold text-slate-900 transition hover:bg-white/90"
+                      className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-white px-6 text-sm font-bold text-slate-900 transition hover:bg-white/90 min-[400px]:w-auto sm:mt-6"
                     >
                       {banner.cta}
                     </Link>
                   </div>
-                  <div className="pointer-events-none absolute inset-y-0 end-0 hidden w-1/2 items-center justify-center gap-2 sm:flex lg:static lg:w-auto" aria-hidden>
+                  <div className="pointer-events-none order-first flex items-end justify-center gap-2 sm:order-none sm:col-start-2 sm:row-start-1 sm:items-center sm:gap-3" aria-hidden>
                     {banner.images.map((key, imageIndex) => (
                       <RemoteImage
                         key={key}
                         src={[imagePath(key)]}
                         alt=""
                         className={`object-contain drop-shadow-[0_22px_26px_rgba(0,0,0,0.35)] ${
-                          imageIndex === 0 ? 'size-48 lg:size-64' : 'size-28 lg:size-40'
+                          imageIndex === 0
+                            ? 'size-28 min-[400px]:size-32 sm:size-40 lg:size-64'
+                            : imageIndex === 1
+                              ? 'size-20 min-[400px]:size-24 sm:size-28 lg:size-40'
+                              : 'hidden lg:block lg:size-40'
                         }`}
                       />
                     ))}
@@ -86,7 +99,7 @@ export function BannerSlider() {
               type="button"
               aria-label="بنر قبلی"
               onClick={() => go(index - 1)}
-              className="absolute end-3 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/85 text-slate-900 shadow transition hover:bg-white"
+              className="absolute end-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-white/85 text-slate-900 shadow transition hover:bg-white sm:grid"
             >
               <ChevronRight className="size-5" />
             </button>
@@ -94,7 +107,7 @@ export function BannerSlider() {
               type="button"
               aria-label="بنر بعدی"
               onClick={() => go(index + 1)}
-              className="absolute start-3 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/85 text-slate-900 shadow transition hover:bg-white"
+              className="absolute start-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-white/85 text-slate-900 shadow transition hover:bg-white sm:grid"
             >
               <ChevronLeft className="size-5" />
             </button>

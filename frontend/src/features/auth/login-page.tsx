@@ -37,8 +37,8 @@ export function LoginPage() {
   }
 
   return (
-    <section className="container-page grid min-h-[70vh] place-items-center py-12">
-      <div className="card animate-fade-up w-full max-w-md p-6 shadow-[var(--shadow-lg)] sm:p-8">
+    <section className="container-page grid min-h-[70vh] place-items-center py-8 sm:py-12">
+      <div className="card animate-fade-up w-full max-w-md p-5 shadow-[var(--shadow-lg)] sm:p-8">
       <span className="mb-4 grid size-12 place-items-center rounded-2xl bg-brand text-brand-fg shadow-[var(--shadow-md)]">
         <ShoppingBag className="size-6" />
       </span>

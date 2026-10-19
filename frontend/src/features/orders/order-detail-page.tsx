@@ -30,12 +30,12 @@ export function OrderDetailPage() {
   }
 
   return (
-    <section className="container-page max-w-3xl py-8">
+    <section className="container-page max-w-3xl py-6 sm:py-8">
       <Link to="/orders" className="text-xs text-fg-subtle transition hover:text-fg">
         ← سفارش‌های من
       </Link>
 
-      <h1 className="mt-4 page-title">سفارش {detail.order_number}</h1>
+      <h1 className="mt-4 break-all page-title">سفارش {detail.order_number}</h1>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
         <div className="card px-4 py-3">
           <dt className="text-fg-subtle">وضعیت سفارش</dt>
@@ -64,19 +64,19 @@ export function OrderDetailPage() {
             {subOrder.items?.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center justify-between border-b border-line py-2"
+                className="flex items-center justify-between gap-3 border-b border-line py-2"
               >
-                <span>
+                <span className="min-w-0 break-words">
                   {item.product_name_snapshot} × {item.quantity}
                 </span>
-                <span className="tabular-nums">{faPrice(item.total_price)}</span>
+                <span className="shrink-0 tabular-nums">{faPrice(item.total_price)}</span>
               </li>
             ))}
           </ul>
         </div>
       ))}
 
-      <div className="mt-6 rounded-xl border border-line px-4 py-3 text-xs text-fg-muted">
+      <div className="mt-6 break-words rounded-xl border border-line px-4 py-3 text-xs text-fg-muted">
         <p className="text-fg-subtle">نشانی تحویل</p>
         <p className="mt-1">
           {detail.shipping_address_snapshot.recipient_name} —{' '}
@@ -99,7 +99,7 @@ export function OrderDetailPage() {
       ) : (
         <Link
           to={`/orders/${detail.id}/pay`}
-          className="btn btn-primary mt-6"
+          className="btn btn-primary mt-6 w-full sm:w-auto"
         >
           پرداخت سفارش
         </Link>

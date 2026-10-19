@@ -41,12 +41,12 @@ export function StatCard({ label, value, hint, icon: Icon, tone = 'violet' }: St
     <GlowCard className="relative overflow-hidden p-4 sm:p-5">
       <div className="pointer-events-none absolute -end-8 -top-8 size-24 rounded-full bg-brand/5 blur-2xl" />
       <div className="relative flex items-start justify-between gap-2">
-        <p className="text-xs font-medium text-fg-subtle">{label}</p>
-        <span className={cn('grid size-10 place-items-center rounded-2xl border', TONE_CLASSES[tone])}>
+        <p className="min-w-0 text-xs font-medium text-fg-subtle">{label}</p>
+        <span className={cn('grid size-9 shrink-0 place-items-center rounded-2xl border sm:size-10', TONE_CLASSES[tone])}>
           <Icon className="size-4" />
         </span>
       </div>
-      <p className="relative mt-4 text-2xl font-black tabular-nums text-fg sm:text-3xl">{value}</p>
+      <p className="relative mt-3 break-words text-lg font-black tabular-nums text-fg min-[400px]:text-xl sm:mt-4 sm:text-3xl">{value}</p>
       {hint ? <p className="relative mt-1.5 text-[11px] text-fg-subtle">{hint}</p> : null}
     </GlowCard>
   )
@@ -109,7 +109,11 @@ export function AdminToolbar({ search, onSearch, placeholder, children }: Toolba
           className="input ps-10"
         />
       </label>
-      {children ? <div className="flex flex-wrap items-center gap-2 text-xs">{children}</div> : null}
+      {children ? (
+        <div className="flex flex-wrap items-center gap-2 text-xs [&>*]:min-w-0 max-sm:[&>select]:w-full max-sm:[&>label]:w-full">
+          {children}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -131,8 +135,8 @@ export function Pager({
   }
 
   return (
-    <div className="flex items-center gap-2 text-xs">
-      <span className="text-[11px] text-fg-subtle">
+    <div className="flex flex-wrap items-center gap-2 text-xs">
+      <span className="w-full text-[11px] text-fg-subtle sm:w-auto">
         صفحه {faNum(page)} از {faNum(lastPage)} • {faNum(total)} مورد
       </span>
       <button

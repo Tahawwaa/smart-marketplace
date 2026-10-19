@@ -66,7 +66,7 @@ export function PaymentPage() {
   }
 
   return (
-    <section className="container-page max-w-2xl py-8">
+    <section className="container-page max-w-2xl py-6 sm:py-8">
       <Link
         to={`/orders/${detail.id}`}
         className="text-xs text-fg-subtle transition hover:text-fg"
@@ -122,19 +122,19 @@ export function PaymentPage() {
         <p className="mt-4 text-xs text-success-ink">این سفارش قبلاً پرداخت شده است.</p>
       ) : null}
 
-      <div className="mt-6 flex flex-wrap gap-3">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <button
           type="button"
           disabled={busy || alreadyPaid}
           onClick={() => void pay()}
-          className="btn btn-primary"
+          className="btn btn-primary w-full sm:w-auto"
         >
           {busy ? <Loader2 className="size-4 animate-spin" /> : null}
           پرداخت آزمایشی
         </button>
         <Link
           to={`/orders/${detail.id}`}
-          className="btn btn-secondary"
+          className="btn btn-secondary w-full sm:w-auto"
         >
           بازگشت به سفارش
         </Link>

@@ -5,7 +5,7 @@ import { CATEGORIES } from '../../features/home/data'
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-line bg-surface">
-      <div className="container-page flex flex-col gap-10 py-12 md:flex-row md:items-start md:justify-between">
+      <div className="container-page flex flex-col gap-8 py-10 sm:gap-10 sm:py-12 md:flex-row md:items-start md:justify-between">
         <div className="max-w-sm">
           <Link to="/" className="flex items-center gap-2.5 page-title">
             <span className="grid size-9 place-items-center rounded-xl bg-brand text-brand-fg shadow-[var(--shadow-md)]">
