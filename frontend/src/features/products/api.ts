@@ -6,6 +6,7 @@ export const fetchCategories = (signal?: AbortSignal) => api<ApiList<Category>>(
 export type ProductQuery = {
   category?: string
   brand?: string
+  vendor?: string
   search?: string
   sort?: string
   per_page?: number

@@ -5,7 +5,7 @@ import { cartSessionStore } from '../../lib/api/client'
  * بین بازدیدها و بعد از ورود به حساب، قابل بازیابی باشد.
  */
 function create(): string {
-  const random = crypto.randomUUID().replace(/-/g, '')
+  const random = Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, '0')).join('')
   return `${random}${Date.now().toString(36)}`.slice(0, 40)
 }
 

@@ -9,6 +9,10 @@ type RemoteImageProps = {
 
 export function RemoteImage({ src, alt, className, fallback = null }: RemoteImageProps) {
   const sources = Array.isArray(src) ? src : [src]
+  return <ImageAttempt key={JSON.stringify(sources)} sources={sources} alt={alt} className={className} fallback={fallback} />
+}
+
+function ImageAttempt({ sources, alt, className, fallback }: Omit<RemoteImageProps, 'src'> & { sources: string[] }) {
   const [attempt, setAttempt] = useState(0)
 
   if (attempt >= sources.length) return <>{fallback}</>

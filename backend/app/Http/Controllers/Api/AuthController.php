@@ -28,7 +28,7 @@ class AuthController extends Controller
             'email' => $request->string('email')->lower()->value(),
             'phone' => $request->filled('phone') ? $request->string('phone')->value() : null,
             'password' => $request->string('password')->value(),
-            'role' => $request->input('role', UserRole::Customer->value),
+            'role' => $request->input('role') ?? UserRole::Customer->value,
         ]);
 
         $token = $user->createToken($this->deviceName($request))->plainTextToken;

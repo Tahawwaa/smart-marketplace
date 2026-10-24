@@ -59,7 +59,7 @@ class AdminBrandController extends AdminController
         $payload = $request->validated();
         $name = $payload['name'] ?? $brand?->name;
 
-        $payload['slug'] = $payload['slug'] ?? $this->uniqueSlug($name, $brand);
+        $payload['slug'] = $payload['slug'] ?? $brand?->slug ?? $this->uniqueSlug($name, $brand);
 
         return $payload;
     }

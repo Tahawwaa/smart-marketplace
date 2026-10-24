@@ -1,46 +1,49 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { NotFoundPage } from './app/not-found-page'
 import { RequireAdmin } from './components/layout/require-admin'
 import { RequireAuth } from './components/layout/require-auth'
 import { RequireVendor } from './components/layout/require-vendor'
-import { AccountAddressesPage } from './features/account/account-addresses-page'
-import { AccountLayout } from './features/account/account-layout'
-import { AccountOverviewPage } from './features/account/account-overview-page'
-import { AccountPasswordPage } from './features/account/account-password-page'
-import { AccountStorePage } from './features/account/account-store-page'
-import { AdminBrandsPage } from './features/admin/admin-brands-page'
-import { AdminCategoriesPage } from './features/admin/admin-categories-page'
-import { AdminDashboardPage } from './features/admin/admin-dashboard-page'
-import { AdminLayout } from './features/admin/admin-layout'
-import { AdminOrdersPage } from './features/admin/admin-orders-page'
-import { AdminProductsPage } from './features/admin/admin-products-page'
-import { AdminUsersPage } from './features/admin/admin-users-page'
-import { AdminVendorsPage } from './features/admin/admin-vendors-page'
 import { AuthProvider } from './features/auth/auth-provider'
-import { LoginPage } from './features/auth/login-page'
-import { RegisterPage } from './features/auth/register-page'
 import { CartProvider } from './features/cart/cart-provider'
-import { CartPage } from './features/cart/cart-page'
 import { HomePage } from './features/home/home-page'
-import { OrderDetailPage } from './features/orders/order-detail-page'
-import { OrdersPage } from './features/orders/orders-page'
-import { CheckoutPage } from './features/orders/checkout-page'
-import { PaymentPage } from './features/payments/payment-page'
-import { ProductDetailPage } from './features/products/product-detail-page'
-import { VendorDashboardPage } from './features/vendor/vendor-dashboard-page'
-import { VendorAnalyticsPage } from './features/vendor/vendor-analytics-page'
-import { VendorInventoryPage } from './features/vendor/vendor-inventory-page'
-import { VendorLayout } from './features/vendor/vendor-layout'
-import { VendorOrdersPage } from './features/vendor/vendor-orders-page'
-import { VendorProductFormPage } from './features/vendor/vendor-product-form-page'
-import { VendorProductsPage } from './features/vendor/vendor-products-page'
 import { MarketplaceLayout } from './layouts/marketplace-layout'
+
+const NotFoundPage = lazy(() => import('./app/not-found-page').then((module) => ({ default: module.NotFoundPage })))
+const AccountAddressesPage = lazy(() => import('./features/account/account-addresses-page').then((module) => ({ default: module.AccountAddressesPage })))
+const AccountLayout = lazy(() => import('./features/account/account-layout').then((module) => ({ default: module.AccountLayout })))
+const AccountOverviewPage = lazy(() => import('./features/account/account-overview-page').then((module) => ({ default: module.AccountOverviewPage })))
+const AccountPasswordPage = lazy(() => import('./features/account/account-password-page').then((module) => ({ default: module.AccountPasswordPage })))
+const AccountStorePage = lazy(() => import('./features/account/account-store-page').then((module) => ({ default: module.AccountStorePage })))
+const AdminBrandsPage = lazy(() => import('./features/admin/admin-brands-page').then((module) => ({ default: module.AdminBrandsPage })))
+const AdminCategoriesPage = lazy(() => import('./features/admin/admin-categories-page').then((module) => ({ default: module.AdminCategoriesPage })))
+const AdminDashboardPage = lazy(() => import('./features/admin/admin-dashboard-page').then((module) => ({ default: module.AdminDashboardPage })))
+const AdminLayout = lazy(() => import('./features/admin/admin-layout').then((module) => ({ default: module.AdminLayout })))
+const AdminOrdersPage = lazy(() => import('./features/admin/admin-orders-page').then((module) => ({ default: module.AdminOrdersPage })))
+const AdminProductsPage = lazy(() => import('./features/admin/admin-products-page').then((module) => ({ default: module.AdminProductsPage })))
+const AdminUsersPage = lazy(() => import('./features/admin/admin-users-page').then((module) => ({ default: module.AdminUsersPage })))
+const AdminVendorsPage = lazy(() => import('./features/admin/admin-vendors-page').then((module) => ({ default: module.AdminVendorsPage })))
+const LoginPage = lazy(() => import('./features/auth/login-page').then((module) => ({ default: module.LoginPage })))
+const RegisterPage = lazy(() => import('./features/auth/register-page').then((module) => ({ default: module.RegisterPage })))
+const CartPage = lazy(() => import('./features/cart/cart-page').then((module) => ({ default: module.CartPage })))
+const OrderDetailPage = lazy(() => import('./features/orders/order-detail-page').then((module) => ({ default: module.OrderDetailPage })))
+const OrdersPage = lazy(() => import('./features/orders/orders-page').then((module) => ({ default: module.OrdersPage })))
+const CheckoutPage = lazy(() => import('./features/orders/checkout-page').then((module) => ({ default: module.CheckoutPage })))
+const PaymentPage = lazy(() => import('./features/payments/payment-page').then((module) => ({ default: module.PaymentPage })))
+const ProductDetailPage = lazy(() => import('./features/products/product-detail-page').then((module) => ({ default: module.ProductDetailPage })))
+const VendorDashboardPage = lazy(() => import('./features/vendor/vendor-dashboard-page').then((module) => ({ default: module.VendorDashboardPage })))
+const VendorAnalyticsPage = lazy(() => import('./features/vendor/vendor-analytics-page').then((module) => ({ default: module.VendorAnalyticsPage })))
+const VendorInventoryPage = lazy(() => import('./features/vendor/vendor-inventory-page').then((module) => ({ default: module.VendorInventoryPage })))
+const VendorLayout = lazy(() => import('./features/vendor/vendor-layout').then((module) => ({ default: module.VendorLayout })))
+const VendorOrdersPage = lazy(() => import('./features/vendor/vendor-orders-page').then((module) => ({ default: module.VendorOrdersPage })))
+const VendorProductFormPage = lazy(() => import('./features/vendor/vendor-product-form-page').then((module) => ({ default: module.VendorProductFormPage })))
+const VendorProductsPage = lazy(() => import('./features/vendor/vendor-products-page').then((module) => ({ default: module.VendorProductsPage })))
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
+          <Suspense fallback={<p className="px-4 py-16 text-center text-sm text-fg-muted">در حال بارگذاری…</p>}>
           <Routes>
             <Route element={<MarketplaceLayout />}>
               <Route path="/" element={<HomePage />} />
@@ -88,6 +91,7 @@ function App() {
               <Route path="*" element={<Navigate to="/404" replace />} />
             </Route>
           </Routes>
+          </Suspense>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

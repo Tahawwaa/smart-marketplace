@@ -42,7 +42,10 @@ export function CartPage() {
                     min={1}
                     value={item.quantity}
                     aria-label={`تعداد ${item.product?.name ?? ''}`}
-                    onChange={(event) => setQuantity(item.id, Number(event.target.value) || 0)}
+                    onChange={(event) => {
+                      const value = Number(event.target.value)
+                      if (Number.isInteger(value) && value >= 1) void setQuantity(item.id, value).catch(() => undefined)
+                    }}
                     className="input !w-20 shrink-0 !py-1.5"
                   />
                   <span className="min-w-0 flex-1 text-end text-xs tabular-nums text-fg-muted sm:min-w-28 sm:flex-none">
@@ -51,7 +54,7 @@ export function CartPage() {
                   <button
                     type="button"
                     aria-label={`حذف ${item.product?.name ?? ''}`}
-                    onClick={() => remove(item.id)}
+                    onClick={() => void remove(item.id).catch(() => undefined)}
                     className="btn btn-danger btn-icon btn-sm shrink-0"
                   >
                     <Trash2 className="size-3.5" />
@@ -75,7 +78,7 @@ export function CartPage() {
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
               <button
                 type="button"
-                onClick={clear}
+                onClick={() => void clear().catch(() => undefined)}
                 className="btn btn-secondary btn-sm"
               >
                 خالی‌کردن سبد

@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { Pager } from '../../components/ui/pager'
+import { subOrderStatusLabel } from '../vendor/api'
 import { Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAsync } from '../../hooks/use-async'
@@ -9,7 +12,8 @@ import { fetchOrders } from './api'
  * و اینجا فقط فهرست سفارش‌ها رندر می‌شود.
  */
 export function OrdersPage({ embedded = false }: { embedded?: boolean } = {}) {
-  const orders = useAsync((signal) => fetchOrders(signal), 'orders')
+  const [page, setPage] = useState(1)
+  const orders = useAsync((signal) => fetchOrders(signal, page), `orders-${page}`)
   const items = orders.data?.data ?? []
 
   const body = (
@@ -46,7 +50,7 @@ export function OrdersPage({ embedded = false }: { embedded?: boolean } = {}) {
                 className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 transition hover:border-line-strong"
               >
                 <span className="text-sm text-fg">سفارش {order.order_number}</span>
-                <span className="text-xs text-fg-muted">{order.status}</span>
+                <span className="text-xs text-fg-muted">{subOrderStatusLabel(order.status)}</span>
                 <span className="text-xs tabular-nums text-fg-muted">
                   {faPrice(order.grand_total)}
                   {order.items_count ? (
@@ -58,6 +62,7 @@ export function OrdersPage({ embedded = false }: { embedded?: boolean } = {}) {
           ))}
         </ul>
       )}
+      {orders.data?.meta ? <Pager page={page} lastPage={orders.data.meta.last_page} total={orders.data.meta.total} onChange={setPage} /> : null}
     </>
   )
 

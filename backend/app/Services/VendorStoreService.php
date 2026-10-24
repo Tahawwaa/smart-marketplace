@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Vendor;
 use App\Support\Slug;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Owns the link between an account and its store.
@@ -54,6 +55,11 @@ class VendorStoreService
     public function open(User $user, string $storeName, ?string $bankSheba = null): Vendor
     {
         return DB::transaction(function () use ($user, $storeName, $bankSheba) {
+            $user = User::query()->lockForUpdate()->findOrFail($user->id);
+            if ($this->find($user) !== null) {
+                throw ValidationException::withMessages(['store_name' => 'برای این حساب قبلاً فروشگاهی ثبت شده است.']);
+            }
+
             $vendor = $user->store()->create([
                 'store_name' => $storeName,
                 'slug' => $this->uniqueSlug($storeName),

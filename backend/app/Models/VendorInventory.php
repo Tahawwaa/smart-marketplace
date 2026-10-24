@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\VendorStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +26,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class VendorInventory extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /** @return Builder<VendorInventory> */
+    public function scopePurchasable(Builder $query): Builder
+    {
+        return $query->where('vendor_inventories.is_available', true)
+            ->whereColumn('vendor_inventories.quantity', '>', 'vendor_inventories.reserved_quantity')
+            ->whereHas('variant', fn (Builder $variant) => $variant->where('is_active', true)
+                ->whereHas('product', fn (Builder $product) => $product->published()))
+            ->whereHas('vendor', fn (Builder $vendor) => $vendor->where('status', VendorStatus::Approved)
+                ->whereHas('user', fn (Builder $user) => $user->where('is_active', true)));
+    }
+
+    public function isPurchasable(): bool
+    {
+        return static::query()->whereKey($this->id)->purchasable()->exists();
+    }
 
     /**
      * Get the warranty offered by the vendor for this stock row.

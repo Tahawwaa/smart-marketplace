@@ -146,7 +146,7 @@ export type OrderItem = {
   vendor_inventory_id: number
   product_name_snapshot: string
   variant_sku_snapshot: string | null
-  selected_attributes_snapshot: Record<string, unknown> | null
+  selected_attributes_snapshot: { name: string | null; value: string }[] | null
   unit_price: number
   quantity: number
   total_price: number

@@ -29,6 +29,8 @@ class CategoryController extends Controller
 
     public function show(Category $category): CategoryResource
     {
+        abort_unless($category->is_active, 404);
+
         $category->load(['parent:id,name,slug', 'childrenRecursive']);
 
         return CategoryResource::make($category);

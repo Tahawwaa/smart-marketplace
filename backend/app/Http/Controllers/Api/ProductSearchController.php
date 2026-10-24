@@ -19,7 +19,7 @@ class ProductSearchController extends Controller
 
         return response()
             ->json(['data' => $search->suggest($validated['q'] ?? '')])
-            ->header('Cache-Control', 'public, max-age=30');
+            ->header('Cache-Control', 'no-cache');
     }
 
     public function popular(ProductRecommendationService $recommendations): AnonymousResourceCollection
@@ -29,7 +29,7 @@ class ProductSearchController extends Controller
 
     public function recommendations(Product $product, ProductRecommendationService $recommendations): AnonymousResourceCollection
     {
-        abort_unless($product->is_active, 404);
+        abort_unless(Product::query()->whereKey($product->id)->published()->exists(), 404);
 
         return ProductResource::collection($recommendations->forProduct($product));
     }

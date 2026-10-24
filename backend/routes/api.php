@@ -39,7 +39,7 @@ Route::post('cart/items', [CartController::class, 'store']);
 Route::patch('cart/items/{item}', [CartController::class, 'update']);
 Route::delete('cart/items/{item}', [CartController::class, 'destroy']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureUserIsActive::class])->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
     Route::put('auth/profile', [AuthController::class, 'updateProfile']);
     Route::put('auth/password', [AuthController::class, 'updatePassword']);
@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [VendorProfileController::class, 'store']);
 
         Route::get('products', [VendorProductController::class, 'index']);
+        Route::get('products/{product}', [VendorProductController::class, 'show']);
         Route::post('products', [VendorProductController::class, 'store']);
         Route::put('products/{product}', [VendorProductController::class, 'update']);
         Route::delete('products/{product}', [VendorProductController::class, 'destroy']);

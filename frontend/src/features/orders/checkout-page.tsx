@@ -26,7 +26,7 @@ const FIELDS: { name: keyof AddressInput; label: string; required?: boolean }[] 
 ]
 
 export function CheckoutPage() {
-  const { items, total, loading, refresh } = useCart()
+  const { items, total, loading, error: cartError, refresh } = useCart()
   const navigate = useNavigate()
   const addresses = useAsync((signal) => fetchAddresses(signal), 'addresses')
 
@@ -43,6 +43,7 @@ export function CheckoutPage() {
     choice ?? (saved.length === 0 ? 'new' : (saved.find((address) => address.is_default) ?? saved[0]).id)
 
   async function submit() {
+    if (submitting || addresses.loading || addresses.error || cartError) return
     setSubmitting(true)
     setError(null)
     try {
@@ -162,15 +163,15 @@ export function CheckoutPage() {
         </div>
       ) : null}
 
-      {error ? (
+      {error || addresses.error || cartError ? (
         <p className="alert alert-danger mt-4">
-          {error}
+          {error ?? addresses.error ?? cartError}
         </p>
       ) : null}
 
       <button
         type="button"
-        disabled={submitting}
+        disabled={submitting || addresses.loading || Boolean(addresses.error) || Boolean(cartError)}
         onClick={() => void submit()}
         className="btn btn-primary mt-6 w-full sm:w-auto"
       >

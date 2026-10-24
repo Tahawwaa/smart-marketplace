@@ -1,4 +1,4 @@
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1').replace(/\/$/, '')
+export const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1').replace(/\/$/, '')
 
 const TOKEN_KEY = 'sm_token'
 
@@ -39,7 +39,7 @@ type RequestOptions = {
 }
 
 export async function api<T>(path: string, { method = 'GET', query, body, signal }: RequestOptions = {}): Promise<T> {
-  const url = new URL(`${BASE_URL}${path}`)
+  const url = new URL(`${BASE_URL}${path}`, window.location.origin)
   Object.entries(query ?? {}).forEach(([key, value]) => {
     if (value !== undefined) url.searchParams.set(key, String(value))
   })
@@ -65,5 +65,6 @@ export async function api<T>(path: string, { method = 'GET', query, body, signal
   if (!response.ok) {
     throw new ApiError(payload?.message ?? 'خطای ناشناخته از سرور.', response.status, payload?.errors)
   }
+  if (payload === null) throw new ApiError('پاسخ سرور معتبر نیست.', response.status)
   return payload as T
 }

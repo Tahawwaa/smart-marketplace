@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { ApiError } from '../../lib/api/client'
+import { createRequestQueue } from '../../lib/request-queue'
 import type { Cart } from '../../types/api'
 import { useAuth } from '../auth/auth-context'
 import * as cartApi from './api'
@@ -8,46 +9,52 @@ import { cartSession } from './cart-session'
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { ready, user } = useAuth()
+  return <CartSessionProvider key={ready ? (user?.id ?? 'guest') : 'pending'} ready={ready}>{children}</CartSessionProvider>
+}
+
+function CartSessionProvider({ children, ready }: { children: ReactNode; ready: boolean }) {
   const [cart, setCart] = useState<Cart | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const loadedFor = useRef<number | null | undefined>(undefined)
+  const [queue] = useState(createRequestQueue)
 
-  // سبد مهمان به شناسه‌ی مرورگر گره خورده و باید پیش از نخستین درخواست ساخته شود.
-  if (typeof window !== 'undefined') cartSession.get()
+  const loadCart = useCallback(() =>
+    queue.run(async () => {
+      cartSession.get()
+      return cartApi.fetchCart()
+    }).then((response) => {
+      setCart(response.data)
+      setError(null)
+    }).catch((cause: unknown) => {
+      if (cause instanceof DOMException && cause.name === 'AbortError') return
+      setError(cause instanceof ApiError ? cause.message : 'سبد خرید دریافت نشد.')
+    }).finally(() => {
+      setLoading(false)
+    }), [queue])
 
   const refresh = useCallback(async () => {
     setLoading(true)
-    try {
-      const response = await cartApi.fetchCart()
-      setCart(response.data)
-      setError(null)
-    } catch (cause) {
-      setError(cause instanceof ApiError ? cause.message : 'سبد خرید دریافت نشد.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    await loadCart()
+  }, [loadCart])
 
   useEffect(() => {
-    // سبد مهمان هنگام ورود به سرور منتقل می‌شود؛ پس از تغییر کاربر دوباره می‌خوانیم.
-    if (!ready || loadedFor.current === user?.id) return
-
-    loadedFor.current = user?.id
-    void refresh()
-  }, [ready, user?.id, refresh])
+    if (ready) void loadCart()
+    return () => queue.invalidate()
+  }, [ready, loadCart, queue])
 
   const mutate = useCallback(async (run: () => Promise<{ data: Cart }>) => {
     setError(null)
     try {
-      const response = await run()
+      cartSession.get()
+      const response = await queue.run(run)
       setCart(response.data)
     } catch (cause) {
+      if (cause instanceof DOMException && cause.name === 'AbortError') throw cause
       const message = cause instanceof ApiError ? cause.message : 'عملیات سبد خرید انجام نشد.'
       setError(message)
       throw cause
     }
-  }, [])
+  }, [queue])
 
   const add = useCallback(
     (vendorInventoryId: number, quantity = 1) =>
@@ -68,10 +75,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clear = useCallback(async () => {
     const items = cart?.items ?? []
     for (const item of items) {
-      await cartApi.removeCartItem(item.id)
+      await remove(item.id)
     }
     await refresh()
-  }, [cart, refresh])
+  }, [cart, refresh, remove])
 
   const value = useMemo(
     () => ({

@@ -82,7 +82,7 @@ class ProductFilter
             ->when(isset($filters['vendor']), fn (Builder $query) => $query->whereHas(
                 'inventories',
                 fn (Builder $inventory) => $inventory
-                    ->where('is_available', true)
+                    ->purchasable()
                     ->whereHas('vendor', fn (Builder $vendor) => $vendor->where('slug', $filters['vendor'])),
             ))
             ->when(isset($filters['search']), fn (Builder $query) => $this->search->apply($query, $filters['search']))
@@ -90,7 +90,7 @@ class ProductFilter
                 isset($filters['min_price']) || isset($filters['max_price']),
                 function (Builder $query) use ($filters) {
                     $query->whereHas('inventories', fn (Builder $inventory) => $inventory
-                        ->where('is_available', true)
+                        ->purchasable()
                         ->when(
                             isset($filters['min_price']),
                             fn (Builder $inventory) => $inventory->whereRaw(
@@ -119,15 +119,20 @@ class ProductFilter
      */
     private function applyAttributes(Builder $query, array $attributes): void
     {
-        foreach ($attributes as $attribute => $values) {
-            $query->whereHas('variants', fn (Builder $variant) => $variant
-                ->where('is_active', true)
-                ->whereHas('attributeValues', fn (Builder $value) => $value
+        if ($attributes === []) {
+            return;
+        }
+
+        $query->whereHas('variants', function (Builder $variant) use ($attributes) {
+            $variant->where('is_active', true);
+            foreach ($attributes as $attribute => $values) {
+                $variant->whereHas('attributeValues', fn (Builder $value) => $value
                     ->whereIn('value', $values)
                     ->whereHas('attribute', fn (Builder $definition) => is_numeric($attribute)
                         ? $definition->whereKey($attribute)
-                        : $definition->where('slug', $attribute))));
-        }
+                        : $definition->where('slug', $attribute)));
+            }
+        });
     }
 
     /**
@@ -136,12 +141,10 @@ class ProductFilter
      */
     private function applySort(Builder $query, string $sort, ?string $search = null): Builder
     {
-        if ($sort === 'price_asc' || $sort === 'price_desc') {
-            $query->withMin(
-                ['inventories as price_from' => fn (Builder $inventory) => $inventory->where('is_available', true)],
-                DB::raw('coalesce(sale_price, price)'),
-            );
-        }
+        $query->withMin(
+            ['inventories as price_from' => fn (Builder $inventory) => $inventory->purchasable()],
+            DB::raw('coalesce(sale_price, price)'),
+        );
 
         return match ($sort) {
             'price_asc' => $query->orderBy('price_from'),
@@ -193,7 +196,7 @@ class ProductFilter
             $normalised[(string) $attribute] = collect((array) $values)
                 ->flatMap(fn ($value) => explode(',', (string) $value))
                 ->map(fn (string $value) => trim($value))
-                ->filter()
+                ->filter(fn (string $value) => $value !== '')
                 ->unique()
                 ->values()
                 ->all();

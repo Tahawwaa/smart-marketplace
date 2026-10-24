@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\SubOrder;
 use App\Models\User;
+use App\Models\VendorInventory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -31,19 +32,15 @@ class OrderService
      */
     public function placeFromCart(User $user, Cart $cart, array $addressSnapshot): Order
     {
-        $items = CartItem::query()
-            ->where('cart_id', $cart->id)
-            ->with(['inventory.variant.product', 'inventory.vendor'])
-            ->get();
-
-        if ($items->isEmpty()) {
-            throw ValidationException::withMessages([
-                'cart' => 'سبد خرید خالی است.',
-            ]);
-        }
-
         try {
-            return DB::transaction(function () use ($user, $cart, $items, $addressSnapshot) {
+            return DB::transaction(function () use ($user, $cart, $addressSnapshot) {
+                $cart = Cart::query()->where('user_id', $user->id)->lockForUpdate()->find($cart->id);
+                $items = $cart === null ? collect() : $cart->items()->orderBy('vendor_inventory_id')->get();
+
+                if ($items->isEmpty()) {
+                    throw ValidationException::withMessages(['cart' => 'سبد خرید خالی است.']);
+                }
+
                 $lines = $items->map(fn (CartItem $item) => $this->reserveLine($item, $cart->id));
 
                 $totalItemsPrice = (float) $lines->sum('total_price');
@@ -57,7 +54,7 @@ class OrderService
                     'discount_total' => 0,
                     'tax_total' => 0,
                     'grand_total' => $totalItemsPrice,
-                    'currency' => 'IRR',
+                    'currency' => 'IRT',
                     'payment_status' => PaymentStatus::Pending,
                     'status' => OrderStatus::Pending,
                 ]);
@@ -87,9 +84,10 @@ class OrderService
      */
     private function reserveLine(CartItem $item, int $cartId): array
     {
-        $inventory = $item->inventory;
+        $inventory = VendorInventory::query()->with(['variant.product', 'variant.attributeValues.attribute', 'vendor'])
+            ->lockForUpdate()->find($item->vendor_inventory_id);
 
-        if ($inventory === null || ! $inventory->is_available) {
+        if ($inventory === null || ! $inventory->isPurchasable()) {
             throw ValidationException::withMessages([
                 'cart' => 'یکی از کالاهای سبد خرید دیگر موجود نیست.',
             ]);
@@ -104,7 +102,8 @@ class OrderService
             'vendor_inventory_id' => $inventory->id,
             'product_name_snapshot' => $inventory->variant?->product?->name ?? 'کالا',
             'variant_sku_snapshot' => $inventory->variant?->sku ?? (string) $inventory->variant_id,
-            'selected_attributes_snapshot' => null,
+            'selected_attributes_snapshot' => $inventory->variant->attributeValues
+                ->map(fn ($value) => ['name' => $value->attribute?->name, 'value' => $value->value])->all(),
             'unit_price' => $unitPrice,
             'quantity' => $item->quantity,
             'total_price' => round($unitPrice * $item->quantity, 2),

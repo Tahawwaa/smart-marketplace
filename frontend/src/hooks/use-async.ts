@@ -11,7 +11,9 @@ export function useAsync<T>(load: (signal: AbortSignal) => Promise<T>, key = '')
   useEffect(() => {
     const controller = new AbortController()
     load(controller.signal)
-      .then((data) => setResult({ key: requestKey, data, error: null }))
+      .then((data) => {
+        if (!controller.signal.aborted) setResult({ key: requestKey, data, error: null })
+      })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return
         const message = error instanceof ApiError ? error.message : 'خطای غیرمنتظره.'

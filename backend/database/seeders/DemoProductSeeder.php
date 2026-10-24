@@ -11,7 +11,6 @@ use App\Models\ProductVariant;
 use App\Models\Vendor;
 use App\Models\VendorInventory;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DemoProductSeeder extends Seeder
 {
@@ -47,9 +46,11 @@ class DemoProductSeeder extends Seeder
 
     public function run(): void
     {
-        $vendor = Vendor::query()->firstOrFail();
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Demo products may only be seeded in local or testing environments.');
+        }
 
-        $this->purgeProducts();
+        $vendor = Vendor::query()->firstOrFail();
 
         $categories = [];
         foreach (self::CATEGORIES as $slug => $name) {
@@ -60,6 +61,11 @@ class DemoProductSeeder extends Seeder
         }
 
         foreach (self::PRODUCTS as $index => [$image, $categorySlug, $brandName, $name, $price, $oldPrice]) {
+            if (Product::withTrashed()->where('slug', $image)->exists()
+                || ProductVariant::withTrashed()->where('sku', 'DEMO-'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT))->exists()) {
+                continue;
+            }
+
             $brand = Brand::query()->firstOrCreate(
                 ['slug' => 'brand-'.md5($brandName)],
                 ['name' => $brandName, 'is_active' => true],
@@ -103,14 +109,4 @@ class DemoProductSeeder extends Seeder
         }
     }
 
-    private function purgeProducts(): void
-    {
-        DB::table('cart_items')->delete();
-        DB::table('inventory_reservations')->delete();
-        DB::table('inventory_logs')->delete();
-        DB::table('vendor_inventories')->delete();
-        DB::table('product_images')->delete();
-        DB::table('product_variants')->delete();
-        DB::table('products')->delete();
-    }
 }

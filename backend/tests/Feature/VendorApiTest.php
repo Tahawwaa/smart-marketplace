@@ -241,6 +241,7 @@ class VendorApiTest extends TestCase
         [$user, $vendor] = $this->vendor();
         $subOrder = SubOrder::factory()->create([
             'vendor_id' => $vendor->id,
+            'order_id' => Order::factory()->create(['payment_status' => 'paid'])->id,
             'status' => OrderStatus::Pending,
         ]);
 

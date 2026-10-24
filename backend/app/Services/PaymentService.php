@@ -27,9 +27,11 @@ class PaymentService
      */
     public function start(User $user, Order $order): array
     {
-        $this->guardPayable($order);
+        return DB::transaction(function () use ($user, $order) {
+            $order = Order::query()->lockForUpdate()->findOrFail($order->id);
+            abort_unless($order->user_id === $user->id, 404);
+            $this->guardPayable($order);
 
-        return DB::transaction(function () use ($order) {
             // A second attempt supersedes an unpaid one; the old row stays for audit.
             Payment::query()
                 ->where('order_id', $order->id)
@@ -61,17 +63,19 @@ class PaymentService
      */
     public function confirm(User $user, Payment $payment): Payment
     {
-        $order = $payment->order;
+        return DB::transaction(function () use ($user, $payment) {
+            $order = Order::query()->lockForUpdate()->findOrFail($payment->order_id);
+            abort_unless($order->user_id === $user->id, 404);
+            $payment = Payment::query()->lockForUpdate()->findOrFail($payment->id);
 
-        abort_if($order === null || $order->user_id !== $user->id, 404);
+            if ($payment->status !== PaymentStatus::Pending->value) {
+                throw ValidationException::withMessages([
+                    'payment' => 'این پرداخت قبلاً تعیین وضعیت شده است.',
+                ]);
+            }
 
-        if ($payment->status !== PaymentStatus::Pending->value) {
-            throw ValidationException::withMessages([
-                'payment' => 'این پرداخت قبلاً تعیین وضعیت شده است.',
-            ]);
-        }
+            $this->guardPayable($order);
 
-        return DB::transaction(function () use ($user, $payment, $order) {
             if (! $this->gateway->verify($payment)) {
                 $payment->update(['status' => PaymentStatus::Failed->value]);
                 $order->update(['payment_status' => PaymentStatus::Failed]);
@@ -133,7 +137,7 @@ class PaymentService
      */
     private function guardPayable(Order $order): void
     {
-        if ($order->payment_status === PaymentStatus::Paid) {
+        if (in_array($order->payment_status, [PaymentStatus::Paid, PaymentStatus::PartiallyRefunded, PaymentStatus::Refunded], true)) {
             throw ValidationException::withMessages([
                 'order' => 'این سفارش قبلاً پرداخت شده است.',
             ]);

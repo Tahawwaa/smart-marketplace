@@ -18,6 +18,15 @@ class Category extends Model
                 ? (int) static::query()->whereKey($category->parent_id)->value('depth') + 1
                 : 0;
         });
+
+        static::saved(function (Category $category) {
+            if ($category->wasChanged('depth')) {
+                $category->children()->each(fn (Category $child) => $child->save());
+            }
+            if ($category->wasChanged('name')) {
+                $category->products()->each(fn (Product $product) => app(\App\Services\ProductSearchService::class)->reindex($product));
+            }
+        });
     }
 
     use HasFactory;

@@ -6,15 +6,12 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Cache;
 
 class ProductSearchService
 {
     public const MAX_TOKENS = 6;
 
     public const SUGGEST_LIMIT = 8;
-
-    private const SUGGEST_TTL_SECONDS = 60;
 
     private const MIN_TERM_LENGTH = 2;
 
@@ -42,7 +39,7 @@ class ProductSearchService
      */
     public function tokens(string $term): array
     {
-        $tokens = array_values(array_unique(array_filter(explode(' ', $this->normalize($term)))));
+        $tokens = array_values(array_unique(array_filter(explode(' ', $this->normalize($term)), fn (string $token) => $token !== '')));
 
         return array_slice($tokens, 0, self::MAX_TOKENS);
     }
@@ -81,8 +78,8 @@ class ProductSearchService
             $like = $this->escapeLike($token);
 
             $query->where(fn (Builder $inner) => $inner
-                ->whereRaw("search_text like ? escape '\\'", [$like.'%'])
-                ->orWhereRaw("search_text like ? escape '\\'", ['% '.$like.'%']));
+                ->whereRaw("search_text like ? escape '!'", [$like.'%'])
+                ->orWhereRaw("search_text like ? escape '!'", ['% '.$like.'%']));
         }
 
         return $query;
@@ -106,14 +103,14 @@ class ProductSearchService
 
         return $query
             ->orderByRaw(
-                "case when search_text like ? escape '\\' then 0 when search_text like ? escape '\\' then 1 else 2 end",
+                "case when search_text like ? escape '!' then 0 when search_text like ? escape '!' then 1 else 2 end",
                 [$like.'%', '%'.$like.'%'],
             )
             ->latest('id');
     }
 
     /**
-     * Lightweight autocomplete payload; cached because it is hit on every keystroke.
+     * Lightweight autocomplete payload filtered against the current publication state.
      *
      * @return array{products: list<array<string, mixed>>, categories: list<array<string, mixed>>, brands: list<array<string, mixed>>}
      */
@@ -125,11 +122,7 @@ class ProductSearchService
             return ['products' => [], 'categories' => [], 'brands' => []];
         }
 
-        return Cache::remember(
-            'search:suggest:'.md5($normalized),
-            self::SUGGEST_TTL_SECONDS,
-            fn () => $this->buildSuggestions($normalized),
-        );
+        return $this->buildSuggestions($normalized);
     }
 
     /**
@@ -142,7 +135,7 @@ class ProductSearchService
                 Product::query()
                     ->select(['id', 'name', 'slug', 'category_id', 'search_text'])
                     ->with(['category:id,name,slug', 'images:id,product_id,path,is_primary,sort_order'])
-                    ->where('is_active', true),
+                    ->published(),
                 $normalized,
             ),
             $normalized,
@@ -175,6 +168,6 @@ class ProductSearchService
 
     private function escapeLike(string $value): string
     {
-        return addcslashes($value, '%_\\');
+        return strtr($value, ['!' => '!!', '%' => '!%', '_' => '!_']);
     }
 }

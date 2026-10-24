@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
 use App\Enums\UserRole;
+use App\Models\Order;
 use App\Models\SubOrder;
 use App\Models\User;
 use App\Models\Vendor;
@@ -28,6 +29,7 @@ class VendorAnalyticsTest extends TestCase
         SubOrder::factory()->create([
             'vendor_id' => $vendor->id,
             'status' => OrderStatus::Delivered,
+            'order_id' => Order::factory()->create(['payment_status' => 'paid'])->id,
             'subtotal_price' => 1000,
             'commission_amount' => 100,
             'vendor_net_amount' => 900,
@@ -40,6 +42,7 @@ class VendorAnalyticsTest extends TestCase
         SubOrder::factory()->create([
             'vendor_id' => $other->id,
             'status' => OrderStatus::Delivered,
+            'order_id' => Order::factory()->create(['payment_status' => 'paid'])->id,
             'subtotal_price' => 7000,
         ]);
 

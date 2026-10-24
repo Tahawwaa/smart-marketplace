@@ -26,7 +26,7 @@ class CartResource extends JsonResource
             'items_count' => $items->count(),
             'total_quantity' => (int) $items->sum('quantity'),
             'subtotal' => round((float) $subtotal, 2),
-            'currency' => 'IRR',
+            'currency' => 'IRT',
             'expires_at' => $this->expires_at?->toIso8601String(),
         ];
     }

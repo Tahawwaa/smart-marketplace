@@ -10,6 +10,10 @@ import type { Payment } from '../../types/api'
 
 export function PaymentPage() {
   const { orderId = '' } = useParams()
+  return <OrderPayment key={orderId} orderId={orderId} />
+}
+
+function OrderPayment({ orderId }: { orderId: string }) {
   const id = Number(orderId)
 
   const order = useAsync((signal) => fetchOrder(id, signal), orderId)
@@ -19,10 +23,12 @@ export function PaymentPage() {
 
   const detail = order.data?.data ?? null
   const alreadyPaid = detail?.payment_status === 'paid'
+  const payable = detail !== null && ['pending', 'failed'].includes(detail.payment_status)
+    && !['cancelled', 'refunded'].includes(detail.status)
 
   /** پرداخت دوبخشی است: ساخت تلاش، و بعد پرسیدن نتیجه از درگاه. */
   async function pay() {
-    if (detail === null) return
+    if (detail === null || !payable || busy) return
 
     setBusy(true)
     setError(null)
@@ -125,7 +131,7 @@ export function PaymentPage() {
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <button
           type="button"
-          disabled={busy || alreadyPaid}
+          disabled={busy || !payable}
           onClick={() => void pay()}
           className="btn btn-primary w-full sm:w-auto"
         >

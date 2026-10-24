@@ -74,7 +74,7 @@ class AdminCategoryController extends AdminController
 
         // A slug is only derived when the caller leaves it out, so an admin can
         // pin a stable URL before renaming a category.
-        $payload['slug'] = $payload['slug'] ?? $this->uniqueSlug($name, $category);
+        $payload['slug'] = $payload['slug'] ?? $category?->slug ?? $this->uniqueSlug($name, $category);
 
         return $payload;
     }

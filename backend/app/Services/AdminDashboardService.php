@@ -134,6 +134,7 @@ class AdminDashboardService
 
         return SubOrder::query()
             ->whereIn('status', $revenueStatuses)
+            ->whereHas('order', fn ($order) => $order->whereIn('payment_status', self::REVENUE_PAYMENT_STATUSES))
             ->selectRaw('vendor_id, sum(subtotal_price) as gross, sum(commission_amount) as commission, count(*) as orders')
             ->groupBy('vendor_id')
             ->orderByDesc('gross')
@@ -162,7 +163,7 @@ class AdminDashboardService
     {
         return Order::query()
             ->with('user:id,name,email')
-            ->withCount('subOrders')
+            ->withCount('items')
             ->latest('id')
             ->limit($limit)
             ->get()
@@ -172,7 +173,7 @@ class AdminDashboardService
                 'status' => $order->status?->value,
                 'payment_status' => $order->payment_status?->value,
                 'grand_total' => (float) $order->grand_total,
-                'items_count' => (int) $order->sub_orders_count,
+                'items_count' => (int) $order->items_count,
                 'customer' => $order->user === null ? null : [
                     'id' => $order->user->id,
                     'name' => $order->user->name,

@@ -37,6 +37,6 @@ class AddCartItemRequest extends FormRequest
 
     public function quantity(): int
     {
-        return (int) $this->input('quantity', 1);
+        return (int) ($this->input('quantity') ?? 1);
     }
 }

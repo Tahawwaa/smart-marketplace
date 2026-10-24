@@ -6,11 +6,9 @@ use App\Enums\OrderStatus;
 use App\Http\Requests\Admin\UpdateOrderStatusRequest;
 use App\Http\Resources\Admin\AdminOrderResource;
 use App\Models\Order;
-use App\Models\OrderStatusHistory;
-use App\Models\SubOrder;
+use App\Services\OrderStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\DB;
 
 class AdminOrderController extends AdminController
 {
@@ -30,7 +28,7 @@ class AdminOrderController extends AdminController
                 fn ($query) => $query->where('order_number', 'like', '%'.$request->string('search')->value().'%'),
             )
             ->with('user:id,name,email,phone')
-            ->withCount('subOrders')
+            ->withCount('items')
             ->latest('id')
             ->paginate($this->perPage($request))
             ->withQueryString();
@@ -44,7 +42,7 @@ class AdminOrderController extends AdminController
             'user:id,name,email,phone',
             'subOrders.items',
             'subOrders.vendor:id,store_name,slug',
-        ])->loadCount('subOrders'));
+        ])->loadCount('items'));
     }
 
     /**
@@ -54,33 +52,17 @@ class AdminOrderController extends AdminController
      * each flip is recorded on the sub-order history so the vendor timeline
      * stays truthful.
      */
-    public function updateStatus(UpdateOrderStatusRequest $request, Order $order): AdminOrderResource
+    public function updateStatus(UpdateOrderStatusRequest $request, Order $order, OrderStatusService $statuses): AdminOrderResource
     {
         $status = OrderStatus::from($request->string('status')->value());
         $note = $request->input('note');
 
-        DB::transaction(function () use ($order, $status, $note, $request) {
-            $order->update(['status' => $status]);
-
-            $order->subOrders()->get()->each(function (SubOrder $subOrder) use ($status, $note, $request) {
-                $from = $subOrder->status;
-
-                $subOrder->update(['status' => $status]);
-
-                OrderStatusHistory::create([
-                    'sub_order_id' => $subOrder->id,
-                    'from_status' => $from?->value,
-                    'to_status' => $status->value,
-                    'changed_by_user_id' => $request->user()->id,
-                    'note' => $note,
-                ]);
-            });
-        });
+        $statuses->updateAdmin($order, $status, $request->user(), $note);
 
         return AdminOrderResource::make($order->fresh()->load([
             'user:id,name,email,phone',
             'subOrders.items',
             'subOrders.vendor:id,store_name,slug',
-        ])->loadCount('subOrders'));
+        ])->loadCount('items'));
     }
 }

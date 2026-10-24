@@ -1,15 +1,14 @@
 import { motion } from 'motion/react'
-import { Loader2, PackageSearch, RefreshCw, ShoppingBag, SlidersHorizontal } from 'lucide-react'
-import { useState } from 'react'
+import { PackageSearch, RefreshCw, ShoppingBag, SlidersHorizontal } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { cn } from '../../lib/cn'
 import { faNum } from '../../lib/format'
 import { useAsync } from '../../hooks/use-async'
 import { CATEGORIES } from '../home/data'
-import { fetchProducts } from './api'
+import { fetchCategories, fetchProducts } from './api'
 import { ProductCard, type ProductCardData } from './product-card'
-import { SAMPLE_PRODUCTS } from './sample'
-import { imagePath, productImageSources } from './images'
+import { Pager } from '../../components/ui/pager'
+import { productImageSources } from './images'
 
 const SORTS = [
   { value: 'newest', label: 'جدیدترین' },
@@ -33,64 +32,55 @@ function GridSkeleton() {
   )
 }
 
-/** جایگزین نمایشی وقتی API کالایی برنمی‌گرداند؛ فقط برای دیده‌شدن چیدمان. */
-function sampleAsCards(category: string, search: string): ProductCardData[] {
-  const term = search.trim().toLowerCase()
-
-  return SAMPLE_PRODUCTS.filter((product) => {
-    if (category && product.category !== category) return false
-    if (!term) return true
-    return (
-      product.name.toLowerCase().includes(term) || product.brand.toLowerCase().includes(term)
-    )
-  }).map((product) => ({
-    id: product.id,
-    name: product.name,
-    categorySlug: product.category,
-    categoryName: CATEGORIES.find((item) => item.slug === product.category)?.name ?? '',
-    brandName: product.brand,
-    price: product.price,
-    oldPrice: product.oldPrice,
-    rating: product.rating,
-    sold: product.sold,
-    imageSources: [imagePath(product.image)],
-  }))
-}
-
 export function Catalog() {
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
+  const categories = useAsync((signal) => fetchCategories(signal), 'catalog-categories')
+  const categoryOptions = (categories.data?.data ?? []).map((item) => ({
+    ...item,
+    icon: CATEGORIES.find((known) => known.slug === item.slug)?.icon ?? ShoppingBag,
+    tint: CATEGORIES.find((known) => known.slug === item.slug)?.tint ?? 'text-fg-muted',
+  }))
   const category = params.get('category') ?? ''
   const search = params.get('search') ?? ''
-  const [sort, setSort] = useState('newest')
-  const [perPage, setPerPage] = useState(PER_PAGE)
+  const brand = params.get('brand') ?? ''
+  const vendor = params.get('vendor') ?? ''
+  const sort = SORTS.some((option) => option.value === params.get('sort')) ? params.get('sort')! : 'newest'
+  const requestedPage = Number(params.get('page') ?? 1)
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
+  const setPage = (value: number) => {
+    const next = new URLSearchParams(params)
+    next.set('page', String(value))
+    setParams(next)
+  }
+  const setSort = (value: string) => {
+    const next = new URLSearchParams(params)
+    next.set('sort', value)
+    next.delete('page')
+    setParams(next)
+  }
 
   const onSelectCategory = (slug: string) => {
     const next = new URLSearchParams(params)
+    next.delete('page')
     if (slug) next.set('category', slug)
     else next.delete('category')
     setParams(next)
   }
 
-  // Collapse back to the first batch whenever the filters change.
-  const filterKey = `${category}|${search}|${sort}`
-  const [seenFilters, setSeenFilters] = useState(filterKey)
-  if (seenFilters !== filterKey) {
-    setSeenFilters(filterKey)
-    setPerPage(PER_PAGE)
-  }
-
   const query = {
     category: category || undefined,
     search: search || undefined,
+    brand: brand || undefined,
+    vendor: vendor || undefined,
     sort,
-    per_page: perPage,
-    page: 1,
+    per_page: PER_PAGE,
+    page,
   }
 
   const products = useAsync((signal) => fetchProducts(query, signal), JSON.stringify(query))
 
-  const live: ProductCardData[] = (products.data?.data ?? []).map((product) => ({
+  const items: ProductCardData[] = (products.data?.data ?? []).map((product) => ({
     id: product.id,
     slug: product.slug,
     name: product.name,
@@ -98,14 +88,14 @@ export function Catalog() {
     categoryName: product.category?.name ?? '',
     brandName: product.brand?.name,
     price: product.price_from ?? null,
-    imageSources: productImageSources(product.name, product.category?.slug ?? '', product.id),
+    imageSources: [
+      ...(product.images?.length ? [(product.images.find((image) => image.is_primary) ?? product.images[0]).path] : []),
+      ...productImageSources(product.name, product.category?.slug ?? '', product.id),
+    ],
   }))
 
-  const usingSample = live.length === 0
-  const items = usingSample ? sampleAsCards(category, search) : live
-  const total = usingSample ? items.length : (products.data?.meta?.total ?? items.length)
-  const hasMore = !usingSample && items.length < total
-  const activeCategory = CATEGORIES.find((item) => item.slug === category)
+  const total = products.data?.meta?.total ?? items.length
+  const activeCategory = categoryOptions.find((item) => item.slug === category)
 
   const onAddToCart = (product: ProductCardData) => {
     // فهرست کالاها موجودی نمی‌فرستد؛ برای انتخاب تنوع به صفحه‌ی کالا می‌رویم.
@@ -139,7 +129,7 @@ export function Catalog() {
         >
           همه کالاها
         </button>
-        {CATEGORIES.map((item) => (
+        {categoryOptions.map((item) => (
           <button
             key={item.slug}
             type="button"
@@ -186,7 +176,7 @@ export function Catalog() {
 
       {products.loading ? (
         <GridSkeleton />
-      ) : products.error && usingSample ? (
+      ) : products.error ? (
         <div className="card flex flex-col items-center gap-4 py-16 text-center">
           <p className="text-sm text-fg-muted">{products.error}</p>
           <button type="button" onClick={products.retry} className="btn btn-secondary btn-sm">
@@ -206,30 +196,15 @@ export function Catalog() {
         </div>
       ) : (
         <>
-          {usingSample && (
-            <p className="alert alert-warning mb-4 text-[11px]">
-              کالایی از سرویس API دریافت نشد؛ نمونهٔ نمایشی چیدمان نمایش داده می‌شود.
-            </p>
-          )}
           <motion.div layout className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {items.map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} onAdd={onAddToCart} />
             ))}
           </motion.div>
 
-          {hasMore && (
-            <div className="mt-8 flex justify-center">
-              <button
-                type="button"
-                disabled={products.loading}
-                onClick={() => setPerPage((value) => value + PER_PAGE)}
-                className="btn btn-secondary px-8"
-              >
-                {products.loading ? <Loader2 className="size-3.5 animate-spin" /> : null}
-                نمایش کالاهای بیشتر
-              </button>
-            </div>
-          )}
+          <div className="mt-8 flex justify-center">
+            <Pager page={page} lastPage={products.data?.meta?.last_page ?? 1} total={total} onChange={setPage} />
+          </div>
         </>
       )}
     </section>

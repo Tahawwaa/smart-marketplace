@@ -1,6 +1,6 @@
 import { ArrowRight, CheckCircle2, PackageSearch, ShoppingBag, Store } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ApiError } from '../../lib/api/client'
 import { useCart } from '../cart/cart-context'
 import { useAsync } from '../../hooks/use-async'
@@ -12,9 +12,15 @@ import { ProductCard } from './product-card'
 
 export function ProductDetailPage() {
   const { slug = '' } = useParams()
+  return <ProductDetail key={slug} slug={slug} />
+}
+
+function ProductDetail({ slug }: { slug: string }) {
+  const navigate = useNavigate()
   const { add } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
+  const [busy, setBusy] = useState(false)
   const [inventoryId, setInventoryId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,6 +39,7 @@ export function ProductDetailPage() {
 
   // موجودی‌ها زیر هر تنوع می‌آیند؛ ارزان‌ترین موجودی قابل خرید انتخاب می‌شود.
   const offers = (detail?.variants ?? []).flatMap((variant) => variant.inventories ?? [])
+    .filter((offer) => offer.is_available && offer.available_quantity > 0)
   const selected =
     offers.find((offer) => offer.id === inventoryId) ??
     [...offers].sort((a, b) => a.effective_price - b.effective_price)[0] ??
@@ -109,28 +116,32 @@ export function ProductDetailPage() {
                 id="quantity"
                 type="number"
                 min={1}
+                max={selected?.available_quantity ?? 1}
                 value={quantity}
-                onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
+                onChange={(event) => setQuantity(Math.min(selected?.available_quantity ?? 1, Math.max(1, Math.floor(Number(event.target.value)) || 1)))}
                 className="input !w-24"
               />
             </div>
 
             <button
               type="button"
-              disabled={selected === null}
+              disabled={busy || selected === null || quantity > selected.available_quantity}
               onClick={() => {
-                if (selected === null) return
+                if (selected === null || busy) return
                 setError(null)
+                setAdded(false)
+                setBusy(true)
                 add(selected.id, quantity)
                   .then(() => setAdded(true))
                   .catch((cause: unknown) =>
                     setError(cause instanceof ApiError ? cause.message : 'افزودن به سبد انجام نشد.'),
                   )
+                  .finally(() => setBusy(false))
               }}
               className="btn btn-primary btn-lg mt-5 w-full disabled:cursor-not-allowed"
             >
               <ShoppingBag className="size-4" />
-              افزودن به سبد خرید
+              {busy ? 'در حال افزودن…' : selected === null ? 'ناموجود' : 'افزودن به سبد خرید'}
             </button>
 
             {added ? (
@@ -237,7 +248,7 @@ export function ProductDetailPage() {
                     ...productImageSources(item.name, item.category?.slug ?? '', item.id),
                   ],
                 }}
-                onAdd={() => undefined}
+                onAdd={() => navigate(`/products/${item.slug}`)}
               />
             ))}
           </div>

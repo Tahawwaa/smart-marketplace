@@ -1,7 +1,7 @@
 import { api } from '../../lib/api/client'
 import type { Address, AddressInput, ApiItem, ApiList, Order } from '../../types/api'
 
-export const fetchOrders = (signal?: AbortSignal) => api<ApiList<Order>>('/orders', { signal })
+export const fetchOrders = (signal?: AbortSignal, page = 1) => api<ApiList<Order>>('/orders', { signal, query: { page } })
 
 export const fetchOrder = (id: number, signal?: AbortSignal) =>
   api<ApiItem<Order>>(`/orders/${id}`, { signal })

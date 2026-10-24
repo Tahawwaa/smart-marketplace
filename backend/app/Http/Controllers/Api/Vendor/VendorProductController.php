@@ -41,6 +41,18 @@ class VendorProductController extends VendorController
         return VendorProductResource::collection($products);
     }
 
+    public function show(Request $request, Product $product): VendorProductResource
+    {
+        $vendor = $this->vendor($request);
+        $this->authorizeProduct($vendor->id, $product);
+
+        return VendorProductResource::make($product->load([
+            'category:id,name,slug', 'brand:id,name,slug',
+            'variants' => fn ($query) => $query->orderBy('id'),
+            'variants.inventories' => fn ($query) => $query->where('vendor_id', $vendor->id),
+        ]));
+    }
+
     public function store(StoreProductRequest $request): JsonResponse
     {
         $vendor = $this->vendor($request);

@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\ProductStatus;
+use App\Enums\VendorStatus;
 use App\Services\ProductSearchService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,6 +30,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /** @return Builder<Product> */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('products.is_active', true)
+            ->where('products.status', ProductStatus::Approved)
+            ->where(fn (Builder $query) => $query->whereNull('products.vendor_id')
+                ->orWhereHas('vendor', fn (Builder $vendor) => $vendor
+                    ->where('status', VendorStatus::Approved)
+                    ->whereHas('user', fn (Builder $user) => $user->where('is_active', true))));
+    }
 
     protected static function booted(): void
     {

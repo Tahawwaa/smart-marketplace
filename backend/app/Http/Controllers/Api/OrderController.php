@@ -23,7 +23,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->where('user_id', $request->user()->id)
             ->with(['subOrders.items'])
-            ->withCount('subOrders')
+            ->withCount('items')
             ->latest('id')
             ->paginate(15)
             ->withQueryString();

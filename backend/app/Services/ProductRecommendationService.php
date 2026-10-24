@@ -86,7 +86,7 @@ class ProductRecommendationService
     private function similarIds(Product $product, array $exclude): array
     {
         return Product::query()
-            ->where('is_active', true)
+            ->published()
             ->whereKeyNot($product->id)
             ->whereNotIn('id', $exclude)
             ->where(fn (Builder $query) => $query
@@ -120,7 +120,7 @@ class ProductRecommendationService
         }
 
         $fill = Product::query()
-            ->where('is_active', true)
+            ->published()
             ->whereNotIn('id', $sold)
             ->latest('id')
             ->limit(self::LIMIT - count($sold))
@@ -136,8 +136,14 @@ class ProductRecommendationService
         return DB::table('order_items')
             ->join('vendor_inventories', 'vendor_inventories.id', '=', 'order_items.vendor_inventory_id')
             ->join('product_variants', 'product_variants.id', '=', 'vendor_inventories.variant_id')
+            ->join('sub_orders', 'sub_orders.id', '=', 'order_items.sub_order_id')
+            ->join('orders', 'orders.id', '=', 'sub_orders.order_id')
+            ->whereIn('orders.payment_status', ['paid', 'partially_refunded'])
+            ->whereNotIn('sub_orders.status', ['cancelled', 'refunded'])
+            ->whereNull('orders.deleted_at')
+            ->whereNull('sub_orders.deleted_at')
             ->join('products', 'products.id', '=', 'product_variants.product_id')
-            ->where('products.is_active', true)
+            ->whereIn('products.id', Product::query()->published()->select('products.id'))
             ->whereNull('products.deleted_at');
     }
 
@@ -150,10 +156,10 @@ class ProductRecommendationService
         $products = Product::query()
             ->with(['brand:id,name,slug', 'category:id,name,slug', 'images'])
             ->withMin(
-                ['inventories as price_from' => fn (Builder $inventory) => $inventory->where('is_available', true)],
+                ['inventories as price_from' => fn (Builder $inventory) => $inventory->purchasable()],
                 DB::raw('coalesce(sale_price, price)'),
             )
-            ->where('is_active', true)
+            ->published()
             ->whereIn('id', $ids)
             ->get();
 

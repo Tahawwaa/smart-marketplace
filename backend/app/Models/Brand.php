@@ -14,6 +14,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Brand extends Model
 {
+    protected static function booted(): void
+    {
+        static::updated(function (Brand $brand) {
+            if ($brand->wasChanged('name')) {
+                $brand->products()->each(fn (Product $product) => app(\App\Services\ProductSearchService::class)->reindex($product));
+            }
+        });
+    }
+
     /**
      * Get the attributes that should be cast.
      *

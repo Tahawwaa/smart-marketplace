@@ -44,11 +44,11 @@ export function RequireVendor() {
   }
 
   // فروشگاه هست ولی سرور آن را نپذیرفته (تعلیق یا رد شده)؛ ساخت دوباره بی‌فایده است.
-  if (profile.error || vendor === null) {
+  if (profile.error || vendor === null || ['suspended', 'rejected'].includes(vendor.status)) {
     return (
       <div className="mx-auto max-w-xl px-4 py-24 text-center sm:px-6">
         <p className="text-sm text-fg-muted">
-          {profile.error ?? 'برای این حساب فروشگاهی ثبت نشده است.'}
+          {profile.error ?? 'دسترسی فروشگاه شما فعال نیست.'}
         </p>
         <p className="mt-2 text-xs text-fg-subtle">
           برای پیگیری وضعیت فروشگاه به بخش «فروشندگی» در پنل کاربری سر بزنید.

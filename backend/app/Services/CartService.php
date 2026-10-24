@@ -6,10 +6,10 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\User;
 use App\Models\VendorInventory;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class CartService
 {
@@ -46,21 +46,13 @@ class CartService
      * a bearer token may still be present: a logged-in shopper must always see
      * the user cart, never the guest one.
      */
-    private function user(Request $request): ?Authenticatable
+    private function user(Request $request): ?User
     {
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
+        abort_if($request->bearerToken() !== null && $user === null, 401);
+        abort_if($user !== null && ! $user->is_active, 403, 'این حساب کاربری غیرفعال است.');
 
-        if ($user !== null) {
-            return $user;
-        }
-
-        $token = $request->bearerToken();
-
-        if ($token === null) {
-            return null;
-        }
-
-        return PersonalAccessToken::findToken($token)?->tokenable;
+        return $user;
     }
 
     /**
@@ -87,10 +79,14 @@ class CartService
             return $query->first();
         }
 
-        return $query->firstOrCreate(
-            ['user_id' => $user->id],
-            ['expires_at' => now()->addDays(self::TTL_DAYS)],
-        );
+        return DB::transaction(function () use ($user, $query) {
+            User::query()->lockForUpdate()->findOrFail($user->id);
+
+            return $query->firstOrCreate(
+                ['user_id' => $user->id],
+                ['expires_at' => now()->addDays(self::TTL_DAYS)],
+            );
+        });
     }
 
     public function forSession(?string $sessionId, bool $create = true): ?Cart
@@ -99,16 +95,19 @@ class CartService
             return null;
         }
 
-        $query = Cart::query()->where('session_id', $sessionId)->whereNull('user_id');
+        return DB::transaction(function () use ($sessionId, $create) {
+            $query = Cart::query()->where('session_id', $sessionId)->whereNull('user_id');
+            $cart = $query->lockForUpdate()->first();
 
-        if (! $create) {
-            return $query->first();
-        }
+            if ($cart?->expires_at?->isPast()) {
+                $cart->delete();
+                $cart = null;
+            }
 
-        return $query->firstOrCreate(
-            ['session_id' => $sessionId],
-            ['expires_at' => now()->addDays(self::TTL_DAYS)],
-        );
+            return $cart ?? ($create ? $query->create([
+                'session_id' => $sessionId, 'expires_at' => now()->addDays(self::TTL_DAYS),
+            ]) : null);
+        }, 3);
     }
 
     /**
@@ -132,24 +131,28 @@ class CartService
      */
     public function addItem(Cart $cart, VendorInventory $inventory, int $quantity): CartItem
     {
-        $existing = $cart->items()->where('vendor_inventory_id', $inventory->id)->first();
-        $requested = ($existing?->quantity ?? 0) + $quantity;
+        return DB::transaction(function () use ($cart, $inventory, $quantity) {
+            $cart = Cart::query()->lockForUpdate()->findOrFail($cart->id);
+            $inventory = VendorInventory::query()->lockForUpdate()->findOrFail($inventory->id);
+            $existing = $cart->items()->where('vendor_inventory_id', $inventory->id)->first();
+            $requested = ($existing?->quantity ?? 0) + $quantity;
 
-        $this->assertAvailable($inventory, $requested);
+            $this->assertAvailable($inventory, $requested);
 
-        $this->touch($cart);
+            $this->touch($cart);
 
-        if ($existing !== null) {
-            $existing->update(['quantity' => $requested]);
+            if ($existing !== null) {
+                $existing->update(['quantity' => $requested]);
 
-            return $existing;
-        }
+                return $existing;
+            }
 
-        return $cart->items()->create([
-            'vendor_inventory_id' => $inventory->id,
-            'quantity' => $quantity,
-            'unit_price_snapshot' => $inventory->effectivePrice(),
-        ]);
+            return $cart->items()->create([
+                'vendor_inventory_id' => $inventory->id,
+                'quantity' => $quantity,
+                'unit_price_snapshot' => $inventory->effectivePrice(),
+            ]);
+        });
     }
 
     /**
@@ -159,11 +162,13 @@ class CartService
      */
     public function updateQuantity(CartItem $item, int $quantity): void
     {
-        $this->assertAvailable($item->inventory, $quantity);
-
-        $this->touch($item->cart);
-
-        $item->update(['quantity' => $quantity]);
+        DB::transaction(function () use ($item, $quantity) {
+            $cart = Cart::query()->lockForUpdate()->findOrFail($item->cart_id);
+            $item = $cart->items()->findOrFail($item->id);
+            $this->assertAvailable($item->inventory, $quantity);
+            $this->touch($cart);
+            $item->update(['quantity' => $quantity]);
+        });
     }
 
     /**
@@ -175,44 +180,49 @@ class CartService
             return;
         }
 
-        $guest = Cart::query()
-            ->where('session_id', $sessionId)
-            ->whereNull('user_id')
-            ->with('items.inventory')
-            ->first();
+        DB::transaction(function () use ($user, $sessionId) {
+            $guest = Cart::query()
+                ->where('session_id', $sessionId)
+                ->whereNull('user_id')
+                ->lockForUpdate()
+                ->with('items.inventory')
+                ->first();
 
-        if ($guest === null || $guest->items->isEmpty()) {
-            $guest?->delete();
+            if ($guest === null || $guest->items->isEmpty() || $guest->expires_at?->isPast()) {
+                $guest?->delete();
 
-            return;
-        }
-
-        $cart = $this->forUser($user);
-
-        foreach ($guest->items as $item) {
-            $inventory = $item->inventory;
-
-            if ($inventory === null || $inventory->availableQuantity() < 1) {
-                continue;
+                return;
             }
 
-            $existing = $cart->items()->where('vendor_inventory_id', $item->vendor_inventory_id)->first();
-            $quantity = min(
+            $cart = $this->forUser($user);
+            $cart = Cart::query()->lockForUpdate()->findOrFail($cart->id);
+
+            foreach ($guest->items as $item) {
+                $inventory = $item->inventory;
+
+                if ($inventory === null || ! $inventory->isPurchasable()) {
+                    continue;
+                }
+
+                $existing = $cart->items()->where('vendor_inventory_id', $item->vendor_inventory_id)->first();
+                $quantity = min(
                 ($existing?->quantity ?? 0) + $item->quantity,
                 $inventory->availableQuantity(),
-            );
+                100,
+                );
 
-            if ($existing !== null) {
-                $existing->update(['quantity' => $quantity]);
+                if ($existing !== null) {
+                    $existing->update(['quantity' => $quantity]);
 
-                continue;
+                    continue;
+                }
+
+                $item->update(['cart_id' => $cart->id, 'quantity' => $quantity]);
             }
 
-            $item->update(['cart_id' => $cart->id, 'quantity' => $quantity]);
-        }
-
-        $guest->delete();
-        $this->touch($cart);
+            $guest->delete();
+            $this->touch($cart);
+        });
     }
 
     /**
@@ -226,9 +236,13 @@ class CartService
     /**
      * @throws ValidationException
      */
-    private function assertAvailable(VendorInventory $inventory, int $quantity): void
+    private function assertAvailable(?VendorInventory $inventory, int $quantity): void
     {
-        if (! $inventory->is_available || $inventory->availableQuantity() < $quantity) {
+        if ($quantity < 1 || $quantity > 100) {
+            throw ValidationException::withMessages(['quantity' => 'تعداد کالا باید بین ۱ و ۱۰۰ باشد.']);
+        }
+
+        if ($inventory === null || ! $inventory->isPurchasable() || $inventory->availableQuantity() < $quantity) {
             throw ValidationException::withMessages([
                 'quantity' => 'موجودی کالا کافی نیست.',
             ]);

@@ -17,8 +17,8 @@ class ProductController extends Controller
 
         $products = $filter->apply(
             Product::query()
-                ->with(['brand:id,name,slug', 'category:id,name,slug'])
-                ->where('is_active', true),
+                ->with(['brand:id,name,slug', 'category:id,name,slug', 'images'])
+                ->published(),
             $filters,
         )
             ->paginate($filters['per_page'] ?? ProductFilter::PER_PAGE_DEFAULT)
@@ -29,7 +29,7 @@ class ProductController extends Controller
 
     public function show(Product $product): ProductResource
     {
-        abort_unless($product->is_active, 404);
+        abort_unless(Product::query()->whereKey($product->id)->published()->exists(), 404);
 
         $product->load([
             'brand:id,name,slug',
@@ -37,6 +37,7 @@ class ProductController extends Controller
             'images',
             'variants' => fn ($query) => $query->where('is_active', true),
             'variants.attributeValues.attribute:id,name,slug',
+            'variants.inventories' => fn ($query) => $query->purchasable(),
             'variants.inventories.vendor:id,store_name,slug',
             'variants.inventories.warranty:id,name,duration_months',
         ]);

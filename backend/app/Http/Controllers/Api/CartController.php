@@ -20,7 +20,7 @@ class CartController extends Controller
 
     public function show(Request $request): JsonResponse
     {
-        $cart = $this->carts->resolve($request) ?? new Cart;
+        $cart = $this->carts->resolve($request, create: false) ?? new Cart;
 
         return $this->cartResponse($cart);
     }

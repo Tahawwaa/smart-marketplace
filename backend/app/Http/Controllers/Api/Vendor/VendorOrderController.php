@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api\Vendor;
 use App\Enums\OrderStatus;
 use App\Http\Requests\Vendor\UpdateSubOrderStatusRequest;
 use App\Http\Resources\VendorSubOrderResource;
-use App\Models\OrderStatusHistory;
+use App\Services\OrderStatusService;
 use App\Models\SubOrder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\DB;
 
 class VendorOrderController extends VendorController
 {
@@ -41,7 +40,7 @@ class VendorOrderController extends VendorController
     /**
      * Move a sub-order along and keep an audit trail of the change.
      */
-    public function updateStatus(UpdateSubOrderStatusRequest $request, SubOrder $subOrder): VendorSubOrderResource
+    public function updateStatus(UpdateSubOrderStatusRequest $request, SubOrder $subOrder, OrderStatusService $statuses): VendorSubOrderResource
     {
         $vendor = $this->vendor($request);
 
@@ -49,19 +48,8 @@ class VendorOrderController extends VendorController
 
         $status = OrderStatus::from($request->string('status')->value());
 
-        DB::transaction(function () use ($request, $subOrder, $status) {
-            $from = $subOrder->status;
-
-            $subOrder->update(['status' => $status]);
-
-            OrderStatusHistory::create([
-                'sub_order_id' => $subOrder->id,
-                'from_status' => $from?->value,
-                'to_status' => $status->value,
-                'changed_by_user_id' => $request->user()->id,
-                'note' => $request->input('note'),
-            ]);
-        });
+        $statuses->updateVendor($subOrder, $status, $request->user(), $request->input('note'));
+        $subOrder->refresh();
 
         return VendorSubOrderResource::make($subOrder->load($this->relations()));
     }

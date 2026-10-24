@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Models\OrderItem;
 use App\Models\SubOrder;
 use App\Models\Vendor;
@@ -30,6 +31,7 @@ class VendorAnalyticsService
 
         $sold = SubOrder::query()
             ->where('vendor_id', $vendor->id)
+            ->whereHas('order', fn ($order) => $order->whereIn('payment_status', [PaymentStatus::Paid, PaymentStatus::PartiallyRefunded]))
             ->whereIn('status', array_map(fn (OrderStatus $status) => $status->value, self::SOLD_STATUSES))
             ->where('created_at', '>=', $since)
             ->get(['id', 'subtotal_price', 'commission_amount', 'vendor_net_amount', 'created_at']);
@@ -58,6 +60,9 @@ class VendorAnalyticsService
         $topProducts = OrderItem::query()
             ->join('sub_orders', 'sub_orders.id', '=', 'order_items.sub_order_id')
             ->where('sub_orders.vendor_id', $vendor->id)
+            ->whereHas('subOrder.order', fn ($order) => $order->whereIn('payment_status', [PaymentStatus::Paid, PaymentStatus::PartiallyRefunded]))
+            ->where('sub_orders.created_at', '>=', $since)
+            ->whereNull('sub_orders.deleted_at')
             ->whereIn('sub_orders.status', array_map(fn (OrderStatus $status) => $status->value, self::SOLD_STATUSES))
             ->selectRaw('order_items.product_name_snapshot as name, sum(order_items.quantity) as units, sum(order_items.total_price) as revenue')
             ->groupBy('order_items.product_name_snapshot')
@@ -88,6 +93,11 @@ class VendorAnalyticsService
 
         return [
             'period_days' => $days,
+            'catalog' => [
+                'products' => $vendor->products()->count(),
+                'pending_products' => $vendor->products()->where('status', 'pending')->count(),
+                'out_of_stock' => $vendor->inventories()->whereColumn('quantity', '<=', 'reserved_quantity')->count(),
+            ],
             'totals' => [
                 'orders' => $sold->count(),
                 'revenue' => (float) $sold->sum('subtotal_price'),

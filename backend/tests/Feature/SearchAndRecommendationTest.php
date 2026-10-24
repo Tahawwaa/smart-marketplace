@@ -19,7 +19,7 @@ class SearchAndRecommendationTest extends TestCase
 
     private function soldTogether(Product ...$products): void
     {
-        $subOrder = SubOrder::factory()->create(['order_id' => Order::factory()->create()->id]);
+        $subOrder = SubOrder::factory()->create(['order_id' => Order::factory()->create(['payment_status' => 'paid'])->id]);
 
         foreach ($products as $product) {
             $variant = ProductVariant::factory()->create(['product_id' => $product->id]);

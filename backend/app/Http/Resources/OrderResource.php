@@ -24,7 +24,7 @@ class OrderResource extends JsonResource
             'grand_total' => (float) $this->grand_total,
             'currency' => $this->currency,
             'shipping_address_snapshot' => $this->shipping_address_snapshot,
-            'items_count' => $this->whenCounted('subOrders'),
+            'items_count' => $this->whenCounted('items'),
             'sub_orders' => $this->whenLoaded(
                 'subOrders',
                 fn () => SubOrderResource::collection($this->subOrders),

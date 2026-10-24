@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,12 +24,28 @@ class UpdateCategoryRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:255'],
             'slug' => ['sometimes', 'string', 'max:255', Rule::unique('categories', 'slug')->ignore($category)],
             'parent_id' => [
+                'bail',
                 'sometimes',
                 'nullable',
                 'integer',
                 'exists:categories,id',
                 // A category cannot be filed under itself.
                 Rule::notIn([$category?->id]),
+                function (string $attribute, mixed $value, \Closure $fail) use ($category) {
+                    $visited = [$category?->id];
+                    $parentId = $value;
+
+                    while ($parentId !== null) {
+                        if (in_array((int) $parentId, $visited, true)) {
+                            $fail('دسته‌بندی والد نمی‌تواند از زیردسته‌های این دسته باشد.');
+
+                            return;
+                        }
+
+                        $visited[] = (int) $parentId;
+                        $parentId = Category::query()->whereKey($parentId)->value('parent_id');
+                    }
+                },
             ],
             'is_active' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],

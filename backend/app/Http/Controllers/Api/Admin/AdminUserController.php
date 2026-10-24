@@ -8,6 +8,7 @@ use App\Http\Resources\Admin\AdminUserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class AdminUserController extends AdminController
 {
@@ -52,7 +53,18 @@ class AdminUserController extends AdminController
      */
     public function update(UpdateUserRequest $request, User $user): AdminUserResource
     {
-        $user->update($request->validated());
+        DB::transaction(function () use ($request, $user) {
+            $admins = User::query()->where('role', UserRole::Admin)->where('is_active', true)->lockForUpdate()->get();
+            $user->refresh();
+            $payload = $request->validated();
+            $removesAdmin = ($payload['role'] ?? $user->role->value) !== UserRole::Admin->value
+                || ! ($payload['is_active'] ?? $user->is_active);
+
+            abort_if($user->isAdmin() && $user->is_active && $removesAdmin && $admins->count() <= 1,
+                422, 'آخرین مدیر فعال سامانه را نمی‌توان غیرفعال کرد یا نقش او را تغییر داد.');
+
+            $user->update($payload);
+        });
 
         return AdminUserResource::make(
             $user->load('vendors:id,user_id,store_name,slug,status')->loadCount('orders'),
@@ -68,12 +80,19 @@ class AdminUserController extends AdminController
 
         $remainingAdmins = User::query()
             ->where('role', UserRole::Admin)
+            ->where('is_active', true)
             ->whereKeyNot($user->id)
             ->count();
 
         abort_if($user->isAdmin() && $remainingAdmins === 0, 422, 'آخرین مدیر سامانه را نمی‌توان حذف کرد.');
 
-        $user->delete();
+        abort_if($user->orders()->withTrashed()->exists() || $user->vendors()->withTrashed()->exists(),
+            422, 'این حساب سفارش یا فروشگاه دارد؛ به جای حذف، آن را غیرفعال کنید.');
+
+        DB::transaction(function () use ($user) {
+            $user->tokens()->delete();
+            $user->delete();
+        });
 
         return response()->noContent();
     }

@@ -52,6 +52,10 @@ export function AccountStorePage() {
     )
   }
 
+  if (store.error) {
+    return <div role="alert"><FormError message={store.error} /><button type="button" onClick={store.retry} className="btn btn-secondary mt-3">تلاش دوباره</button></div>
+  }
+
   if (mine) {
     return (
       <div className="space-y-4">
@@ -71,7 +75,7 @@ export function AccountStorePage() {
             <div>
               <dt className="text-fg-subtle">نشانی فروشگاه</dt>
               <dd className="mt-0.5 text-sm text-fg-muted" dir="ltr">
-                /products?store={mine.slug}
+                /products?vendor={mine.slug}
               </dd>
             </div>
             <div>
@@ -94,8 +98,7 @@ export function AccountStorePage() {
           {mine.status === 'pending' ? (
             <p className="alert alert-warning mt-4">
               <ShieldAlert className="mt-0.5 size-4 shrink-0" />
-              فروشگاه شما در انتظار تأیید مدیر است؛ پس از تأیید می‌توانید کالا ثبت کنید. تا آن زمان پنل فروشنده
-              فقط وضعیت فروشگاه را نشان می‌دهد.
+              فروشگاه شما در انتظار تأیید مدیر است. می‌توانید کالاها را آماده کنید؛ نمایش و فروش آن‌ها پس از تأیید فروشگاه و کالا انجام می‌شود.
             </p>
           ) : null}
 

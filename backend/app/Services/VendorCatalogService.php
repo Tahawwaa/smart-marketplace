@@ -95,16 +95,9 @@ class VendorCatalogService
                     continue;
                 }
 
-                $variant->update(array_filter([
-                    'sku' => $variantPayload['sku'] ?? null,
-                    'barcode' => array_key_exists('barcode', $variantPayload) ? $variantPayload['barcode'] : null,
-                    'weight_grams' => array_key_exists('weight_grams', $variantPayload) ? $variantPayload['weight_grams'] : null,
-                    'is_active' => $variantPayload['is_active'] ?? true,
-                ], fn ($value) => $value !== null));
-
-                if (! array_key_exists('price', $variantPayload)) {
-                    continue;
-                }
+                $variant->update(array_intersect_key($variantPayload, array_flip([
+                    'sku', 'barcode', 'weight_grams', 'is_active',
+                ])));
 
                 $this->updateStock(
                     $this->stockRow($vendor, $variant),
@@ -123,32 +116,35 @@ class VendorCatalogService
      */
     public function updateStock(VendorInventory $inventory, array $payload): VendorInventory
     {
-        $quantity = $payload['quantity'] ?? null;
+        return DB::transaction(function () use ($inventory, $payload) {
+            $inventory = VendorInventory::query()->lockForUpdate()->findOrFail($inventory->id);
+            $quantity = $payload['quantity'] ?? null;
 
-        // Stock cannot drop below what shoppers already reserved.
-        if ($quantity !== null) {
-            $quantity = max((int) $quantity, (int) $inventory->reserved_quantity);
-        }
+            // Stock cannot drop below what shoppers already reserved.
+            if ($quantity !== null) {
+                $quantity = max((int) $quantity, (int) $inventory->reserved_quantity);
+            }
 
-        $salePrice = array_key_exists('sale_price', $payload) ? $payload['sale_price'] : $inventory->sale_price;
-        $price = $payload['price'] ?? $inventory->price;
+            $salePrice = array_key_exists('sale_price', $payload) ? $payload['sale_price'] : $inventory->sale_price;
+            $price = $payload['price'] ?? $inventory->price;
 
-        if ($salePrice !== null && (float) $salePrice > (float) $price) {
-            $salePrice = null;
-        }
+            if ($salePrice !== null && (float) $salePrice > (float) $price) {
+                $salePrice = null;
+            }
 
-        $inventory->update([
-            'price' => $price,
-            'sale_price' => $salePrice,
-            'quantity' => $quantity ?? $inventory->quantity,
-            'is_available' => $payload['is_available'] ?? $inventory->is_available,
-            'lead_time_days' => $payload['lead_time_days'] ?? $inventory->lead_time_days,
-            'warranty_id' => array_key_exists('warranty_id', $payload) ? $payload['warranty_id'] : $inventory->warranty_id,
-        ]);
+            $inventory->update([
+                'price' => $price,
+                'sale_price' => $salePrice,
+                'quantity' => $quantity ?? $inventory->quantity,
+                'is_available' => $payload['is_available'] ?? $inventory->is_available,
+                'lead_time_days' => $payload['lead_time_days'] ?? $inventory->lead_time_days,
+                'warranty_id' => array_key_exists('warranty_id', $payload) ? $payload['warranty_id'] : $inventory->warranty_id,
+            ]);
 
-        $inventory->increment('lock_version');
+            $inventory->increment('lock_version');
 
-        return $inventory->refresh();
+            return $inventory->refresh();
+        });
     }
 
     /**

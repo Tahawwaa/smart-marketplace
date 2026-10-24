@@ -23,7 +23,8 @@ export function SiteHeader() {
   const [input, setInput] = useState(search)
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
-  const [suggestions, setSuggestions] = useState<SearchSuggestions | null>(null)
+  const [suggestionResult, setSuggestions] = useState<{ term: string; data: SearchSuggestions } | null>(null)
+  const suggestions = suggestionResult?.term === input.trim() ? suggestionResult.data : null
   const [focused, setFocused] = useState(false)
   const [active, setActive] = useState(-1)
 
@@ -34,7 +35,8 @@ export function SiteHeader() {
     const timer = window.setTimeout(() => {
       fetchSuggestions(term, controller.signal)
         .then((response) => {
-          setSuggestions(response.data)
+          if (controller.signal.aborted) return
+          setSuggestions({ term, data: response.data })
           setActive(-1)
         })
         .catch(() => undefined)
@@ -82,7 +84,7 @@ export function SiteHeader() {
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
       setActive((value) => (value <= 0 ? suggestionLinks.length - 1 : value - 1))
-    } else if (event.key === 'Enter' && active >= 0) {
+    } else if (event.key === 'Enter' && active >= 0 && suggestionLinks[active]) {
       event.preventDefault()
       goTo(suggestionLinks[active].to)
     } else if (event.key === 'Escape') {
