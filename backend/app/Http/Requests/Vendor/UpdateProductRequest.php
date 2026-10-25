@@ -35,6 +35,7 @@ class UpdateProductRequest extends FormRequest
             'variants.*.price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.sale_price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.quantity' => ['nullable', 'integer', 'min:0'],
+            'variants.*.lock_version' => ['sometimes', 'required', 'integer', 'min:0'],
             'variants.*.warranty_id' => ['nullable', 'integer', 'exists:warranties,id'],
             'variants.*.lead_time_days' => ['nullable', 'integer', 'min:0', 'max:365'],
             'variants.*.is_available' => ['nullable', 'boolean'],

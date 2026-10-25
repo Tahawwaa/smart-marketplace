@@ -49,6 +49,7 @@ export async function downloadVendorOrdersCsv(days = 30) {
 
 /** ورودی یک گونه همراه با موجودی اولیه‌ی آن. */
 export type VariantInput = {
+  lock_version?: number
   id?: number
   sku?: string | null
   barcode?: string | null

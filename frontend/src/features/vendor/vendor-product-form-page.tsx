@@ -5,8 +5,11 @@ import { ApiError } from '../../lib/api/client'
 import { createVendorProduct, updateVendorProduct, type VariantInput } from './api'
 import { useCategoryOptions } from './use-category-options'
 import { useVendorProduct } from './use-vendor-product'
+import { VendorError, VendorPageHeading } from './vendor-ui'
 
 type VariantRow = {
+  lock_version?: number
+  reserved_quantity?: number
   id?: number
   sku: string
   price: string
@@ -27,6 +30,7 @@ const EMPTY_VARIANT_ROW = { ...EMPTY_VARIANT }
 
 function toVariantInput(row: VariantRow): VariantInput {
   return {
+    lock_version: row.lock_version,
     sku: row.sku.trim() === '' ? null : row.sku.trim(),
     price: Number(row.price),
     sale_price: row.sale_price.trim() === '' ? null : Number(row.sale_price),
@@ -43,7 +47,7 @@ export function VendorProductFormPage() {
     return (
       <ProductForm
         isEdit={false}
-        initial={{ category_id: '', name: '', description: '', variants: [EMPTY_VARIANT_ROW] }}
+        initial={{ category_id: '', name: '', description: '', is_active: true, meta_title: '', meta_description: '', variants: [EMPTY_VARIANT_ROW] }}
       />
     )
   }
@@ -52,6 +56,9 @@ export function VendorProductFormPage() {
 }
 
 type FormState = {
+  is_active: boolean
+  meta_title: string
+  meta_description: string
   category_id: string
   name: string
   description: string
@@ -71,7 +78,7 @@ function EditForm({ productId }: { productId: number }) {
   }
 
   if (product.error) {
-    return <p className="text-sm text-fg-muted">{product.error}</p>
+    return <VendorError message={product.error} retry={product.retry} />
   }
 
   if (product.data === null) {
@@ -93,10 +100,15 @@ function EditForm({ productId }: { productId: number }) {
         category_id: String(product.data.category?.id ?? ''),
         name: product.data.name,
         description: product.data.description ?? '',
+        is_active: product.data.is_active,
+        meta_title: product.data.meta_title ?? '',
+        meta_description: product.data.meta_description ?? '',
         variants: (product.data.variants ?? []).map((variant) => {
           const inventory = variant.inventories?.[0]
           return {
             id: variant.id,
+            lock_version: inventory?.lock_version,
+            reserved_quantity: inventory?.reserved_quantity,
             sku: variant.sku ?? '',
             price: inventory ? String(inventory.price) : '',
             sale_price:
@@ -150,8 +162,10 @@ function ProductForm({
 
     try {
       if (isEdit && productId !== undefined) {
-        // سرویس بک‌اند برای هر گونه‌ی موجود، ردیف موجودی را از روی قیمت به‌روز می‌کند.
         await updateVendorProduct(productId, {
+          is_active: form.is_active,
+          meta_title: form.meta_title.trim() || null,
+          meta_description: form.meta_description.trim() || null,
           category_id: Number(form.category_id),
           name: form.name,
           description: form.description.trim() === '' ? null : form.description,
@@ -159,6 +173,9 @@ function ProductForm({
         })
       } else {
         await createVendorProduct({
+          is_active: form.is_active,
+          meta_title: form.meta_title.trim() || null,
+          meta_description: form.meta_description.trim() || null,
           category_id: Number(form.category_id),
           name: form.name,
           description: form.description.trim() === '' ? null : form.description,
@@ -183,6 +200,8 @@ function ProductForm({
 
   return (
     <form onSubmit={submit} className="space-y-4 text-xs">
+      <VendorPageHeading title={isEdit ? 'ویرایش کالا' : 'ثبت کالای جدید'} description="اطلاعات دقیق، قیمت مناسب و موجودی به‌روز، پایهٔ یک فروش موفق است." />
+      {categories.error ? <VendorError message={categories.error} retry={categories.retry} /> : null}
       {isEdit ? null : (
         <p className="rounded-xl border border-line bg-surface px-4 py-3 text-fg-muted">
           کالای جدید در وضعیت «در انتظار تأیید» ثبت می‌شود و پس از تأیید مدیر در فروشگاه نمایش داده
@@ -190,10 +209,13 @@ function ProductForm({
         </p>
       )}
 
+      <section className="card space-y-4 p-5 sm:p-6">
+      <h3 className="text-sm font-bold text-fg">اطلاعات اصلی کالا</h3>
       <label className="block text-fg-muted">
         نام کالا <span className="text-danger-ink">*</span>
         <input
           required
+          maxLength={255}
           value={form.name}
           onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
           className="input mt-1 w-full"
@@ -231,7 +253,9 @@ function ProductForm({
         />
       </label>
 
-      <div className="space-y-3">
+      <label className="flex items-center gap-2 text-fg-muted"><input type="checkbox" checked={form.is_active} onChange={(event) => setForm((current) => ({ ...current, is_active: event.target.checked }))} />نمایش کالا پس از تأیید فعال باشد</label>
+      </section>
+      <div className="card space-y-4 p-5 sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <span className="font-bold text-fg-muted">گونه‌ها و موجودی</span>
           {isEdit ? null : (
@@ -269,6 +293,7 @@ function ProductForm({
                 required
                 type="number"
                 min={0}
+                step="0.01"
                 value={row.price}
                 onChange={(event) => patchVariant(index, { price: event.target.value })}
                 className="input mt-1 w-full"
@@ -280,6 +305,8 @@ function ProductForm({
                 type="number"
                 min={0}
                 value={row.sale_price}
+                max={row.price === '' ? undefined : Number(row.price)}
+                step="0.01"
                 onChange={(event) => patchVariant(index, { sale_price: event.target.value })}
                 className="input mt-1 w-full"
               />
@@ -288,7 +315,7 @@ function ProductForm({
               موجودی
               <input
                 type="number"
-                min={0}
+                min={row.reserved_quantity ?? 0}
                 value={row.quantity}
                 onChange={(event) => patchVariant(index, { quantity: event.target.value })}
                 className="input mt-1 w-full"
@@ -300,6 +327,7 @@ function ProductForm({
                 type="number"
                 min={0}
                 value={row.lead_time_days}
+                max={365}
                 onChange={(event) => patchVariant(index, { lead_time_days: event.target.value })}
                 className="input mt-1 w-full"
               />
@@ -323,6 +351,8 @@ function ProductForm({
         ))}
       </div>
 
+      <details className="card p-5"><summary className="cursor-pointer text-sm font-bold text-fg">اطلاعات نمایش در جست‌وجو (اختیاری)</summary><div className="mt-4 space-y-4"><label className="block text-fg-muted">عنوان صفحه<input className="input mt-2" maxLength={255} value={form.meta_title} onChange={(event) => setForm((current) => ({ ...current, meta_title: event.target.value }))} /></label><label className="block text-fg-muted">توضیح کوتاه<textarea className="input mt-2" rows={3} maxLength={500} value={form.meta_description} onChange={(event) => setForm((current) => ({ ...current, meta_description: event.target.value }))} /></label></div></details>
+
       {error ? (
         <p className="alert alert-danger">
           {error}
@@ -340,7 +370,7 @@ function ProductForm({
       <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
         <button
           type="submit"
-          disabled={busy}
+          disabled={busy || categories.loading || Boolean(categories.error)}
           className="btn btn-primary"
         >
           {busy ? <Loader2 className="size-4 animate-spin" /> : null}

@@ -34,6 +34,8 @@ const VendorDashboardPage = lazy(() => import('./features/vendor/vendor-dashboar
 const VendorAnalyticsPage = lazy(() => import('./features/vendor/vendor-analytics-page').then((module) => ({ default: module.VendorAnalyticsPage })))
 const VendorInventoryPage = lazy(() => import('./features/vendor/vendor-inventory-page').then((module) => ({ default: module.VendorInventoryPage })))
 const VendorLayout = lazy(() => import('./features/vendor/vendor-layout').then((module) => ({ default: module.VendorLayout })))
+const VendorOrderDetailPage = lazy(() => import('./features/vendor/vendor-order-detail-page').then((module) => ({ default: module.VendorOrderDetailPage })))
+const VendorSettingsPage = lazy(() => import('./features/vendor/vendor-settings-page').then((module) => ({ default: module.VendorSettingsPage })))
 const VendorOrdersPage = lazy(() => import('./features/vendor/vendor-orders-page').then((module) => ({ default: module.VendorOrdersPage })))
 const VendorProductFormPage = lazy(() => import('./features/vendor/vendor-product-form-page').then((module) => ({ default: module.VendorProductFormPage })))
 const VendorProductsPage = lazy(() => import('./features/vendor/vendor-products-page').then((module) => ({ default: module.VendorProductsPage })))
@@ -72,6 +74,8 @@ function App() {
                     <Route path="products/:id/edit" element={<VendorProductFormPage />} />
                     <Route path="inventory" element={<VendorInventoryPage />} />
                     <Route path="orders" element={<VendorOrdersPage />} />
+                    <Route path="orders/:id" element={<VendorOrderDetailPage />} />
+                    <Route path="settings" element={<VendorSettingsPage />} />
                     <Route path="analytics" element={<VendorAnalyticsPage />} />
                   </Route>
                 </Route>

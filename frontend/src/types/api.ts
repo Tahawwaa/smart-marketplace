@@ -197,6 +197,7 @@ export type Vendor = {
 export type VendorProfileResponse = { data: Vendor | null }
 
 export type VendorVariantInventory = {
+  lock_version: number
   id: number
   price: number
   sale_price: number | null

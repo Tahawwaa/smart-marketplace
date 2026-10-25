@@ -195,7 +195,7 @@ class VendorApiTest extends TestCase
         $this->assertSame(4, $inventory->fresh()->quantity);
     }
 
-    public function test_a_sale_price_above_the_price_is_dropped(): void
+    public function test_a_sale_price_above_the_price_is_rejected(): void
     {
         [$user, $vendor] = $this->vendor();
         [$inventory] = $this->stockRow($vendor);
@@ -205,9 +205,8 @@ class VendorApiTest extends TestCase
                 'price' => 100000,
                 'sale_price' => 150000,
             ])
-            ->assertOk()
-            ->assertJsonPath('data.sale_price', null)
-            ->assertJsonPath('data.effective_price', 100000);
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('sale_price');
     }
 
     public function test_stock_of_another_store_cannot_be_updated(): void

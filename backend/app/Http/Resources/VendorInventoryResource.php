@@ -19,6 +19,7 @@ class VendorInventoryResource extends JsonResource
             'effective_price' => (float) ($this->sale_price ?? $this->price),
             'quantity' => (int) $this->quantity,
             'reserved_quantity' => (int) $this->reserved_quantity,
+            'lock_version' => (int) $this->lock_version,
             'available_quantity' => $this->availableQuantity(),
             'lead_time_days' => $this->lead_time_days,
             'is_available' => $this->is_available,

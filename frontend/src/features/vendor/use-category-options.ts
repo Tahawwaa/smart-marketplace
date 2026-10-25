@@ -19,5 +19,6 @@ export function useCategoryOptions() {
     options: flatten(response.data?.data ?? []),
     loading: response.loading,
     error: response.error,
+    retry: response.retry,
   }
 }
