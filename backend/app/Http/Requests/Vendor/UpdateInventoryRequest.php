@@ -17,6 +17,7 @@ class UpdateInventoryRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'lock_version' => ['sometimes', 'required', 'integer', 'min:0'],
             'price' => ['nullable', 'numeric', 'min:0'],
             'sale_price' => ['nullable', 'numeric', 'min:0'],
             'quantity' => ['nullable', 'integer', 'min:0'],

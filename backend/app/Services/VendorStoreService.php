@@ -13,9 +13,8 @@ use Illuminate\Validation\ValidationException;
 /**
  * Owns the link between an account and its store.
  *
- * Selling is not a separate kind of account: any account may open a store, and
- * the `vendor` role is granted alongside the role the account already has so an
- * admin or a long-standing customer never loses their existing access.
+ * Any account may own a store. Admins retain their role while other accounts
+ * receive the vendor role and keep their customer features.
  */
 class VendorStoreService
 {
@@ -47,10 +46,7 @@ class VendorStoreService
     }
 
     /**
-     * Open a store for the account and wait for an admin to approve it.
-     *
-     * The account keeps its current role; `vendor` is added on top so a
-     * customer remains a customer and an admin remains an admin.
+     * Open a store, approving an admin's own store immediately.
      */
     public function open(User $user, string $storeName, ?string $bankSheba = null): Vendor
     {
@@ -64,9 +60,8 @@ class VendorStoreService
                 'store_name' => $storeName,
                 'slug' => $this->uniqueSlug($storeName),
                 'bank_sheba' => $bankSheba,
-                // A new store starts empty and unapproved; only an admin can
-                // move it to `approved`.
-                'status' => VendorStatus::Pending,
+                'status' => $user->isAdmin() ? VendorStatus::Approved : VendorStatus::Pending,
+                'approved_at' => $user->isAdmin() ? now() : null,
                 'commission_rate' => 0,
             ]);
 

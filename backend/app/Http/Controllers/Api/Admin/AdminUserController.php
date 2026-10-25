@@ -8,6 +8,7 @@ use App\Http\Resources\Admin\AdminUserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class AdminUserController extends AdminController
@@ -74,7 +75,7 @@ class AdminUserController extends AdminController
     /**
      * Guard against the marketplace locking itself out.
      */
-    public function destroy(Request $request, User $user): \Illuminate\Http\Response
+    public function destroy(Request $request, User $user): Response
     {
         abort_if($user->id === $request->user()->id, 422, 'نمی‌توانید حساب خودتان را حذف کنید.');
 

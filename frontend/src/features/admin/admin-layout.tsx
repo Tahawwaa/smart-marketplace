@@ -88,6 +88,13 @@ export function AdminLayout() {
             ))}
           </nav>
           <Link
+            to={user?.store ? '/vendor' : '/account/store'}
+            className="mt-2 flex items-center gap-2 rounded-xl border border-brand/20 bg-brand-soft px-3 py-2.5 text-xs font-bold text-brand-ink transition hover:bg-surface"
+          >
+            <Store className="size-4" />
+            پنل فروشندگی من
+          </Link>
+          <Link
             to="/"
             className="mt-2 hidden items-center gap-2 rounded-xl px-3 py-2.5 text-xs text-fg-subtle transition hover:bg-surface hover:text-fg lg:flex"
           >

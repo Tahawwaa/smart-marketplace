@@ -120,6 +120,7 @@ class OrderStatusService
 
             $before = $stock->quantity;
             $stock->increment('quantity', $item->quantity);
+            $stock->increment('lock_version');
             InventoryLog::create([
                 'vendor_inventory_id' => $stock->id, 'order_item_id' => $item->id,
                 'change_quantity' => $item->quantity, 'quantity_before' => $before,

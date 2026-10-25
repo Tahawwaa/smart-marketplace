@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Enums\ProductStatus;
 use App\Models\Product;
+use App\Models\InventoryLog;
 use App\Models\ProductVariant;
 use App\Models\Vendor;
 use App\Models\VendorInventory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class VendorCatalogService
 {
@@ -118,6 +120,9 @@ class VendorCatalogService
     {
         return DB::transaction(function () use ($inventory, $payload) {
             $inventory = VendorInventory::query()->lockForUpdate()->findOrFail($inventory->id);
+            abort_if(isset($payload['lock_version']) && (int) $payload['lock_version'] !== (int) $inventory->lock_version,
+                409, 'موجودی یا قیمت از زمان باز کردن فرم تغییر کرده است. اطلاعات را تازه‌سازی کنید.');
+            $before = $inventory->quantity;
             $quantity = $payload['quantity'] ?? null;
 
             // Stock cannot drop below what shoppers already reserved.
@@ -129,6 +134,9 @@ class VendorCatalogService
             $price = $payload['price'] ?? $inventory->price;
 
             if ($salePrice !== null && (float) $salePrice > (float) $price) {
+                if (array_key_exists('sale_price', $payload)) {
+                    throw ValidationException::withMessages(['sale_price' => 'قیمت تخفیف نباید بیشتر از قیمت اصلی باشد.']);
+                }
                 $salePrice = null;
             }
 
@@ -142,6 +150,13 @@ class VendorCatalogService
             ]);
 
             $inventory->increment('lock_version');
+
+            if ($before !== $inventory->quantity) {
+                InventoryLog::create([
+                    'vendor_inventory_id' => $inventory->id, 'change_quantity' => $inventory->quantity - $before,
+                    'quantity_before' => $before, 'quantity_after' => $inventory->quantity, 'type' => 'vendor_adjustment',
+                ]);
+            }
 
             return $inventory->refresh();
         });

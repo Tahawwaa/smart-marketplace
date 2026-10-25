@@ -29,22 +29,27 @@ class VendorAnalyticsController extends VendorController
     public function exportOrders(Request $request): StreamedResponse
     {
         $vendor = $this->vendor($request);
+        $filters = $request->validate(['days' => ['nullable', 'integer', 'in:7,30,90']]);
+        $days = $filters['days'] ?? null;
 
-        return response()->streamDownload(function () use ($vendor) {
+        return response()->streamDownload(function () use ($vendor, $days) {
             $handle = fopen('php://output', 'w');
             fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, ['sub_order_number', 'status', 'subtotal', 'commission', 'net', 'created_at']);
+            fputcsv($handle, ['sub_order_number', 'status', 'payment_status', 'subtotal_toman', 'commission_toman', 'net_toman', 'created_at'], escape: '');
 
-            $vendor->subOrders()->orderBy('id')->chunk(200, function ($rows) use ($handle) {
+            $vendor->subOrders()->whereHas('order')->with('order:id,payment_status')
+                ->when($days, fn ($query) => $query->where('created_at', '>=', today()->subDays($days - 1))->where('created_at', '<', today()->addDay()))
+                ->orderBy('id')->chunk(200, function ($rows) use ($handle) {
                 foreach ($rows as $row) {
                     fputcsv($handle, [
-                        $row->sub_order_number,
+                        preg_match('/^[=+@\-\t\r]/', $row->sub_order_number) ? "'".$row->sub_order_number : $row->sub_order_number,
                         $row->status?->value,
+                        $row->order?->payment_status?->value,
                         $row->subtotal_price,
                         $row->commission_amount,
                         $row->vendor_net_amount,
                         $row->created_at?->toDateTimeString(),
-                    ]);
+                    ], escape: '');
                 }
             });
 

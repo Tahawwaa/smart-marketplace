@@ -23,11 +23,25 @@ class VendorInventoryController extends VendorController
     {
         $vendor = $this->vendor($request);
 
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'stock' => ['nullable', 'in:low,out,available,disabled'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:50'],
+        ]);
+
         $rows = VendorInventory::query()
             ->where('vendor_id', $vendor->id)
+            ->whereHas('variant.product')
+            ->when($filters['search'] ?? null, fn ($query, $search) => $query->whereHas('variant', fn ($variant) => $variant
+                ->where(fn ($variant) => $variant->where('sku', 'like', '%'.$search.'%')
+                    ->orWhereHas('product', fn ($product) => $product->where('name', 'like', '%'.$search.'%')))))
+            ->when(($filters['stock'] ?? null) === 'low', fn ($query) => $query->whereRaw('(quantity - reserved_quantity) between 1 and 5'))
+            ->when(($filters['stock'] ?? null) === 'out', fn ($query) => $query->whereColumn('quantity', '<=', 'reserved_quantity'))
+            ->when(($filters['stock'] ?? null) === 'available', fn ($query) => $query->whereColumn('quantity', '>', 'reserved_quantity')->where('is_available', true))
+            ->when(($filters['stock'] ?? null) === 'disabled', fn ($query) => $query->where('is_available', false))
             ->with('variant.product:id,name,slug')
             ->orderByDesc('id')
-            ->paginate(15)
+            ->paginate($filters['per_page'] ?? 15)
             ->withQueryString();
 
         return VendorStockResource::collection($rows);

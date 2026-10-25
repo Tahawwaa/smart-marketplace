@@ -29,7 +29,7 @@ class UpdateProductRequest extends FormRequest
             'variants' => ['nullable', 'array'],
             'variants.*.id' => ['required', 'integer', 'distinct', Rule::exists('product_variants', 'id')->where('product_id', $this->route('product')?->id)->whereNull('deleted_at')],
             'variants.*.sku' => ['sometimes', 'required', 'string', 'max:64', 'distinct'],
-            'variants.*.barcode' => ['nullable', 'string', 'max:64'],
+            'variants.*.barcode' => ['nullable', 'string', 'max:64', 'distinct'],
             'variants.*.weight_grams' => ['nullable', 'integer', 'min:0'],
             'variants.*.is_active' => ['sometimes', 'boolean'],
             'variants.*.price' => ['nullable', 'numeric', 'min:0'],

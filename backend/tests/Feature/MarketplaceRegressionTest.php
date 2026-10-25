@@ -2,22 +2,31 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Enums\OrderStatus;
 use App\Enums\ProductStatus;
 use App\Enums\UserRole;
+use App\Exceptions\OutOfStockException;
+use App\Models\Attribute;
+use App\Models\Brand;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\SubOrder;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Models\VendorInventory;
+use App\Services\CartService;
 use App\Services\InventoryService;
 use App\Services\PaymentService;
+use App\Services\VendorCatalogService;
+use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\DemoProductSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class MarketplaceRegressionTest extends TestCase
@@ -148,7 +157,7 @@ class MarketplaceRegressionTest extends TestCase
         $payment = $service->start($user, $order)['payment'];
         $stale = $payment->fresh();
         $service->confirm($user, $payment);
-        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        $this->expectException(ValidationException::class);
         $service->confirm($user, $stale);
     }
 
@@ -286,7 +295,7 @@ class MarketplaceRegressionTest extends TestCase
         $order = Order::factory()->create();
         $sub = SubOrder::factory()->create(['order_id' => $order->id]);
         $stock = VendorInventory::factory()->create(['quantity' => 8]);
-        \App\Models\OrderItem::factory()->create(['sub_order_id' => $sub->id, 'vendor_inventory_id' => $stock->id, 'quantity' => 2]);
+        OrderItem::factory()->create(['sub_order_id' => $sub->id, 'vendor_inventory_id' => $stock->id, 'quantity' => 2]);
         $this->actingAs($admin, 'sanctum')->patchJson('/api/v1/admin/orders/'.$order->id.'/status', ['status' => 'cancelled'])->assertOk();
         $this->patchJson('/api/v1/admin/orders/'.$order->id.'/status', ['status' => 'cancelled'])->assertOk();
         $this->assertSame(10, $stock->fresh()->quantity);
@@ -309,7 +318,7 @@ class MarketplaceRegressionTest extends TestCase
         $service = app(InventoryService::class);
         $reservation = $service->reserve($stock->id, 1);
         $reservation->update(['expires_at' => now()->subMinute()]);
-        $this->expectException(\App\Exceptions\OutOfStockException::class);
+        $this->expectException(OutOfStockException::class);
         $service->consume($reservation);
     }
 
@@ -319,7 +328,7 @@ class MarketplaceRegressionTest extends TestCase
         $stale = $stock->fresh();
         $stock->update(['quantity' => 8]);
         app(InventoryService::class)->reserve($stock->id, 3);
-        $service = app(\App\Services\VendorCatalogService::class);
+        $service = app(VendorCatalogService::class);
         $service->updateStock($stale, ['price' => 900]);
         $this->assertSame(8, $stock->fresh()->quantity);
         $service->updateStock($stale, ['quantity' => 0]);
@@ -344,7 +353,7 @@ class MarketplaceRegressionTest extends TestCase
 
     public function test_brand_edits_keep_the_slug_and_refresh_product_search(): void
     {
-        $brand = \App\Models\Brand::query()->create(['name' => 'Oldbrand', 'slug' => 'stable-brand']);
+        $brand = Brand::query()->create(['name' => 'Oldbrand', 'slug' => 'stable-brand']);
         Product::factory()->create(['brand_id' => $brand->id]);
         $this->actingAs(User::factory()->create(['role' => UserRole::Admin]), 'sanctum')
             ->putJson('/api/v1/admin/brands/'.$brand->id, ['name' => 'Newbrand'])->assertOk()
@@ -362,7 +371,7 @@ class MarketplaceRegressionTest extends TestCase
             'order_id' => Order::factory()->create(['payment_status' => 'paid'])->id,
         ]);
         foreach ([$old, $unpaid] as $sub) {
-            \App\Models\OrderItem::factory()->create(['sub_order_id' => $sub->id]);
+            OrderItem::factory()->create(['sub_order_id' => $sub->id]);
         }
         $this->actingAs($vendor->user, 'sanctum')->getJson('/api/v1/vendors/me/analytics?days=7')->assertOk()
             ->assertJsonPath('data.totals.orders', 0)->assertJsonCount(0, 'data.top_products');
@@ -372,9 +381,9 @@ class MarketplaceRegressionTest extends TestCase
     {
         $item = CartItem::factory()->create();
         $productId = $item->inventory->variant->product_id;
-        $this->seed(\Database\Seeders\DemoProductSeeder::class);
+        $this->seed(DemoProductSeeder::class);
         $count = Product::query()->count();
-        $this->seed(\Database\Seeders\DemoProductSeeder::class);
+        $this->seed(DemoProductSeeder::class);
         $this->assertDatabaseHas('cart_items', ['id' => $item->id]);
         $this->assertDatabaseHas('products', ['id' => $productId]);
         $this->assertSame($count, Product::query()->count());
@@ -384,7 +393,7 @@ class MarketplaceRegressionTest extends TestCase
     {
         $this->app->instance('env', 'production');
         $this->expectException(\RuntimeException::class);
-        app(\Database\Seeders\DatabaseSeeder::class)->run();
+        app(DatabaseSeeder::class)->run();
     }
 
     public function test_legacy_order_currency_is_corrected_without_changing_amounts(): void
@@ -419,7 +428,7 @@ class MarketplaceRegressionTest extends TestCase
             'user_id' => null, 'session_id' => 'expired-merge-session', 'expires_at' => now()->subMinute(),
         ]);
         CartItem::factory()->create(['cart_id' => $guest->id]);
-        app(\App\Services\CartService::class)->mergeGuestCart(User::factory()->create(), $guest->session_id);
+        app(CartService::class)->mergeGuestCart(User::factory()->create(), $guest->session_id);
         $this->assertDatabaseCount('cart_items', 0);
         $this->assertDatabaseCount('carts', 0);
     }
@@ -428,7 +437,7 @@ class MarketplaceRegressionTest extends TestCase
     {
         $order = Order::factory()->create();
         $sub = SubOrder::factory()->create(['order_id' => $order->id]);
-        \App\Models\OrderItem::factory(2)->create(['sub_order_id' => $sub->id]);
+        OrderItem::factory(2)->create(['sub_order_id' => $sub->id]);
         $this->actingAs($order->user, 'sanctum')->getJson('/api/v1/orders')
             ->assertOk()->assertJsonPath('data.0.items_count', 2);
         $this->getJson('/api/v1/orders/'.$order->id)->assertOk()->assertJsonPath('data.items_count', 2);
@@ -439,8 +448,8 @@ class MarketplaceRegressionTest extends TestCase
     public function test_attribute_filters_must_match_the_same_variant(): void
     {
         $product = Product::factory()->create();
-        $color = \App\Models\Attribute::create(['name' => 'Color', 'slug' => 'color']);
-        $size = \App\Models\Attribute::create(['name' => 'Size', 'slug' => 'size']);
+        $color = Attribute::create(['name' => 'Color', 'slug' => 'color']);
+        $size = Attribute::create(['name' => 'Size', 'slug' => 'size']);
         $red = $color->values()->create(['value' => 'red']);
         $large = $size->values()->create(['value' => 'large']);
         $first = ProductVariant::factory()->create(['product_id' => $product->id]);
@@ -456,7 +465,7 @@ class MarketplaceRegressionTest extends TestCase
     {
         Product::factory()->create();
         $variant = ProductVariant::factory()->create();
-        $attribute = \App\Models\Attribute::create(['name' => 'Count', 'slug' => 'count']);
+        $attribute = Attribute::create(['name' => 'Count', 'slug' => 'count']);
         $value = $attribute->values()->create(['value' => '0']);
         $variant->attributeValues()->attach($value->id, ['attribute_id' => $attribute->id]);
         $this->getJson('/api/v1/products?attrs[count]=0')->assertOk()

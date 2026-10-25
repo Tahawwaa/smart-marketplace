@@ -144,7 +144,7 @@ export function SiteHeader() {
           <span className="grid size-9 place-items-center rounded-xl bg-brand text-brand-fg shadow-[var(--shadow-md)]">
             <ShoppingBag className="size-5" />
           </span>
-          <span>بازار هوشمند</span>
+          <span>tahajorablo</span>
         </Link>
 
         <form

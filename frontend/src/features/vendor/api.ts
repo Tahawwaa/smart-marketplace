@@ -6,14 +6,22 @@ import type {
   VendorProfileResponse,
   VendorStock,
   VendorSubOrder,
+  Vendor,
 } from '../../types/api'
 
 export const fetchVendorProfile = (signal?: AbortSignal) =>
   api<VendorProfileResponse>('/vendors/me', { signal })
 
+export const updateVendorProfile = (input: { store_name: string; bank_sheba: string | null }) =>
+  api<ApiItem<Vendor>>('/vendors/me', { method: 'PUT', body: input })
+
 export type VendorAnalytics = {
   catalog: { products: number; pending_products: number; out_of_stock: number }
   period_days: number
+  period: { from: string; to: string }
+  previous_totals: { orders: number; revenue: number; commission: number; net: number; average_order_value: number }
+  revenue_change_percent: number | null
+  fulfillment: { to_prepare: number; in_transit: number }
   totals: { orders: number; revenue: number; commission: number; net: number; average_order_value: number }
   payouts: { pending: number; paid: number }
   daily: { date: string; orders: number; revenue: number }[]
@@ -25,10 +33,10 @@ export type VendorAnalytics = {
 export const fetchVendorAnalytics = (days: number, signal?: AbortSignal) =>
   api<{ data: VendorAnalytics }>('/vendors/me/analytics', { query: { days }, signal })
 
-export async function downloadVendorOrdersCsv() {
+export async function downloadVendorOrdersCsv(days = 30) {
   const token = tokenStore.get()
-  const response = await fetch(`${BASE_URL}/vendors/me/orders-export`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  const response = await fetch(`${BASE_URL}/vendors/me/orders-export?days=${days}`, {
+    headers: { Accept: 'text/csv', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
   })
   if (!response.ok) throw new Error('دریافت فایل ناموفق بود.')
   const url = URL.createObjectURL(await response.blob())
@@ -36,7 +44,7 @@ export async function downloadVendorOrdersCsv() {
   link.href = url
   link.download = 'vendor-orders.csv'
   link.click()
-  URL.revokeObjectURL(url)
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
 /** ورودی یک گونه همراه با موجودی اولیه‌ی آن. */
@@ -67,8 +75,8 @@ export type ProductInput = {
 export const createVendorProduct = (input: ProductInput) =>
   api<ApiItem<VendorProduct>>('/vendors/me/products', { method: 'POST', body: input })
 
-export const fetchVendorProducts = (signal?: AbortSignal, page = 1) =>
-  api<ApiList<VendorProduct>>('/vendors/me/products', { signal, query: { page } })
+export const fetchVendorProducts = (signal?: AbortSignal, page = 1, filters: { search?: string; status?: string } = {}) =>
+  api<ApiList<VendorProduct>>('/vendors/me/products', { signal, query: { page, ...filters } })
 
 export const fetchVendorProduct = (id: number, signal?: AbortSignal) =>
   api<ApiItem<VendorProduct>>(`/vendors/me/products/${id}`, { signal })
@@ -79,10 +87,11 @@ export const updateVendorProduct = (id: number, input: Partial<ProductInput>) =>
 export const deleteVendorProduct = (id: number) =>
   api<void>(`/vendors/me/products/${id}`, { method: 'DELETE' })
 
-export const fetchVendorStock = (signal?: AbortSignal, page = 1) =>
-  api<ApiList<VendorStock>>('/vendors/me/inventory', { signal, query: { page } })
+export const fetchVendorStock = (signal?: AbortSignal, page = 1, filters: { search?: string; stock?: string } = {}) =>
+  api<ApiList<VendorStock>>('/vendors/me/inventory', { signal, query: { page, ...filters } })
 
 export type StockInput = {
+  lock_version?: number
   price?: number
   sale_price?: number | null
   quantity?: number
@@ -93,11 +102,14 @@ export type StockInput = {
 export const updateVendorStock = (id: number, input: StockInput) =>
   api<ApiItem<VendorStock>>(`/vendors/me/inventory/${id}`, { method: 'PUT', body: input })
 
-export const fetchVendorOrders = (status: string, signal?: AbortSignal, page = 1) =>
+export const fetchVendorOrders = (status: string, signal?: AbortSignal, page = 1, filters: { search?: string; payment_status?: string; per_page?: number } = {}) =>
   api<ApiList<VendorSubOrder>>('/vendors/me/orders', {
-    query: { status: status || undefined, page },
+    query: { status: status || undefined, page, ...filters },
     signal,
   })
+
+export const fetchVendorOrder = (id: number, signal?: AbortSignal) =>
+  api<ApiItem<VendorSubOrder>>(`/vendors/me/orders/${id}`, { signal })
 
 /** فقط گذرهای مجاز فروشنده؛ لغو و بازگشت وجه در اختیار فروشنده نیست. */
 export const VENDOR_SUB_ORDER_STATUSES = ['confirmed', 'processing', 'shipped', 'delivered'] as const

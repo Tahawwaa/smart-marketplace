@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\Admin\AdminBrandController;
 use App\Http\Controllers\Api\Admin\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\AdminDashboardController;
@@ -7,7 +8,6 @@ use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\Admin\AdminProductController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\AdminVendorController;
-use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Vendor\VendorInventoryController;
 use App\Http\Controllers\Api\Vendor\VendorOrderController;
 use App\Http\Controllers\Api\Vendor\VendorProductController;
 use App\Http\Controllers\Api\Vendor\VendorProfileController;
+use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
 
 Route::post('auth/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
@@ -39,7 +40,7 @@ Route::post('cart/items', [CartController::class, 'store']);
 Route::patch('cart/items/{item}', [CartController::class, 'update']);
 Route::delete('cart/items/{item}', [CartController::class, 'destroy']);
 
-Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureUserIsActive::class])->group(function () {
+Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
     Route::put('auth/profile', [AuthController::class, 'updateProfile']);
     Route::put('auth/password', [AuthController::class, 'updatePassword']);
@@ -62,6 +63,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureUserIsActive::clas
         // «فروشنده شوید»: هر حسابی می‌تواند فروشگاه باز کند؛ فروشگاه تا تأیید مدیر
         // در وضعیت pending می‌ماند.
         Route::post('/', [VendorProfileController::class, 'store']);
+        Route::put('/', [VendorProfileController::class, 'update']);
 
         Route::get('products', [VendorProductController::class, 'index']);
         Route::get('products/{product}', [VendorProductController::class, 'show']);
@@ -73,6 +75,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureUserIsActive::clas
         Route::put('inventory/{inventory}', [VendorInventoryController::class, 'update']);
 
         Route::get('orders', [VendorOrderController::class, 'index']);
+        Route::get('orders/{subOrder}', [VendorOrderController::class, 'show']);
         Route::patch('orders/{subOrder}/status', [VendorOrderController::class, 'updateStatus']);
 
         Route::get('analytics', [VendorAnalyticsController::class, 'show']);

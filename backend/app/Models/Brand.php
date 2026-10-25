@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ProductSearchService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,7 +19,7 @@ class Brand extends Model
     {
         static::updated(function (Brand $brand) {
             if ($brand->wasChanged('name')) {
-                $brand->products()->each(fn (Product $product) => app(\App\Services\ProductSearchService::class)->reindex($product));
+                $brand->products()->each(fn (Product $product) => app(ProductSearchService::class)->reindex($product));
             }
         });
     }

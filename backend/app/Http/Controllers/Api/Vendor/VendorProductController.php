@@ -26,8 +26,18 @@ class VendorProductController extends VendorController
     {
         $vendor = $this->vendor($request);
 
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:draft,pending,approved,rejected'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:50'],
+        ]);
+
         $products = Product::query()
             ->where('vendor_id', $vendor->id)
+            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
+            ->when($filters['search'] ?? null, fn ($query, $search) => $query->where(fn ($query) => $query
+                ->where('name', 'like', '%'.$search.'%')
+                ->orWhereHas('variants', fn ($variant) => $variant->where('sku', 'like', '%'.$search.'%'))))
             ->with([
                 'category:id,name,slug',
                 'brand:id,name,slug',
@@ -35,7 +45,7 @@ class VendorProductController extends VendorController
                 'variants.inventories' => fn ($query) => $query->where('vendor_id', $vendor->id),
             ])
             ->latest('id')
-            ->paginate(15)
+            ->paginate($filters['per_page'] ?? 15)
             ->withQueryString();
 
         return VendorProductResource::collection($products);

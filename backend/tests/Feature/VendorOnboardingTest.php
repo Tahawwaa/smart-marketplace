@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Enums\VendorStatus;
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,17 +37,42 @@ class VendorOnboardingTest extends TestCase
         ]);
     }
 
-    public function test_an_admin_keeps_the_admin_role_after_opening_a_store(): void
+    public function test_an_admin_can_use_both_panels_after_opening_an_approved_store(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
         $this->actingAs($admin, 'sanctum')
             ->postJson('/api/v1/vendors/me', ['store_name' => 'فروشگاه مدیر'])
             ->assertCreated()
-            ->assertJsonPath('user.role', UserRole::Admin->value);
+            ->assertJsonPath('user.role', UserRole::Admin->value)
+            ->assertJsonPath('data.status', VendorStatus::Approved->value)
+            ->assertJsonPath('user.store.status', VendorStatus::Approved->value);
 
         // Losing the admin role here would lock the owner out of the panel.
         $this->assertSame(UserRole::Admin, $admin->fresh()->role);
+        $this->assertNotNull($admin->store()->firstOrFail()->approved_at);
+        $this->getJson('/api/v1/admin/vendors')->assertOk();
+        $this->getJson('/api/v1/vendors/me/analytics')->assertOk();
+        $this->getJson('/api/v1/vendors/me/orders')->assertOk();
+        $this->postJson('/api/v1/vendors/me/products', [
+            'name' => 'کالای فروشگاه مدیر',
+            'category_id' => Category::factory()->create()->id,
+            'variants' => [['price' => 100000, 'quantity' => 5]],
+        ])->assertCreated()->assertJsonPath('data.name', 'کالای فروشگاه مدیر');
+
+        $otherProduct = Product::factory()->create(['vendor_id' => Vendor::factory()->create()->id]);
+        $this->getJson('/api/v1/vendors/me/products')->assertOk()->assertJsonCount(1, 'data');
+        $this->getJson('/api/v1/vendors/me/products/'.$otherProduct->id)->assertNotFound();
+    }
+
+    public function test_a_customer_cannot_request_admin_store_approval(): void
+    {
+        $user = User::factory()->create(['role' => UserRole::Customer]);
+        $this->actingAs($user, 'sanctum')->postJson('/api/v1/vendors/me', [
+            'store_name' => 'فروشگاه مشتری', 'role' => 'admin', 'status' => 'approved', 'approved_at' => now()->toIso8601String(),
+        ])->assertCreated()->assertJsonPath('data.status', VendorStatus::Pending->value);
+        $this->assertNull($user->store()->firstOrFail()->approved_at);
+        $this->getJson('/api/v1/admin/vendors')->assertForbidden();
     }
 
     public function test_a_second_store_cannot_be_opened_for_the_same_account(): void

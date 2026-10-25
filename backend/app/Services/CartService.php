@@ -206,9 +206,9 @@ class CartService
 
                 $existing = $cart->items()->where('vendor_inventory_id', $item->vendor_inventory_id)->first();
                 $quantity = min(
-                ($existing?->quantity ?? 0) + $item->quantity,
-                $inventory->availableQuantity(),
-                100,
+                    ($existing?->quantity ?? 0) + $item->quantity,
+                    $inventory->availableQuantity(),
+                    100,
                 );
 
                 if ($existing !== null) {

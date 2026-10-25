@@ -255,6 +255,7 @@ export type VendorStock = {
 }
 
 export type VendorSubOrder = {
+  history?: { id: number; from_status: string | null; to_status: string; note: string | null; created_at: string | null }[]
   id: number
   sub_order_number: string
   status: string

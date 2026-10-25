@@ -29,23 +29,27 @@ class VendorAnalyticsService
     {
         $since = Carbon::today()->subDays($days - 1);
 
-        $sold = SubOrder::query()
+        $until = Carbon::tomorrow();
+        $soldQuery = SubOrder::query()
             ->where('vendor_id', $vendor->id)
             ->whereHas('order', fn ($order) => $order->whereIn('payment_status', [PaymentStatus::Paid, PaymentStatus::PartiallyRefunded]))
             ->whereIn('status', array_map(fn (OrderStatus $status) => $status->value, self::SOLD_STATUSES))
-            ->where('created_at', '>=', $since)
-            ->get(['id', 'subtotal_price', 'commission_amount', 'vendor_net_amount', 'created_at']);
+            ;
 
-        $byDay = $sold->groupBy(fn (SubOrder $row) => $row->created_at->toDateString());
+        $sold = (clone $soldQuery)->where('created_at', '>=', $since)->where('created_at', '<', $until);
+        $totals = $this->totals(clone $sold);
+        $previous = $this->totals((clone $soldQuery)->where('created_at', '>=', $since->copy()->subDays($days))->where('created_at', '<', $since));
+        $byDay = (clone $sold)->selectRaw('DATE(created_at) as day, count(*) as orders, sum(subtotal_price) as revenue')
+            ->groupByRaw('DATE(created_at)')->get()->keyBy('day');
 
         $daily = collect(range(0, $days - 1))->map(function (int $offset) use ($since, $byDay) {
             $date = $since->copy()->addDays($offset)->toDateString();
-            $rows = $byDay->get($date, collect());
+            $row = $byDay->get($date);
 
             return [
                 'date' => $date,
-                'orders' => $rows->count(),
-                'revenue' => (float) $rows->sum('subtotal_price'),
+                'orders' => (int) ($row?->orders ?? 0),
+                'revenue' => (float) ($row?->revenue ?? 0),
             ];
         })->values()->all();
 
@@ -62,6 +66,7 @@ class VendorAnalyticsService
             ->where('sub_orders.vendor_id', $vendor->id)
             ->whereHas('subOrder.order', fn ($order) => $order->whereIn('payment_status', [PaymentStatus::Paid, PaymentStatus::PartiallyRefunded]))
             ->where('sub_orders.created_at', '>=', $since)
+            ->where('sub_orders.created_at', '<', $until)
             ->whereNull('sub_orders.deleted_at')
             ->whereIn('sub_orders.status', array_map(fn (OrderStatus $status) => $status->value, self::SOLD_STATUSES))
             ->selectRaw('order_items.product_name_snapshot as name, sum(order_items.quantity) as units, sum(order_items.total_price) as revenue')
@@ -77,6 +82,7 @@ class VendorAnalyticsService
 
         $lowStock = VendorInventory::query()
             ->where('vendor_id', $vendor->id)
+            ->whereHas('variant.product')
             ->whereRaw('(quantity - reserved_quantity) <= ?', [self::LOW_STOCK_THRESHOLD])
             ->with('variant.product:id,name')
             ->orderByRaw('(quantity - reserved_quantity) asc')
@@ -93,18 +99,19 @@ class VendorAnalyticsService
 
         return [
             'period_days' => $days,
+            'period' => ['from' => $since->toDateString(), 'to' => Carbon::today()->toDateString()],
+            'previous_totals' => $previous,
+            'revenue_change_percent' => $previous['revenue'] > 0 ? round(($totals['revenue'] - $previous['revenue']) / $previous['revenue'] * 100, 1) : null,
+            'fulfillment' => [
+                'to_prepare' => (clone $soldQuery)->whereIn('status', ['confirmed', 'processing'])->count(),
+                'in_transit' => (clone $soldQuery)->where('status', 'shipped')->count(),
+            ],
             'catalog' => [
                 'products' => $vendor->products()->count(),
                 'pending_products' => $vendor->products()->where('status', 'pending')->count(),
-                'out_of_stock' => $vendor->inventories()->whereColumn('quantity', '<=', 'reserved_quantity')->count(),
+                'out_of_stock' => $vendor->inventories()->whereHas('variant.product')->whereColumn('quantity', '<=', 'reserved_quantity')->count(),
             ],
-            'totals' => [
-                'orders' => $sold->count(),
-                'revenue' => (float) $sold->sum('subtotal_price'),
-                'commission' => (float) $sold->sum('commission_amount'),
-                'net' => (float) $sold->sum('vendor_net_amount'),
-                'average_order_value' => $sold->isEmpty() ? 0.0 : round((float) $sold->avg('subtotal_price'), 2),
-            ],
+            'totals' => $totals,
             'payouts' => [
                 'pending' => (float) (clone $payouts)->where('status', 'pending')->sum('amount'),
                 'paid' => (float) (clone $payouts)->where('status', 'paid')->sum('amount'),
@@ -115,4 +122,19 @@ class VendorAnalyticsService
             'low_stock' => $lowStock,
         ];
     }
+
+    /** @return array<string, int|float> */
+    private function totals(\Illuminate\Database\Eloquent\Builder $query): array
+    {
+        $row = $query->selectRaw('count(*) as orders, coalesce(sum(subtotal_price), 0) as revenue, coalesce(sum(commission_amount), 0) as commission, coalesce(sum(vendor_net_amount), 0) as net')->first();
+
+        return [
+            'orders' => (int) $row->orders,
+            'revenue' => (float) $row->revenue,
+            'commission' => (float) $row->commission,
+            'net' => (float) $row->net,
+            'average_order_value' => $row->orders > 0 ? round((float) $row->revenue / $row->orders, 2) : 0.0,
+        ];
+    }
+
 }

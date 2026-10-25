@@ -35,7 +35,7 @@ class OrderController extends Controller
     {
         abort_unless($order->user_id === $request->user()->id, 404);
 
-        return OrderResource::make($order->load($this->relations()));
+        return OrderResource::make($order->load($this->relations())->loadCount('items'));
     }
 
     /**

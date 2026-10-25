@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ProductSearchService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +25,7 @@ class Category extends Model
                 $category->children()->each(fn (Category $child) => $child->save());
             }
             if ($category->wasChanged('name')) {
-                $category->products()->each(fn (Product $product) => app(\App\Services\ProductSearchService::class)->reindex($product));
+                $category->products()->each(fn (Product $product) => app(ProductSearchService::class)->reindex($product));
             }
         });
     }

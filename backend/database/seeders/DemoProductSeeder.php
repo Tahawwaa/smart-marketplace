@@ -108,5 +108,4 @@ class DemoProductSeeder extends Seeder
             ]);
         }
     }
-
 }

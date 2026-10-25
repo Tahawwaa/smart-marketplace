@@ -15,6 +15,7 @@ import { Field, FormError, FormNotice, SubmitButton, inputClass } from './form-c
  */
 export function AccountStorePage() {
   const { user, setUser } = useAuth()
+  const isAdmin = user?.role === 'admin'
   const store = useAsync((signal) => fetchMyStore(signal), 'account-store')
 
   const [storeName, setStoreName] = useState('')
@@ -89,8 +90,10 @@ export function AccountStorePage() {
           {opened ? (
             <div className="mt-4">
               <FormNotice
-                tone="amber"
-                message="فروشگاه ثبت شد و در صف بررسی مدیر قرار گرفت."
+                tone={mine.status === 'approved' ? 'emerald' : 'amber'}
+                message={mine.status === 'approved'
+                  ? 'فروشگاه شما فعال شد. می‌توانید وارد پنل فروشندگی شوید.'
+                  : 'فروشگاه ثبت شد و در صف بررسی مدیر قرار گرفت.'}
               />
             </div>
           ) : null}
@@ -123,7 +126,7 @@ export function AccountStorePage() {
   return (
     <section className="max-w-xl card p-4">
       <h2 className="flex items-center gap-1.5 text-sm font-bold text-fg">
-        <Store className="size-4 text-brand" /> فروشنده شوید
+        <Store className="size-4 text-brand" /> {isAdmin ? 'راه‌اندازی فروشگاه مدیر' : 'فروشنده شوید'}
       </h2>
       <p className="mt-1 text-[11px] text-fg-subtle">
         با ساخت فروشگاه، همان حساب فعلی شما ({user?.email}) فروشنده هم می‌شود و دسترسی خریدار یا مدیرتان از
@@ -151,7 +154,9 @@ export function AccountStorePage() {
       </div>
 
       <p className="mt-4 rounded-xl border border-line bg-surface px-4 py-3 text-[11px] text-fg-muted">
-        پس از ساخت، فروشگاه در وضعیت «در انتظار تأیید» قرار می‌گیرد و مدیر آن را بررسی می‌کند.
+        {isAdmin
+          ? 'فروشگاه حساب مدیر بلافاصله پس از ثبت فعال می‌شود. پنل مدیریت و پنل فروشندگی هر دو در دسترس شما خواهند بود.'
+          : 'پس از ساخت، فروشگاه در وضعیت «در انتظار تأیید» قرار می‌گیرد و مدیر آن را بررسی می‌کند.'}
       </p>
 
       <div className="mt-4 space-y-3">

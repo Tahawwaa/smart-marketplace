@@ -3,11 +3,15 @@ import { Link, Outlet } from 'react-router-dom'
 import { useAsync } from '../../hooks/use-async'
 import { fetchVendorProfile } from '../../features/vendor/api'
 import type { Vendor } from '../../types/api'
+import { useAuth } from '../../features/auth/auth-context'
+import { useState } from 'react'
 
 /** پروفایل فروشگاه در دسترس همه‌ی صفحه‌های پنل قرار می‌گیرد. */
-export type VendorOutletContext = { vendor: Vendor }
+export type VendorOutletContext = { vendor: Vendor; setVendor: (vendor: Vendor) => void }
 
 export function RequireVendor() {
+  const { user } = useAuth()
+  const [updatedVendor, setVendor] = useState<Vendor | null>(null)
   const profile = useAsync((signal) => fetchVendorProfile(signal), 'vendor-profile')
 
   if (profile.loading) {
@@ -19,7 +23,7 @@ export function RequireVendor() {
     )
   }
 
-  const vendor = profile.data?.data ?? null
+  const vendor = updatedVendor ?? profile.data?.data ?? null
 
   // فروشگاهی ثبت نشده: کاربر می‌تواند از همین‌جا فروشنده شود.
   if (vendor === null && profile.error === null) {
@@ -27,8 +31,9 @@ export function RequireVendor() {
       <div className="mx-auto max-w-xl px-4 py-24 text-center sm:px-6">
         <p className="text-sm text-fg">هنوز فروشگاهی برای این حساب ثبت نشده است.</p>
         <p className="mt-2 text-xs text-fg-subtle">
-          با ساخت فروشگاه، همان حساب فعلی فروشنده هم می‌شود و دسترسی خریدار یا مدیرتان از دست نمی‌رود. فروشگاه پس
-          از تأیید مدیر فعال می‌شود.
+          {user?.role === 'admin'
+            ? 'نام فروشگاه خود را ثبت کنید تا پنل فروشندگی شما فعال شود. دسترسی مدیریت شما حفظ می‌شود.'
+            : 'با ساخت فروشگاه، همین حساب فروشنده هم می‌شود. فروشگاه پس از تأیید مدیر فعال می‌شود.'}
         </p>
         <Link
           to="/account/store"
@@ -60,5 +65,5 @@ export function RequireVendor() {
     )
   }
 
-  return <Outlet context={{ vendor } satisfies VendorOutletContext} />
+  return <Outlet context={{ vendor, setVendor } satisfies VendorOutletContext} />
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Vendor;
 
 use App\Http\Requests\Vendor\StoreVendorRequest;
+use App\Http\Requests\Vendor\UpdateVendorProfileRequest;
 use App\Http\Resources\VendorResource;
 use App\Http\Resources\UserResource;
 use App\Services\VendorStoreService;
@@ -28,6 +29,14 @@ class VendorProfileController extends VendorController
         return response()->json([
             'data' => $vendor === null ? null : VendorResource::make($vendor)->resolve($request),
         ]);
+    }
+
+    public function update(UpdateVendorProfileRequest $request): VendorResource
+    {
+        $vendor = $this->vendor($request);
+        $vendor->update($request->safe()->only(['store_name', 'bank_sheba']));
+
+        return VendorResource::make($vendor->refresh());
     }
 
     /**

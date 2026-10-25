@@ -39,6 +39,7 @@ class InventoryService
             }
 
             $stock->increment('reserved_quantity', $quantity);
+            $stock->increment('lock_version');
 
             return InventoryReservation::create([
                 'vendor_inventory_id' => $stock->id,
@@ -75,6 +76,7 @@ class InventoryService
 
             $stock->decrement('reserved_quantity', $reservation->quantity);
             $stock->decrement('quantity', $reservation->quantity);
+            $stock->increment('lock_version');
             $stock->refresh();
 
             $reservation->update(['status' => 'consumed']);
@@ -104,6 +106,7 @@ class InventoryService
             }
 
             $stock->decrement('reserved_quantity', $reservation->quantity);
+            $stock->increment('lock_version');
             $reservation->update(['status' => 'released']);
 
             return true;

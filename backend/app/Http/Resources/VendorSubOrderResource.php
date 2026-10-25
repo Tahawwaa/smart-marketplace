@@ -22,6 +22,13 @@ class VendorSubOrderResource extends JsonResource
             'commission_amount' => (float) $this->commission_amount,
             'vendor_net_amount' => (float) $this->vendor_net_amount,
             'created_at' => $this->created_at?->toIso8601String(),
+            'history' => $this->whenLoaded('statusHistories', fn () => $this->statusHistories->map(fn ($entry) => [
+                'id' => $entry->id,
+                'from_status' => $entry->from_status,
+                'to_status' => $entry->to_status,
+                'note' => $entry->note,
+                'created_at' => $entry->created_at?->toIso8601String(),
+            ])),
             'order' => $this->whenLoaded('order', fn () => $this->order === null ? null : [
                 'id' => $this->order->id,
                 'order_number' => $this->order->order_number,
