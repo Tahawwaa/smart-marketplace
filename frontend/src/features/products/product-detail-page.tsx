@@ -6,9 +6,41 @@ import { useCart } from '../cart/cart-context'
 import { useAsync } from '../../hooks/use-async'
 import { faNum, faPrice } from '../../lib/format'
 import { RemoteImage } from '../../components/ui/remote-image'
+import type { ProductImage, ProductVariant } from '../../types/api'
 import { fetchProduct, fetchRecommendations } from './api'
 import { productImageSources } from './images'
 import { ProductCard } from './product-card'
+
+function isColorAttribute(attribute: { slug: string; name: string }) {
+  return attribute.slug === 'color' || attribute.name === 'رنگ'
+}
+
+function variantColor(variant: ProductVariant) {
+  return variant.attributes?.find(isColorAttribute)?.values[0] ?? null
+}
+
+function colorChoices(variants: ProductVariant[]) {
+  const seen = new Set<number>()
+  const choices: { id: number; value: string; color_code: string | null; variantId: number }[] = []
+
+  for (const variant of variants) {
+    const color = variantColor(variant)
+    if (!color || seen.has(color.id)) continue
+    seen.add(color.id)
+    choices.push({ id: color.id, value: color.value, color_code: color.color_code, variantId: variant.id })
+  }
+
+  return choices
+}
+
+function imageForVariant(images: ProductImage[] | undefined, variantId: number | null) {
+  return (
+    (variantId === null ? undefined : images?.find((item) => item.variant_id === variantId)) ??
+    images?.find((item) => item.is_primary) ??
+    images?.[0] ??
+    null
+  )
+}
 
 export function ProductDetailPage() {
   const { slug = '' } = useParams()
@@ -28,15 +60,6 @@ function ProductDetail({ slug }: { slug: string }) {
   const related = useAsync((signal) => fetchRecommendations(slug, signal), slug)
   const relatedItems = related.data?.data ?? []
   const detail = product.data?.data ?? null
-  const image = detail?.images?.find((item) => item.is_primary) ?? detail?.images?.[0] ?? null
-
-  const imageSources = detail
-    ? [
-        ...(image ? [image.path] : []),
-        ...productImageSources(detail.name, detail.category?.slug ?? '', detail.id),
-      ]
-    : []
-
   // موجودی‌ها زیر هر تنوع می‌آیند؛ ارزان‌ترین موجودی قابل خرید انتخاب می‌شود.
   const offers = (detail?.variants ?? []).flatMap((variant) => variant.inventories ?? [])
     .filter((offer) => offer.is_available && offer.available_quantity > 0)
@@ -44,6 +67,18 @@ function ProductDetail({ slug }: { slug: string }) {
     offers.find((offer) => offer.id === inventoryId) ??
     [...offers].sort((a, b) => a.effective_price - b.effective_price)[0] ??
     null
+  const selectedVariant =
+    detail?.variants?.find((variant) => variant.inventories?.some((offer) => offer.id === selected?.id)) ?? null
+  const image = imageForVariant(detail?.images, selectedVariant?.id ?? null)
+  const colors = colorChoices(detail?.variants ?? [])
+  const selectedColor = selectedVariant ? variantColor(selectedVariant) : null
+
+  const imageSources = detail
+    ? [
+        ...(image ? [image.path] : []),
+        ...productImageSources(detail.name, detail.category?.slug ?? '', detail.id),
+      ]
+    : []
   const price = selected?.effective_price ?? detail?.price_from ?? null
 
   if (product.loading) {
@@ -107,6 +142,43 @@ function ProductDetail({ slug }: { slug: string }) {
             <p className="mt-1 text-2xl font-black tabular-nums text-fg sm:text-3xl">
               {price === null ? 'قیمت پس از انتخاب تنوع' : faPrice(price)}
             </p>
+
+            {colors.length > 0 ? (
+              <div className="mt-5">
+                <p className="text-xs text-fg-subtle">
+                  رنگ
+                  {selectedColor ? (
+                    <span className="ms-1 font-bold text-fg">{selectedColor.value}</span>
+                  ) : null}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="رنگ">
+                  {colors.map((color) => {
+                    const active = selectedColor?.id === color.id
+                    return (
+                      <button
+                        key={color.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        aria-label={color.value}
+                        title={color.value}
+                        onClick={() => {
+                          const variant = detail.variants?.find((item) => item.id === color.variantId)
+                          const offer = (variant?.inventories ?? []).find(
+                            (item) => item.is_available && item.available_quantity > 0,
+                          )
+                          if (offer) setInventoryId(offer.id)
+                        }}
+                        className={`size-8 rounded-full border-2 transition ${
+                          active ? 'border-brand ring-2 ring-brand/30' : 'border-line hover:border-line-strong'
+                        }`}
+                        style={{ backgroundColor: color.color_code ?? '#d4d4d4' }}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+            ) : null}
 
             <div className="mt-5 flex items-center gap-3">
               <label htmlFor="quantity" className="label !mb-0">

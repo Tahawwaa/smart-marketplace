@@ -41,6 +41,7 @@ class ProductResource extends JsonResource
                 'alt' => $image->alt,
                 'sort_order' => $image->sort_order,
                 'is_primary' => $image->is_primary,
+                'variant_id' => $image->variant_id,
             ])->values()->all()),
             'variants' => $this->whenLoaded(
                 'variants',

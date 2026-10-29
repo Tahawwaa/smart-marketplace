@@ -37,6 +37,7 @@ export type ProductImage = {
   alt: string | null
   sort_order: number
   is_primary: boolean
+  variant_id?: number | null
 }
 
 export type ProductVariant = {

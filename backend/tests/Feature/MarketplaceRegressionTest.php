@@ -389,6 +389,18 @@ class MarketplaceRegressionTest extends TestCase
         $this->assertSame($count, Product::query()->count());
     }
 
+    public function test_demo_seeder_creates_linen_coat_color_images(): void
+    {
+        Vendor::factory()->create();
+        $this->seed(DemoProductSeeder::class);
+
+        $product = Product::query()->where('slug', 'linen-coat')->firstOrFail();
+        $this->assertSame('کت لینن آزاد', $product->name);
+        $this->assertCount(3, $product->variants);
+        $this->assertCount(3, $product->images);
+        $this->assertTrue($product->images->every(fn ($image) => $image->variant_id !== null));
+    }
+
     public function test_demo_accounts_cannot_be_seeded_in_production(): void
     {
         $this->app->instance('env', 'production');

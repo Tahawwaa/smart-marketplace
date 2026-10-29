@@ -18,6 +18,9 @@ export type ProductImageKey =
   | 'office-chair'
   | 'plant-pot'
   | 'plaid-shirt'
+  | 'linen-coat-beige'
+  | 'linen-coat-white'
+  | 'linen-coat-olive'
   | 'sneakers'
   | 'high-top'
   | 'handbag'
@@ -42,7 +45,7 @@ const CATEGORY_POOL: Record<string, ProductImageKey[]> = {
   mobile: ['iphone', 'android-phone', 'headphones-max', 'earbuds', 'smartwatch', 'power-bank'],
   laptop: ['laptop-pro', 'laptop-dual', 'laptop-ultra', 'laptop-flip', 'tablet-mini', 'tablet-pen'],
   home: ['sofa', 'blender', 'microwave', 'table-lamp', 'office-chair', 'plant-pot'],
-  fashion: ['handbag', 'sneakers', 'high-top', 'plaid-shirt', 'sunglasses', 'leather-watch'],
+  fashion: ['handbag', 'sneakers', 'high-top', 'plaid-shirt', 'linen-coat-beige', 'sunglasses', 'leather-watch'],
   beauty: ['perfume', 'perfume-noir', 'lipstick', 'eyeshadow', 'body-lotion', 'body-wash'],
   sport: ['basketball', 'tennis-racket', 'football', 'volleyball', 'baseball-glove', 'cricket-bat'],
 }
@@ -73,6 +76,7 @@ const KEYWORDS: Array<[string[], ProductImageKey]> = [
   [['صندلی', 'chair'], 'office-chair'],
   [['گلدان', 'گیاه', 'plant'], 'plant-pot'],
   [['پیراهن', 'shirt'], 'plaid-shirt'],
+  [['کت لینن', 'لینن', 'linen'], 'linen-coat-beige'],
   [['کتونی', 'کفش', 'sneaker', 'shoe'], 'sneakers'],
   [['کیف', 'bag'], 'handbag'],
   [['عینک', 'sunglass'], 'sunglasses'],

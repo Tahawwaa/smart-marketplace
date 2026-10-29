@@ -34,7 +34,7 @@ export function VendorLayout() {
         <div className="mt-2 hidden space-y-3 border-t border-line p-3 lg:block"><p className="truncate text-xs font-bold text-fg">{user?.name}</p><p className="text-[11px] leading-6 text-fg-subtle">مدیریت روزانهٔ کالاها و سفارش‌های فروشگاه شما</p>{user?.role === 'admin' ? <Link to="/admin" className="flex items-center gap-2 text-xs font-bold text-brand"><ShieldCheck className="size-4" />ورود به پنل مدیریت</Link> : <Link to="/account" className="text-xs font-bold text-brand">حساب کاربری</Link>}</div>
         {user?.role === 'admin' ? <Link to="/admin" className="mt-2 flex items-center gap-2 border-t border-line p-3 text-xs font-bold text-brand lg:hidden"><ShieldCheck className="size-4" />ورود به پنل مدیریت</Link> : null}
       </aside>
-      <main className="min-w-0 space-y-5">{vendor.status === 'pending' ? <p className="alert alert-warning">فروشگاه در انتظار تأیید است. می‌توانید کالاها را آماده کنید؛ فروش پس از تأیید فعال می‌شود.</p> : null}<Outlet context={context} /></main>
+      <div className="min-w-0 space-y-5">{vendor.status === 'pending' ? <p className="alert alert-warning">فروشگاه در انتظار تأیید است. می‌توانید کالاها را آماده کنید؛ فروش پس از تأیید فعال می‌شود.</p> : null}<Outlet context={context} /></div>
     </div>
   </section>
 }

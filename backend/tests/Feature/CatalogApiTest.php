@@ -118,6 +118,31 @@ class CatalogApiTest extends TestCase
             ->assertJsonPath('data.0.slug', $matching->slug);
     }
 
+    public function test_product_show_includes_variant_id_on_images(): void
+    {
+        $product = Product::factory()->create(['is_active' => true]);
+        $red = ProductVariant::factory()->create(['product_id' => $product->id]);
+        $blue = ProductVariant::factory()->create(['product_id' => $product->id]);
+        $this->inventory($red, 250_000);
+        $this->inventory($blue, 260_000);
+        $product->images()->create([
+            'path' => '/products/linen-coat-beige.webp',
+            'variant_id' => $red->id,
+            'is_primary' => true,
+        ]);
+        $product->images()->create([
+            'path' => '/products/linen-coat-olive.webp',
+            'variant_id' => $blue->id,
+            'is_primary' => false,
+            'sort_order' => 1,
+        ]);
+
+        $this->getJson('/api/v1/products/'.$product->slug)
+            ->assertOk()
+            ->assertJsonPath('data.images.0.variant_id', $red->id)
+            ->assertJsonPath('data.images.1.variant_id', $blue->id);
+    }
+
     public function test_product_show_exposes_variants_with_vendor_pricing(): void
     {
         $product = Product::factory()->create(['is_active' => true]);

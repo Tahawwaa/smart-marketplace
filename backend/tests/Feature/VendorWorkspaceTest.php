@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\SubOrder;
 use App\Models\Vendor;
 use App\Models\VendorInventory;
@@ -80,6 +81,21 @@ class VendorWorkspaceTest extends TestCase
         $this->actingAs($stock->vendor->user, 'sanctum')
             ->putJson('/api/v1/vendors/me/inventory/'.$stock->id, ['quantity' => 20, 'lock_version' => 0])->assertConflict();
         $this->assertSame(10, $stock->fresh()->quantity);
+    }
+
+    public function test_stale_product_editor_rolls_back_product_and_stock_changes(): void
+    {
+        $vendor = Vendor::factory()->create();
+        $product = Product::factory()->create(['vendor_id' => $vendor->id, 'name' => 'Original']);
+        $variant = ProductVariant::factory()->create(['product_id' => $product->id]);
+        $stock = VendorInventory::factory()->create(['vendor_id' => $vendor->id, 'variant_id' => $variant->id, 'quantity' => 8, 'lock_version' => 2]);
+        $this->actingAs($vendor->user, 'sanctum')->getJson('/api/v1/vendors/me/products/'.$product->id)
+            ->assertOk()->assertJsonPath('data.variants.0.inventories.0.lock_version', 2);
+        $this->putJson('/api/v1/vendors/me/products/'.$product->id, [
+            'name' => 'Stale update', 'variants' => [['id' => $variant->id, 'quantity' => 20, 'lock_version' => 1]],
+        ])->assertConflict();
+        $this->assertSame('Original', $product->fresh()->name);
+        $this->assertSame(8, $stock->fresh()->quantity);
     }
 
     public function test_order_search_payment_filter_and_detail_respect_store_ownership(): void

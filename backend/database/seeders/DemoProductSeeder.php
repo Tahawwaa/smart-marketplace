@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enums\ProductStatus;
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -103,6 +105,83 @@ class DemoProductSeeder extends Seeder
                 'price' => $oldPrice ?? $price,
                 'sale_price' => $oldPrice === null ? null : $price,
                 'quantity' => 25,
+                'reserved_quantity' => 0,
+                'is_available' => true,
+            ]);
+        }
+
+        $this->seedLinenCoat($vendor, $categories['fashion']);
+    }
+
+    private function seedLinenCoat(Vendor $vendor, Category $category): void
+    {
+        $slug = 'linen-coat';
+        $skus = ['DEMO-LINEN-BEIGE', 'DEMO-LINEN-WHITE', 'DEMO-LINEN-OLIVE'];
+
+        if (Product::withTrashed()->where('slug', $slug)->exists()
+            || ProductVariant::withTrashed()->whereIn('sku', $skus)->exists()) {
+            return;
+        }
+
+        $brand = Brand::query()->firstOrCreate(
+            ['slug' => 'brand-'.md5('نُرد')],
+            ['name' => 'نُرد', 'is_active' => true],
+        );
+
+        $color = Attribute::query()->firstOrCreate(
+            ['slug' => 'color'],
+            ['name' => 'رنگ'],
+        );
+
+        $product = Product::query()->create([
+            'category_id' => $category->id,
+            'brand_id' => $brand->id,
+            'vendor_id' => $vendor->id,
+            'name' => 'کت لینن آزاد',
+            'slug' => $slug,
+            'description' => 'کت لینن آزاد با برش راحت؛ در سه رنگ کرم، سفید و زیتونی.',
+            'status' => ProductStatus::Approved,
+            'is_active' => true,
+        ]);
+
+        /**
+         * @var list<array{0: string, 1: string, 2: string, 3: string}>
+         */
+        $colors = [
+            ['beige', 'کرم', '#C6A36A', 'DEMO-LINEN-BEIGE'],
+            ['white', 'سفید', '#F4F1EA', 'DEMO-LINEN-WHITE'],
+            ['olive', 'زیتونی', '#5B5A32', 'DEMO-LINEN-OLIVE'],
+        ];
+
+        foreach ($colors as $index => [$key, $label, $hex, $sku]) {
+            $value = AttributeValue::query()->firstOrCreate(
+                ['attribute_id' => $color->id, 'value' => $label],
+                ['color_code' => $hex],
+            );
+
+            $variant = ProductVariant::query()->create([
+                'product_id' => $product->id,
+                'sku' => $sku,
+                'weight_grams' => 620,
+                'is_active' => true,
+            ]);
+            $variant->attributeValues()->attach($value->id, ['attribute_id' => $color->id]);
+
+            ProductImage::query()->create([
+                'product_id' => $product->id,
+                'variant_id' => $variant->id,
+                'path' => "/products/linen-coat-{$key}.webp",
+                'alt' => "کت لینن آزاد رنگ {$label}",
+                'sort_order' => $index,
+                'is_primary' => $index === 0,
+            ]);
+
+            VendorInventory::query()->create([
+                'vendor_id' => $vendor->id,
+                'variant_id' => $variant->id,
+                'price' => 3_890_000,
+                'sale_price' => 3_290_000,
+                'quantity' => 18,
                 'reserved_quantity' => 0,
                 'is_available' => true,
             ]);
