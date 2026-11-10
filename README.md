@@ -35,6 +35,10 @@ Smart Marketplace یک پلتفرم فروشگاهی **چندفروشنده** (M
 
 ![فرم ورود به حساب کاربری با تم تیره](frontend/instagram/screenshots/desktop-login-dark.png)
 
+### داشبورد مدیریت
+
+![داشبورد مدیریت با آمار فروشگاه، سفارش‌ها و نمودار درآمد نمونه](frontend/instagram/screenshots/desktop-admin-light.png)
+
 ## 🚀 قابلیت‌ها
 
 | حوزه | امکانات |
